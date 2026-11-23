@@ -226,6 +226,10 @@ body::before{background:var(--surface)}
 .cartbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:7;width:min(448px,calc(100% - 32px));border:0;border-radius:18px;background:var(--brand);color:var(--brand-ink);display:flex;align-items:center;gap:10px;padding:12px 14px;font-weight:800;font-size:15px;box-shadow:0 10px 24px rgba(15,76,74,.35)}
 .cartbar .cb-n{background:var(--accent);color:#2A1A03;border-radius:10px;min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px}
 .cartbar .cb-t{flex:1;text-align:left}
+.free-hint{background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:600}
+.free-hint i{display:block;height:8px;border-radius:999px;background:var(--line);overflow:hidden}
+.free-hint i em{display:block;height:100%;background:var(--accent);border-radius:999px}
+.free-hint.ok{color:var(--ok);font-weight:800}
 .cartbar b{font-variant-numeric:tabular-nums}
 body.has-bar .app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .nav{border-top:0;box-shadow:0 -1px 0 var(--line)}
@@ -289,7 +293,8 @@ const STATUS = {
   paid:{t:"Новый", c:"p-paid"}, sent:{t:"У поставщика", c:"p-sent"},
   ready:{t:"Привезли · выдать", c:"p-ready"}, done:{t:"Выдан", c:"p-done"}
 };
-let ZKS = [], PRODUCTS = [];
+let ZKS = [], PRODUCTS = [], DELIV = {delivery_fee:0, free_from:0};
+const deliveryFee = sum => (DELIV.free_from>0 && sum>=DELIV.free_from) ? 0 : (+DELIV.delivery_fee||0);
 
 const ss = {
   get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(_){ return null; } },
@@ -375,9 +380,11 @@ function viewCart(){
     <h2>Корзина пуста</h2>
     <p class="muted">Добавьте товары из каталога. Заказы, оформленные до 21:00, приедут в ваш ЖК завтра.</p>
     <button class="btn" data-go="shop">Перейти в магазин</button></section>`;
-  const sum=cartSum(), old=cartOld();
+  const sum=cartSum(), old=cartOld(), fee=deliveryFee(sum), left=DELIV.free_from>0 ? DELIV.free_from-sum : 0;
   return `<section class="section wrap">
     <h1>Корзина</h1>
+    ${left>0 && DELIV.delivery_fee>0 ? `<div class="free-hint"><span>Добавьте ещё <b>${fmt(left)}</b>, и доставка будет бесплатной</span><i><em style="width:${Math.min(100,sum/DELIV.free_from*100)}%"></em></i></div>`
+      : (DELIV.free_from>0 ? `<div class="free-hint ok"><span>Доставка бесплатная</span></div>` : "")}
     <div class="panel" style="padding-block:4px">
       ${ids.map(id=>{const p=prod(id);return `<div class="line">
         <div class="mini" style="${tile(p)}"><img src="${imgOf(p)}" alt="" onerror="this.remove()">${esc(p.weight)}</div>
@@ -388,8 +395,9 @@ function viewCart(){
     <div class="panel">
       ${old>sum?`<div class="sum-row"><span class="muted">В обычном магазине</span><span class="old" style="font-size:15px">${fmt(old)}</span></div>
       <div class="sum-row"><span>Ваша экономия</span><b style="color:var(--ok)">−${fmt(old-sum)}</b></div>`:""}
-      <div class="sum-row"><span class="muted">Доставка до ЖК</span><span>0 ₸</span></div>
-      <div class="sum-row total"><span>Итого</span><span>${fmt(sum)}</span></div>
+      <div class="sum-row"><span class="muted">Товары</span><span>${fmt(sum)}</span></div>
+      <div class="sum-row"><span class="muted">Доставка до ЖК</span><span>${fee?fmt(fee):`<b style="color:var(--ok)">бесплатно</b>`}</span></div>
+      <div class="sum-row total"><span>Итого</span><span>${fmt(sum+fee)}</span></div>
     </div>
     <form class="panel" id="checkout" novalidate>
       <h2>Получатель</h2>
@@ -402,7 +410,7 @@ function viewCart(){
       <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __"></div>
       <div class="note"><b>Выдача завтра с 18:00 до 21:00</b> у лидера ЖК. Оплата при получении, пока онлайн-оплата не подключена.</div>
       <p id="formErr" class="err" hidden></p>
-      <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Отправляем…":"Оформить заказ на "+fmt(sum)}</button>
+      <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Отправляем…":"Оформить заказ на "+fmt(sum+fee)}</button>
     </form>
   </section>`;
 }
@@ -415,6 +423,7 @@ function viewDone(o){
     <h1>Заказ №${o.id} принят</h1>
     <p class="muted" style="margin:0">${esc(o.leader)} уже видит ваш заказ в кабинете лидера.<br>Забрать: завтра, 18:00–21:00, ${esc(o.zkName)}.</p>
     <div class="panel" style="width:100%;text-align:left">
+      ${o.delivery_fee?`<div class="sum-row"><span class="muted">в том числе доставка</span><span>${fmt(o.delivery_fee)}</span></div>`:""}
       <div class="sum-row"><span>Сумма к оплате</span><b>${fmt(o.total)}</b></div>
       ${o.old_total>o.total?`<div class="sum-row"><span>Сэкономили</span><b style="color:var(--ok)">${fmt(o.old_total-o.total)}</b></div>`:""}
     </div>
@@ -441,7 +450,7 @@ function viewHow(){
     <div class="panel"><span class="muted">Мы закупаем только под уже собранные заказы. Нет торгового зала, кассиров, остатков на полках и курьера на каждый заказ, поэтому цена ближе к оптовой.</span></div>
     <h2>Кто что получает</h2>
     <div class="who">
-      <div class="panel"><h3>Покупатель</h3><span class="muted">Оптовые цены и бесплатная доставка в свой двор.</span></div>
+      <div class="panel"><h3>Покупатель</h3><span class="muted">Оптовые цены и доставка прямо в свой двор.</span></div>
       <div class="panel"><h3>Лидер ЖК</h3><span class="muted">${Math.round(COMMISSION*100)}% от всех заказов своего дома. 30 заказов по 5 000 ₸ дают ${fmt(30*5000*COMMISSION)} за один сбор.</span></div>
       <div class="panel"><h3>ADAL market</h3><span class="muted">Предсказуемый объём закупки, почти нет склада и списаний.</span></div>
     </div>
@@ -645,6 +654,7 @@ async function loadCatalog(){
       api("adal_products?select=id,cat,brand,name,variant,weight,price,old_price,color,color2,image_url&active=eq.true&order=sort")
     ]);
     ZKS=zks; PRODUCTS=prods;
+    try{ DELIV = await rpc("adal_public_settings", {}) || DELIV; }catch(_){}
     if(!ZKS.some(z=>z.id===state.zk) && ZKS[0]) state.zk=ZKS[0].id;
     for(const id of Object.keys(state.cart)) if(!prod(id)) delete state.cart[id];
     saveCart();

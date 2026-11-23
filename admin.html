@@ -355,7 +355,7 @@ function viewList(){
   $("#view").innerHTML = tabsHtml() + `
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
       <div><h1>Товары и цены</h1><p class="muted" style="margin:4px 0 0">Себестоимость и цена сохраняются, когда вы уходите из поля или нажимаете Enter. Прибыль пересчитывается сразу.</p></div>
-      <div class="acts"><button class="btn light" data-act="calcset">Параметры расчёта</button><button class="btn" data-act="new">+ Новый товар</button></div>
+      <div class="acts"><button class="btn light" data-act="delivery">Доставка</button><button class="btn light" data-act="calcset">Параметры расчёта</button><button class="btn" data-act="new">+ Новый товар</button></div>
     </div>
     <div class="summary">
       <div class="stat"><b>${state.products.length}</b><span>всего товаров</span></div>
@@ -887,6 +887,7 @@ document.addEventListener("click", async e => {
   }
   if(b.dataset.act==="new"){ openEditor(null); return; }
   if(b.dataset.act==="calcset"){ openCalcSettings(); return; }
+  if(b.dataset.act==="delivery"){ openDelivery(); return; }
   if(b.dataset.fin){ openFinance(b.dataset.fin); return; }
   if(b.dataset.fmonth){ const d=state.fmonth; state.fmonth=new Date(d.getFullYear(), d.getMonth()+(+b.dataset.fmonth), 1); state.fin=null; loadFinance(); return; }
   if(b.dataset.askfdel){ state.confirm="fe"+b.dataset.askfdel; viewFinance(); return; }
@@ -937,6 +938,58 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("focusout", e => { if(e.target.dataset && e.target.dataset.price) savePrice(e.target); if(e.target.dataset && e.target.dataset.cost) saveCost(e.target); });
 
+function openDelivery(){
+  const D = {trip:15000, per_trip:30, fee:500, free_from:0, ...((state.settings||{}).delivery||{})};
+  const bg = document.createElement("div"); bg.className="sheet-bg";
+  const f = (id,label,val,hint) => `<div class="field"><label for="${id}">${label}</label><input id="${id}" data-dv="${id}" inputmode="numeric" value="${esc(val)}">${hint?`<span class="hint">${hint}</span>`:""}</div>`;
+  bg.innerHTML = `<form class="sheet" id="dvForm" role="dialog" aria-label="Доставка" novalidate>
+    <div class="sheet-head"><h2>Доставка</h2><button type="button" class="ghost" data-close>Закрыть</button></div>
+    <div class="two">
+      ${f("trip","Рейс машины, ₸",D.trip,"Водитель + бензин за один развоз")}
+      ${f("per_trip","Заказов в рейсе",D.per_trip,"Сколько заказов везёте за раз")}
+      ${f("fee","Платная доставка, ₸",D.fee,"Сколько платит покупатель за маленький заказ")}
+      ${f("free_from","Бесплатно от, ₸",D.free_from,"0 — доставка всегда платная")}
+    </div>
+    <div id="dvCalc"></div>
+    <p class="err" id="dvErr" hidden></p>
+    <button class="btn block" type="submit">Сохранить</button></form>`;
+  document.body.appendChild(bg);
+  const val = id => +bg.querySelector("#"+id).value.replace(/\D/g,"")||0;
+  const calc = () => {
+    const per = val("per_trip") ? val("trip")/val("per_trip") : 0;
+    const m = avgMargin(); const free = val("free_from"), fee = val("fee");
+    let h = `<div class="calc"><div class="cl"><span>Доставка одного заказа стоит вам</span><b>${fmt(per)}</b></div>`;
+    if(m==null || m<=0){
+      h += `<span class="muted" style="font-size:13px">Чтобы посчитать порог бесплатной доставки, заполните себестоимость товаров.</span></div>`;
+    } else {
+      const be = Math.ceil(per/m/100)*100, rec = Math.ceil(2*per/m/100)*100;
+      h += `<div class="cl"><span>С каждых 100 ₸ товара вы зарабатываете</span><b>${fmt(m*100)}</b></div>
+        <div class="cl"><span>Заказ окупает доставку от</span><b>${fmt(be)}</b></div>
+        <div class="cl res"><span>Бесплатно рекомендуем от</span><span>${fmt(rec)}</span></div>
+        <span class="muted" style="font-size:12.5px">При таком заказе доставка съедает не больше половины прибыли.</span>
+        ${rec!==free?`<div class="rec"><span>Поставить порог ${fmt(rec)}</span><button type="button" data-setfree="${rec}">Поставить</button></div>`:""}`;
+      if(free>0){
+        const pr = free*m - per;
+        h += `<div class="cl" style="margin-top:8px"><span>Заказ на ${fmt(free)} с бесплатной доставкой</span><b class="${pr>=0?"good":"bad"}">${pr<0?"−":""}${fmt(Math.abs(pr))} прибыли</b></div>`;
+      }
+      const small = 2000, prs = small*m - per + fee;
+      h += `<div class="cl"><span>Заказ на ${fmt(small)} с платной доставкой ${fmt(fee)}</span><b class="${prs>=0?"good":"bad"}">${prs<0?"−":""}${fmt(Math.abs(prs))} прибыли</b></div></div>`;
+    }
+    bg.querySelector("#dvCalc").innerHTML = h;
+  };
+  calc();
+  bg.addEventListener("input", calc);
+  bg.addEventListener("click", e => {
+    if(e.target===bg || e.target.closest("[data-close]")) return bg.remove();
+    const sf = e.target.closest("[data-setfree]"); if(sf){ bg.querySelector("#free_from").value = sf.dataset.setfree; calc(); }
+  });
+  bg.querySelector("#dvForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const body = {trip:val("trip"), per_trip:val("per_trip"), fee:val("fee"), free_from:val("free_from")};
+    try{ const r = await rpc("adal_admin_save_delivery", {p_pass:state.pass, p:body}); state.settings = {...(state.settings||{}), delivery:r.delivery}; bg.remove(); toast("Доставка сохранена — на сайте обновится сразу"); }
+    catch(ex){ const er=bg.querySelector("#dvErr"); er.textContent=ex.message; er.hidden=false; }
+  });
+}
 function openCalcSettings(){
   const st = S();
   const bg = document.createElement("div"); bg.className="sheet-bg";
