@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="ADAL market — совместные закупки для жителей ЖК по оптовым ценам.">
-<meta name="theme-color" content="#0F4C4A">
+<meta name="theme-color" content="#FFFFFF">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>ADAL market</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%230F4C4A%27/%3E%3Cg transform=%27translate(9 13)%27%3E%3Cpath d=%27M3 34V17L14 7l11 10v17z%27 fill=%27%23fff%27/%3E%3Cpath d=%27M21 34V17l11-10 11 10v17z%27 fill=%27%23E9A23B%27/%3E%3C/g%3E%3C/svg%3E">
@@ -181,6 +181,71 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
 .field input.bad,.field select.bad{border-color:var(--warn)}
 .logout{border:0;background:color-mix(in srgb,var(--brand-ink) 14%,transparent);color:var(--brand-ink);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;flex:none}
 @media (prefers-reduced-motion:reduce){.new{animation:none}}
+/* ===== redesign: светлая шапка, чистые карточки, плавающая корзина ===== */
+:root{--bg:#F4F6F5;--shadow:0 1px 2px rgba(14,43,44,.06),0 4px 14px rgba(14,43,44,.06);--r:18px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0B1514;--shadow:none}}
+:root[data-theme="dark"]{--bg:#0B1514;--shadow:none}
+h1,h2{font-family:var(--font-body);font-weight:800;letter-spacing:-.02em}
+h1{font-size:24px;line-height:1.15} h2{font-size:19px}
+body::before{background:var(--surface)}
+.top{background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);color:var(--ink);padding-block:10px 10px;border-bottom:1px solid var(--line)}
+.logo{color:var(--ink)}
+.logo .h1{fill:var(--brand)}
+.logo small{opacity:.55}
+.zk{background:var(--bg);color:var(--ink);padding:6px 10px 6px 14px;border-radius:14px;text-align:left;gap:6px}
+.zk-txt{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.zk-txt small{font-size:11px;font-weight:600;color:var(--muted)}
+.zk-txt span{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deadline{margin-top:8px;background:transparent;color:var(--muted);padding:0;font-size:13px;font-weight:600;gap:8px}
+.deadline .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px var(--ok-soft);flex:none}
+.deadline b{margin-left:auto;color:var(--ink);background:var(--bg);padding:3px 8px;border-radius:8px;font-size:13px}
+.section{gap:16px;padding-block:16px}
+.promo{position:relative;overflow:hidden;background:var(--brand);color:var(--brand-ink);border-radius:22px;padding:20px 18px;display:flex;align-items:flex-end;gap:10px;min-height:132px}
+.promo h1{font-size:22px;color:inherit;max-width:13ch}
+.promo p{margin:8px 0 0;font-size:13.5px;opacity:.85;max-width:25ch}
+.promo-art{position:absolute;right:-8px;bottom:-8px;width:88px;height:auto;opacity:.9}
+.promo>div{position:relative;z-index:1}
+.chip{border:0;background:var(--surface);box-shadow:var(--shadow);padding:9px 16px;font-weight:700}
+.chips{padding:2px 2px 6px;margin:-2px -2px 0}
+.grid{gap:12px}
+.card{border:0;box-shadow:var(--shadow);padding:0;gap:0;overflow:hidden;border-radius:var(--r)}
+.card .photo{border-radius:0;aspect-ratio:1/1.08}
+.card .photo img{object-fit:cover}
+.photo .w{background:rgba(255,255,255,.92);color:#0E2B2C;font-size:12px;top:10px;left:10px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ctl{position:absolute;right:10px;bottom:10px}
+.plus{width:42px;height:42px;border-radius:50%;border:0;background:var(--brand);color:var(--brand-ink);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(15,76,74,.35);transition:transform .12s}
+.plus:active{transform:scale(.92)}
+.pill-q{display:flex;align-items:center;background:var(--brand);color:var(--brand-ink);border-radius:999px;box-shadow:0 4px 12px rgba(15,76,74,.35);height:42px}
+.pill-q button{border:0;background:transparent;color:inherit;width:40px;height:42px;font-size:22px;font-weight:700}
+.pill-q span{min-width:18px;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.card .body{padding:10px 12px 14px;display:flex;flex-direction:column;gap:3px}
+.card .price{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.card .name{font-size:13.5px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .variant{font-size:12.5px;color:var(--muted);font-weight:600}
+.card.in{box-shadow:0 0 0 2px var(--brand),var(--shadow)}
+.skel .body{gap:8px}
+.panel{border:0;box-shadow:var(--shadow);border-radius:var(--r)}
+.order{border:0;box-shadow:var(--shadow);border-radius:16px}
+.btn{border-radius:14px}
+.btn.block{padding:15px;border-radius:16px}
+.field input,.field select{border-radius:12px;background:var(--bg);border-color:transparent}
+.field input:focus,.field select:focus{border-color:var(--brand);outline:none}
+.qty{border-radius:999px}
+.line .mini{border-radius:12px;width:56px;height:56px}
+.cartbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:7;width:min(448px,calc(100% - 32px));border:0;border-radius:18px;background:var(--brand);color:var(--brand-ink);display:flex;align-items:center;gap:10px;padding:12px 14px;font-weight:800;font-size:15px;box-shadow:0 10px 24px rgba(15,76,74,.35)}
+.cartbar .cb-n{background:var(--accent);color:#2A1A03;border-radius:10px;min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.cartbar .cb-t{flex:1;text-align:left}
+.cartbar b{font-variant-numeric:tabular-nums}
+body.has-bar .app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+.nav{border-top:0;box-shadow:0 -1px 0 var(--line)}
+.nav button{font-weight:700;font-size:10.5px;padding:8px 4px 10px}
+.nav button svg{padding:3px 14px;box-sizing:content-box;border-radius:999px;transition:background .15s}
+.nav button[aria-current="page"] svg{background:color-mix(in srgb,var(--brand) 14%,transparent)}
+.badge{top:4px;left:calc(50% + 8px)}
+.toast{bottom:calc(146px + env(safe-area-inset-bottom,0px));border-radius:14px}
+.hero-l,.reg-hero{border-radius:22px}
+@media (prefers-reduced-motion:reduce){.plus{transition:none}}
+
 </style>
 </head>
 <body>
@@ -188,16 +253,17 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
 <div class="app">
   <header class="top wrap">
     <div class="top-row">
-      <div class="logo" aria-label="adal market"><svg width="32" height="25" viewBox="0 0 46 36" aria-hidden="true"><path d="M3 34 V17 L14 7 L25 17 V34 Z" fill="#fff"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg><span>adal<small>market</small></span></div>
+      <div class="logo" aria-label="adal market"><svg width="32" height="25" viewBox="0 0 46 36" aria-hidden="true"><path class="h1" d="M3 34 V17 L14 7 L25 17 V34 Z"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg><span>adal<small>market</small></span></div>
       <button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
-        <span id="zkName"></span>
+        <span class="zk-txt"><small>Доставка в</small><span id="zkName"></span></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
       </button>
     </div>
-    <div class="deadline" id="deadline">Приём заказов до 21:00 · осталось <b id="cd">--:--:--</b></div>
+    <div class="deadline" id="deadline"><span class="dot"></span><span>Заказ до 21:00 — привезём завтра</span><b id="cd">--:--:--</b></div>
   </header>
 
   <main id="view"></main>
+  <button class="cartbar" id="cartBar" data-go="cart" hidden></button>
   <p class="demo wrap">Тестовый запуск: оплата при получении.</p>
 </div>
 
@@ -266,6 +332,11 @@ function toast(msg){
 const tile = p => `background:linear-gradient(150deg,${esc(p.color||"#0F4C4A")},${esc(p.color2||p.color||"#0F4C4A")})`;
 
 /* ---------- views ---------- */
+function cardCtl(id){
+  const q=state.cart[id]||0;
+  if(!q) return `<button class="plus" data-add="${id}" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>`;
+  return `<div class="pill-q"><button data-dec="${id}" aria-label="Меньше">−</button><span>${q}</span><button data-add="${id}" aria-label="Больше">+</button></div>`;
+}
 function qtyCtl(id){
   const q=state.cart[id]||0;
   if(!q) return `<button class="btn" data-add="${id}">В корзину</button>`;
@@ -273,29 +344,34 @@ function qtyCtl(id){
 }
 
 function viewShop(){
-  if(state.loading) return `<section class="section wrap"><div class="grid">${Array.from({length:4},()=>`<div class="card skel"><div class="photo"></div><div class="sk"></div><div class="sk short"></div></div>`).join("")}</div></section>`;
+  if(state.loading) return `<section class="section wrap"><div class="grid">${Array.from({length:4},()=>`<div class="card skel"><div class="photo"></div><div class="body"><div class="sk"></div><div class="sk short"></div></div></div>`).join("")}</div></section>`;
   if(state.loadError) return `<section class="wrap empty"><h2>Не удалось загрузить каталог</h2><p class="muted">${esc(state.loadError)}. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-act="reload">Обновить</button></section>`;
   const cats = Object.keys(CATS).filter(k=>PRODUCTS.some(p=>p.cat===k));
   const list = PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
   return `<section class="section wrap">
     <div>
-      <h1>Бытовая химия по оптовым ценам</h1>
-      <p class="muted" style="margin:6px 0 0">Заказывайте сегодня, завтра заберёте у лидера ${esc(zk().name)}${zk().leader_name?" — "+esc(zk().leader_name):""}.</p>
+      <div class="promo">
+        <div><h1>Оптовые цены для&nbsp;вашего&nbsp;дома</h1>
+        <p>Закажите сегодня, а завтра заберите у ${zk().leader_name?esc(zk().leader_name)+", лидера ":"лидера "}${esc(zk().name)}.</p></div>
+        <svg class="promo-art" viewBox="0 0 46 36" aria-hidden="true"><path d="M3 34 V17 L14 7 L25 17 V34 Z" fill="rgba(255,255,255,.28)"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg>
+      </div>
     </div>
     <div class="chips" role="group" aria-label="Категории">
       <button class="chip" data-cat="all" aria-pressed="${state.cat==="all"}">Все</button>
       ${cats.map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cat===k}">${CATS[k]}</button>`).join("")}
     </div>
     <div class="grid">
-      ${list.map(p=>`<article class="card">
+      ${list.map(p=>`<article class="card ${state.cart[p.id]?"in":""}">
         <div class="photo" style="${tile(p)}">
           <img src="img/${p.id}.jpg" alt="${esc(p.name)}${p.variant?" "+esc(p.variant):""}" loading="lazy" onerror="this.remove()">
           <span class="w">${esc(p.weight)}</span>
+          <div class="ctl">${cardCtl(p.id)}</div>
         </div>
-        <div class="name">${esc(p.name)}${p.variant?`<span class="muted"> · ${esc(p.variant)}</span>`:""}</div>
-        <div class="price-row"><span class="price">${fmt(p.price)}</span>${p.old_price?`<span class="old">${fmt(p.old_price)}</span>`:""}</div>
-        ${p.old_price?`<div><span class="save">−${Math.round((1-p.price/p.old_price)*100)}% к магазину</span></div>`:""}
-        ${qtyCtl(p.id)}
+        <div class="body">
+          <div class="price-row"><span class="price">${fmt(p.price)}</span>${p.old_price?`<span class="old">${fmt(p.old_price)}</span><span class="save">−${Math.round((1-p.price/p.old_price)*100)}%</span>`:""}</div>
+          <div class="name">${esc(p.name)}</div>
+          ${p.variant?`<div class="variant">${esc(p.variant)}</div>`:""}
+        </div>
       </article>`).join("")}
     </div>
   </section>`;
@@ -558,6 +634,9 @@ function render(){
   const nav=state.view==="done"?"cart":state.view;
   document.querySelectorAll(".nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===nav?"page":"false"));
   const c=cartCount(); const bd=$("#cartBadge"); bd.hidden=!c; bd.textContent=c;
+  const cb=$("#cartBar"), showBar=c>0 && (state.view==="shop"||state.view==="how");
+  cb.hidden=!showBar; document.body.classList.toggle("has-bar",showBar);
+  if(showBar) cb.innerHTML=`<span class="cb-n">${c}</span><span class="cb-t">Корзина</span><b>${fmt(cartSum())}</b><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   $("#deadline").hidden = state.view==="leader";
 }
 function go(v){
