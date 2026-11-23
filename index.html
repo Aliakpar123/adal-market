@@ -286,7 +286,7 @@ const rpc = (fn, args) => api("rpc/" + fn, args);
 const COMMISSION = 0.07;
 const CATS = {clean:"Чистящие средства", soap:"Мыло", dish:"Для посуды", wash:"Для стирки"};
 const STATUS = {
-  paid:{t:"Оплачен", c:"p-paid"}, sent:{t:"У поставщика", c:"p-sent"},
+  paid:{t:"Новый", c:"p-paid"}, sent:{t:"У поставщика", c:"p-sent"},
   ready:{t:"Привезли · выдать", c:"p-ready"}, done:{t:"Выдан", c:"p-done"}
 };
 let ZKS = [], PRODUCTS = [];
