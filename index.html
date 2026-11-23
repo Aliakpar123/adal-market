@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#0F4C4A">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>ADAL market</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%230F4C4A%27/%3E%3Cg transform=%27translate(9 13)%27%3E%3Cpath d=%27M3 34V17L14 7l11 10v17z%27 fill=%27%23fff%27/%3E%3Cpath d=%27M21 34V17l11-10 11 10v17z%27 fill=%27%23E9A23B%27/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
@@ -39,8 +40,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brand)}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--brand);color:var(--brand-ink);padding-block:12px}
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.logo{font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:.02em}
-.logo small{font-weight:500;opacity:.75;font-size:12px;margin-left:4px}
+.logo{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:23px;letter-spacing:-.01em;line-height:1;color:#fff}
+.logo svg{flex:none;display:block}
+.logo small{font-family:var(--font-body);font-weight:600;font-size:15px;letter-spacing:.01em;opacity:.8;margin-left:5px}
 .zk{display:flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--brand-ink) 14%,transparent);border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--brand-ink);max-width:60%}
 .zk span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .deadline{margin-top:10px;display:flex;gap:10px;align-items:center;background:var(--accent);color:#2A1A03;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600}
@@ -186,7 +188,7 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
 <div class="app">
   <header class="top wrap">
     <div class="top-row">
-      <div class="logo">ADAL<small>market</small></div>
+      <div class="logo" aria-label="adal market"><svg width="32" height="25" viewBox="0 0 46 36" aria-hidden="true"><path d="M3 34 V17 L14 7 L25 17 V34 Z" fill="#fff"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg><span>adal<small>market</small></span></div>
       <button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
         <span id="zkName"></span>
