@@ -546,7 +546,7 @@ function setTab(t){ state.tab=t; history.replaceState(null,"","#"+t); state.conf
 
 
 /* ===================== План: сколько нужно продавать ===================== */
-const PLAN_DEF = {goal:1000000, staff:[["Закупщик-кладовщик",250000],["Водитель",250000],["Менеджер по лидерам",250000]],
+const PLAN_DEF = {goal:0, staff:[["Я (руководитель)",1000000]],
   payrollTax:17.5, rent:200000, utilities:40000, transport:0, marketing:150000, other:50000,
   avgCheck:"", margin:"", perZk:20, rounds:3};
 const WEEKS = 4.33;
@@ -579,7 +579,7 @@ function planCalc(over={}){
   const P = {...plan(), ...over}, act = actual30();
   const staff = P.staff.reduce((s,[,v])=>s+(+v||0),0);
   const fixed = staff*(1+(+P.payrollTax||0)/100) + (+P.rent||0)+(+P.utilities||0)+(+P.transport||0)+(+P.marketing||0)+(+P.other||0);
-  const goal = +P.goal||0, need = goal + fixed;
+  const goal = 0, need = fixed;
   const avgCheck = +P.avgCheck || (act.avg ? Math.round(act.avg) : 5000);
   const am = autoMargin();
   const margin = P.margin!=="" && P.margin!=null ? +P.margin : (am ?? 15);
@@ -597,7 +597,7 @@ const cnt = n => isFinite(n) ? Math.ceil(n).toLocaleString("ru-RU") : "—";
 
 function planOutHtml(){
   const c = planCalc();
-  const progress = c.goal>0 ? Math.max(0, Math.min(100, c.actNet/c.goal*100)) : 0;
+  const progress = c.fixed>0 ? Math.max(0, Math.min(100, c.act.profit/c.fixed*100)) : 0;
   const lev = (label, over) => { const x = planCalc(over); return `<div class="lever"><span>${label}</span><b>${isFinite(x.zk)?x.zk+" ЖК":"—"} · ${cnt(x.ordersM)} заказов</b></div>`; };
   return `
   <div class="big-res">
@@ -609,11 +609,10 @@ function planOutHtml(){
   <section class="panel">
     <h2>Откуда берутся цифры</h2>
     <div class="calc">
-      <div class="cl"><span>Хочу заработать</span><b>${fmt(c.goal)}</b></div>
-      <div class="cl"><span>+ Зарплаты</span><span>${fmt(c.staff)}</span></div>
+      <div class="cl"><span>Зарплаты (включая вашу)</span><span>${fmt(c.staff)}</span></div>
       <div class="cl"><span>+ Налоги на зарплаты ${pct(+c.P.payrollTax||0)}</span><span>${fmt(c.staffTax)}</span></div>
       <div class="cl"><span>+ Аренда, коммуналка, транспорт, маркетинг, прочее</span><span>${fmt(c.fixed-c.staff-c.staffTax)}</span></div>
-      <div class="cl res"><span>Нужно заработать на товарах</span><span>${fmt(c.need)}</span></div>
+      <div class="cl res"><span>Нужно покрыть в месяц</span><span>${fmt(c.need)}</span></div>
       <div class="cl"><span>Средний чек${c.autoCheck?(c.act.avg?" (по заказам за 30 дней)":" (по умолчанию)"):""}</span><b>${fmt(c.avgCheck)}</b></div>
       <div class="cl"><span>Чистая маржа${c.autoMarginUsed?(c.am!=null?" (по себестоимости товаров)":" (по умолчанию)"):""}</span><b>${pct(c.margin)}</b></div>
       <div class="cl"><span>Прибыль с одного заказа</span><b class="${c.perOrder>0?"good":"bad"}">${fmt(c.perOrder)}</b></div>
@@ -631,13 +630,13 @@ function planOutHtml(){
       <div class="cl"><span>Выручка</span><span>${fmt(c.act.rev)}</span></div>
       <div class="cl"><span>Заработано на товарах (оценка)</span><span>${fmt(c.act.profit)}</span></div>
       <div class="cl"><span>− Постоянные расходы</span><span>${fmt(c.fixed)}</span></div>
-      <div class="cl res"><span>Осталось вам</span><span class="${c.actNet>=0?"good":"bad"}">${c.actNet<0?"−":""}${fmt(Math.abs(c.actNet))}</span></div>
+      <div class="cl res"><span>Сверх всех расходов</span><span class="${c.actNet>=0?"good":"bad"}">${c.actNet<0?"−":""}${fmt(Math.abs(c.actNet))}</span></div>
     </div>
     <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><i style="width:${progress}%"></i></div>
-    <span class="muted" style="font-size:13px">${Math.round(progress)}% от цели ${fmt(c.goal)} в месяц</span>
+    <span class="muted" style="font-size:13px">Покрыто ${Math.round(progress)}% расходов за месяц</span>
   </section>
   <section class="panel">
-    <h2>Что быстрее приблизит к цели</h2>
+    <h2>Что быстрее выведет в плюс</h2>
     <div class="lever"><span><b>Сейчас по плану</b></span><b>${isFinite(c.zk)?c.zk+" ЖК":"—"} · ${cnt(c.ordersM)} заказов</b></div>
     ${lev(`Средний чек +1 000 ₸ (${fmt(c.avgCheck+1000)})`, {avgCheck:c.avgCheck+1000})}
     ${lev(`Маржа +3% (${pct(c.margin+3)})`, {margin:c.margin+3})}
@@ -652,18 +651,18 @@ function viewPlan(){
   const nf = (id,label,val,hint,ph) => `<div class="field"><label for="${id}">${label}</label><input id="${id}" data-plan="${id}" inputmode="numeric" value="${esc(val)}" ${ph?`placeholder="${esc(ph)}"`:""}>${hint?`<span class="hint">${hint}</span>`:""}</div>`;
   $("#view").innerHTML = tabsHtml() + `
   <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
-    <div><h1>План дохода</h1><p class="muted" style="margin:4px 0 0">Сколько нужно продавать, чтобы зарабатывать столько, сколько вы хотите.</p></div>
+    <div><h1>План продаж</h1><p class="muted" style="margin:4px 0 0">Сколько нужно продавать, чтобы покрыть все расходы, включая вашу зарплату.</p></div>
     <div class="acts"><span class="dirty" id="planDirty" hidden>Есть несохранённые изменения</span><button class="btn" data-act="saveplan">Сохранить план</button></div>
   </div>
   <div class="plan-grid">
     <div style="display:flex;flex-direction:column;gap:14px">
-      <div class="goal"><label for="goal">Хочу зарабатывать чистыми в месяц</label>
-        <div class="gin"><input id="goal" data-plan="goal" inputmode="numeric" value="${esc(P.goal)}"><em>₸</em></div>
-        <span style="font-size:13px;opacity:.8">После зарплат, аренды, налогов и выплат лидерам.</span>
+      <div class="goal"><span style="font-weight:700;opacity:.85;font-size:14px">Расходы в месяц</span>
+        <div id="planFixed" style="font-size:30px;font-weight:800;font-variant-numeric:tabular-nums">${fmt(planCalc().fixed)}</div>
+        <span style="font-size:13px;opacity:.8">Зарплаты с налогами, аренда, коммунальные и прочее. Добавьте себя в зарплаты с той суммой, которую хотите получать.</span>
         <div class="mini" id="planMini">${planMiniHtml()}</div></div>
       <section class="panel">
         <div class="sec-h"><h2>Зарплаты</h2><span class="muted" style="font-size:13px">в месяц, на руки</span></div>
-        ${P.staff.map(([n,v],i)=>`<div class="srow"><input data-staffname="${i}" value="${esc(n)}" aria-label="Должность"><input class="num" data-staffsal="${i}" inputmode="numeric" value="${esc(v)}" aria-label="Оклад"><button class="icon" data-staffdel="${i}" aria-label="Удалить"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`).join("")}
+        ${P.staff.map(([n,v],i)=>`<div class="srow"><input data-staffname="${i}" value="${esc(n)}" placeholder="Должность или имя" aria-label="Должность"><input class="num" data-staffsal="${i}" inputmode="numeric" value="${esc(v)}" aria-label="Оклад"><button class="icon" data-staffdel="${i}" aria-label="Удалить"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`).join("")}
         <button class="btn light" data-act="staffadd">+ Сотрудник</button>
         ${nf("payrollTax","Налоги на зарплаты сверху, %",P.payrollTax,"В РК ≈ 17,5%: соцналог, соцотчисления, ОПВР, ОСМС. Если сотрудники на ГПХ или самозанятые — поставьте 0.")}
       </section>
@@ -692,7 +691,7 @@ function viewPlan(){
   </div>`;
 }
 function planMiniHtml(){ const c=planCalc(); return `<div><b>${isFinite(c.zk)?c.zk:"—"}</b><span>ЖК нужно</span></div><div><b>${cnt(c.ordersM)}</b><span>заказов в мес.</span></div><div><b>${cnt(c.perRound)}</b><span>за один сбор</span></div>`; }
-function planChanged(){ const m=$("#planMini"); if(m) m.innerHTML=planMiniHtml(); const d=$("#planDirty"); if(d) d.hidden=false; const o=$("#planOut"); if(o) o.innerHTML = planOutHtml(); }
+function planChanged(){ const m=$("#planMini"); if(m) m.innerHTML=planMiniHtml(); const f=$("#planFixed"); if(f) f.textContent=fmt(planCalc().fixed); const d=$("#planDirty"); if(d) d.hidden=false; const o=$("#planOut"); if(o) o.innerHTML = planOutHtml(); }
 
 /* сжатие фото в браузере: максимум 1000 px по длинной стороне, JPEG */
 function shrink(file){
@@ -778,7 +777,7 @@ document.addEventListener("click", async e => {
   }
   if(b.dataset.act==="new"){ openEditor(null); return; }
   if(b.dataset.act==="calcset"){ openCalcSettings(); return; }
-  if(b.dataset.act==="staffadd"){ plan().staff.push(["Новый сотрудник",200000]); viewPlan(); planChanged(); return; }
+  if(b.dataset.act==="staffadd"){ plan().staff.push(["",200000]); viewPlan(); planChanged(); return; }
   if(b.dataset.staffdel){ plan().staff.splice(+b.dataset.staffdel,1); viewPlan(); planChanged(); return; }
   if(b.dataset.act==="saveplan"){
     b.disabled = true;
