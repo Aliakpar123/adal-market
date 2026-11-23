@@ -106,6 +106,20 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .photo-edit .acts{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 16px;border-radius:14px;font-weight:700;font-size:14px;z-index:40;max-width:calc(100% - 32px)}
 .empty{text-align:center;padding:36px 16px;color:var(--muted)}
+.calc{background:var(--bg);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;font-variant-numeric:tabular-nums}
+.calc .cl{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:3px 0}
+.calc .cl span:first-child{color:var(--muted);font-weight:600}
+.calc .cl.res{border-top:1.5px solid var(--line);margin-top:6px;padding-top:9px;font-weight:800;font-size:17px}
+.calc .cl.res span:first-child{color:var(--ink)}
+.calc .good{color:var(--ok)} .calc .bad{color:var(--bad)}
+.calc .rec{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;background:var(--surface);border-radius:12px;padding:9px 10px 9px 12px;font-size:13.5px;font-weight:700}
+.calc .rec button{border:0;background:var(--brand);color:#fff;border-radius:10px;padding:7px 11px;font-weight:800;font-size:13px}
+.tag.profit{background:var(--ok-soft);color:var(--ok)} .tag.loss{background:var(--bad-soft);color:var(--bad)}
+.price-in small{font-size:10.5px;font-weight:700;color:var(--muted);padding-left:10px;white-space:nowrap}
+.inputs{display:flex;gap:6px}
+.inputs .price-in{width:104px;flex-direction:column;align-items:stretch}
+.inputs .price-in .r{display:flex;align-items:center}
+.inputs .price-in input{padding:2px 0 7px 10px}
 .tabs{display:flex;gap:4px;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:4px}
 .tabs button{flex:1;border:0;background:transparent;border-radius:12px;padding:10px 6px;font-weight:800;font-size:14px;color:var(--muted);position:relative}
 .tabs button[aria-selected="true"]{background:var(--brand);color:var(--brand-ink)}
@@ -179,6 +193,40 @@ const store = {
 const state = { pass: store.get(), products: [], q:"", filter:"all", busy:false, loading:false,
   tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","leaders"].includes(h)?h:"products"; })(),
   orders: [], days: 7, ozk: "all", ost: "all", apps: [], zks: [], confirm: null };
+const DEF_SET = {leader:7, acq:1.5, tax:4, logistics:0, target:15};
+const S = () => ({...DEF_SET, ...(state.settings||{})});
+function econ(price, cost){
+  const st = S(); price = +price||0;
+  const leader = price*st.leader/100, acq = price*st.acq/100, tax = price*st.tax/100, log = +st.logistics||0;
+  const has = cost!==null && cost!=="" && cost!==undefined && !isNaN(+cost);
+  cost = has ? +cost : null;
+  const profit = has ? price - cost - leader - acq - tax - log : null;
+  const k = 1 - (st.leader+st.acq+st.tax+st.target)/100;
+  const rec = has && k>0 ? Math.ceil((cost+log)/k/10)*10 : null;
+  return {price, cost, leader, acq, tax, log, profit, margin: has&&price ? profit/price*100 : null, markup: has&&cost ? (price-cost)/cost*100 : null, rec, st};
+}
+const pct = n => (Math.round(n*10)/10).toLocaleString("ru-RU") + "%";
+function calcHtml(price, cost){
+  const e = econ(price, cost);
+  if(e.cost===null) return `<div class="calc"><span class="muted" style="font-size:13.5px">Впишите себестоимость, и здесь появится расчёт прибыли с одной штуки.</span></div>`;
+  return `<div class="calc">
+    <div class="cl"><span>Цена на сайте</span><b>${fmt(e.price)}</b></div>
+    <div class="cl"><span>− Себестоимость</span><span>${fmt(e.cost)}</span></div>
+    <div class="cl"><span>− Лидеру ЖК ${pct(e.st.leader)}</span><span>${fmt(e.leader)}</span></div>
+    <div class="cl"><span>− Эквайринг ${pct(e.st.acq)}</span><span>${fmt(e.acq)}</span></div>
+    <div class="cl"><span>− Налог ${pct(e.st.tax)}</span><span>${fmt(e.tax)}</span></div>
+    ${e.log?`<div class="cl"><span>− Доставка на 1 шт.</span><span>${fmt(e.log)}</span></div>`:""}
+    <div class="cl res"><span>Чистая прибыль с 1 шт.</span><span class="${e.profit>=0?"good":"bad"}">${e.profit<0?"−":""}${fmt(Math.abs(e.profit))}</span></div>
+    <div class="cl"><span>Маржа от цены</span><b class="${e.margin>=0?"good":"bad"}">${pct(e.margin)}</b></div>
+    <div class="cl"><span>Наценка на себестоимость</span><b>${e.markup===null?"—":pct(e.markup)}</b></div>
+    ${e.rec?`<div class="rec"><span>Цена для маржи ${pct(e.st.target)}: ${fmt(e.rec)}</span>${e.rec!==e.price?`<button type="button" data-userec="${e.rec}">Поставить</button>`:"✓"}</div>`:""}
+  </div>`;
+}
+function profitTag(p){
+  if(p.cost===null||p.cost===undefined) return `<span class="tag">нет себестоимости</span>`;
+  const e = econ(p.price, p.cost);
+  return `<span class="tag ${e.profit>=0?"profit":"loss"}">${e.profit>=0?"прибыль":"убыток"} ${fmt(Math.abs(e.profit))} · ${pct(e.margin)}</span>`;
+}
 const STATUS = {paid:"Оплачен", sent:"У поставщика", ready:"Привезли", done:"Выдан"};
 const pname = id => { const p=state.products.find(x=>x.id==id); return p ? p.name+(p.variant?" · "+p.variant:"") : "Товар №"+id; };
 const dt = s => new Date(s).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
@@ -224,11 +272,15 @@ function rowHtml(p){
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
         <span class="tag">${esc(CATS[p.cat]||p.cat)}</span>
         ${p.active?"":`<span class="tag off">Скрыт</span>`}
-        ${p.sold30?`<span class="tag">Продано за 30 дн.: ${p.sold30}</span>`:""}
+        ${profitTag(p)}
+        ${p.sold30?`<span class="tag">продано 30 дн.: ${p.sold30}</span>`:""}
       </div>
     </div>
     <div class="side">
-      <label class="price-in" title="Цена на сайте"><input data-price="${p.id}" inputmode="numeric" value="${p.price}" aria-label="Цена ${esc(p.name)}"><em>₸</em></label>
+      <div class="inputs">
+        <label class="price-in"><small>себестоимость</small><span class="r"><input data-cost="${p.id}" inputmode="numeric" value="${p.cost??""}" placeholder="—" aria-label="Себестоимость ${esc(p.name)}"><em>₸</em></span></label>
+        <label class="price-in"><small>цена</small><span class="r"><input data-price="${p.id}" inputmode="numeric" value="${p.price}" aria-label="Цена ${esc(p.name)}"><em>₸</em></span></label>
+      </div>
       <div class="row-actions">
         <button class="icon" data-move="${p.id}" data-dir="-1" aria-label="Выше в каталоге"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
         <button class="icon" data-move="${p.id}" data-dir="1" aria-label="Ниже в каталоге"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -245,13 +297,13 @@ function viewList(){
   const sold = state.products.reduce((s,p)=>s+(+p.sold30||0),0);
   $("#view").innerHTML = tabsHtml() + `
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
-      <div><h1>Товары и цены</h1><p class="muted" style="margin:4px 0 0">Цена сохраняется, когда вы уходите из поля или нажимаете Enter.</p></div>
-      <button class="btn" data-act="new">+ Новый товар</button>
+      <div><h1>Товары и цены</h1><p class="muted" style="margin:4px 0 0">Себестоимость и цена сохраняются, когда вы уходите из поля или нажимаете Enter. Прибыль пересчитывается сразу.</p></div>
+      <div class="acts"><button class="btn light" data-act="calcset">Параметры расчёта</button><button class="btn" data-act="new">+ Новый товар</button></div>
     </div>
     <div class="summary">
       <div class="stat"><b>${state.products.length}</b><span>всего товаров</span></div>
       <div class="stat"><b>${on}</b><span>на витрине</span></div>
-      <div class="stat"><b>${sold}</b><span>шт. продано за 30 дней</span></div>
+      <div class="stat"><b>${(()=>{const w=state.products.filter(p=>p.active&&p.cost!=null); return w.length?pct(w.reduce((s,p)=>s+econ(p.price,p.cost).margin,0)/w.length):"—";})()}</b><span>средняя маржа</span></div>
     </div>
     <div class="toolbar">
       <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" placeholder="Найти товар" value="${esc(state.q)}" aria-label="Поиск"></label>
@@ -286,9 +338,11 @@ function openEditor(p){
       <div class="field"><label for="eWeight">Объём / вес</label><input id="eWeight" maxlength="20" value="${esc(p.weight)}" placeholder="1 л"></div>
     </div>
     <div class="two">
+      <div class="field"><label for="eCost">Себестоимость, ₸</label><input id="eCost" inputmode="numeric" value="${esc(p.cost??"")}" placeholder="закупка за 1 шт."><span class="hint">Видна только в админке.</span></div>
       <div class="field"><label for="ePrice">Цена на сайте, ₸</label><input id="ePrice" inputmode="numeric" value="${esc(p.price)}" placeholder="1200"></div>
-      <div class="field"><label for="eOld">Цена в магазине, ₸</label><input id="eOld" inputmode="numeric" value="${esc(p.old_price??"")}" placeholder="необязательно"><span class="hint">Если заполнить, на сайте появится скидка «−%».</span></div>
     </div>
+    <div id="eCalc">${calcHtml(p.price, p.cost)}</div>
+    <div class="field"><label for="eOld">Цена в обычном магазине, ₸</label><input id="eOld" inputmode="numeric" value="${esc(p.old_price??"")}" placeholder="необязательно"><span class="hint">Если заполнить, на сайте появится скидка «−%».</span></div>
     <label class="switch"><input type="checkbox" id="eActive" ${p.active?"checked":""}><span class="tr"></span>Показывать на сайте</label>
     <p class="err" id="eErr" hidden></p>
     <button class="btn block" type="submit">${isNew?"Создать товар":"Сохранить"}</button>
@@ -300,6 +354,10 @@ function openEditor(p){
   (isNew ? bg.querySelector("#eName") : bg.querySelector("#ePrice")).focus();
 
   const pick = bg.querySelector("#ePick"), file = bg.querySelector("#eFile");
+  const recalc = () => { bg.querySelector("#eCalc").innerHTML = calcHtml(bg.querySelector("#ePrice").value.replace(/\D/g,""), bg.querySelector("#eCost").value.replace(/\D/g,"")===""?null:bg.querySelector("#eCost").value.replace(/\D/g,"")); };
+  bg.querySelector("#ePrice").addEventListener("input", recalc);
+  bg.querySelector("#eCost").addEventListener("input", recalc);
+  bg.addEventListener("click", e => { const u = e.target.closest("[data-userec]"); if(u){ bg.querySelector("#ePrice").value = u.dataset.userec; recalc(); } });
   pick.addEventListener("click", () => file.click());
   file.addEventListener("change", async () => {
     const f = file.files[0]; if(!f) return;
@@ -323,7 +381,7 @@ function openEditor(p){
     const err = bg.querySelector("#eErr"); err.hidden = true;
     const body = { id:p.id, cat:bg.querySelector("#eCat").value, brand:bg.querySelector("#eBrand").value, name:bg.querySelector("#eName").value,
       variant:bg.querySelector("#eVariant").value, weight:bg.querySelector("#eWeight").value,
-      price:bg.querySelector("#ePrice").value.replace(/\D/g,""), old_price:bg.querySelector("#eOld").value.replace(/\D/g,""),
+      price:bg.querySelector("#ePrice").value.replace(/\D/g,""), cost:bg.querySelector("#eCost").value.replace(/\D/g,""), old_price:bg.querySelector("#eOld").value.replace(/\D/g,""),
       active:bg.querySelector("#eActive").checked };
     const btn = e.submitter || bg.querySelector("button[type=submit]"); btn.disabled = true;
     try{
@@ -361,7 +419,10 @@ function viewOrders(){
     <section class="panel">
       <div class="sec-h"><h2>Что закупить</h2><span class="muted" style="font-size:13px">заказы «Оплачен» и «У поставщика»</span></div>
       ${buyRows.length?`<div class="buy">${buyRows.map(([id,q])=>`<div class="ln"><span>${esc(pname(id))}</span><b>×${q}</b></div>`).join("")}
-        <div class="ln" style="font-weight:800"><span>Итого по ценам сайта</span><span>${fmt(buySum)}</span></div></div>`
+        <div class="ln" style="font-weight:800"><span>Итого по ценам сайта</span><span>${fmt(buySum)}</span></div>
+        ${(()=>{ const miss=buyRows.filter(([id])=>state.products.find(p=>p.id==id)?.cost==null).length;
+          const c=buyRows.reduce((s,[id,q])=>s+(state.products.find(p=>p.id==id)?.cost||0)*q,0);
+          return `<div class="ln"><span>Нужно на закупку (по себестоимости)${miss?` <span class="muted">· у ${miss} товаров нет себестоимости</span>`:""}</span><b>${fmt(c)}</b></div>`; })()}</div>`
       :`<p class="muted" style="margin:0">Нет заказов, которые ждут закупки.</p>`}
     </section>
     <div class="list">${list.length?list.map(o=>`<div class="ocard">
@@ -475,7 +536,7 @@ async function load(){
   state.loading = true;
   try{
     const d = await rpc("adal_admin_products", {p_pass:state.pass});
-    state.products = d.products;
+    state.products = d.products; state.settings = d.settings;
   }catch(ex){
     if(/пароль|попыток/i.test(ex.message)){ state.pass=null; store.del(); viewLogin(ex.message); state.loading=false; return false; }
     toast(ex.message);
@@ -483,6 +544,15 @@ async function load(){
   state.loading = false; render(); return true;
 }
 
+async function saveCost(input){
+  const id = +input.dataset.cost, p = state.products.find(x=>x.id===id); if(!p) return;
+  const v = input.value.replace(/\D/g,"");
+  if(String(p.cost??"") === v){ input.value = v; return; }
+  try{
+    await rpc("adal_admin_save_product", {p_pass:state.pass, p:{...p, old_price:p.old_price??"", cost:v}});
+    p.cost = v===""?null:+v; toast(v===""?"Себестоимость удалена":`Себестоимость: ${fmt(+v)}`); viewList();
+  }catch(ex){ toast(ex.message); input.value = p.cost??""; }
+}
 async function savePrice(input){
   const id = +input.dataset.price, p = state.products.find(x=>x.id===id);
   const v = input.value.replace(/\D/g,"");
@@ -490,7 +560,7 @@ async function savePrice(input){
   if(!v || +v < 1){ toast("Цена должна быть больше нуля"); input.value = p.price; return; }
   try{
     await rpc("adal_admin_save_product", {p_pass:state.pass, p:{...p, price:v, old_price:p.old_price??""}});
-    p.price = +v; input.value = v;
+    p.price = +v; input.value = v; setTimeout(viewList, 900);
     const box = input.closest(".price-in"); box.classList.add("saved"); setTimeout(()=>box.classList.remove("saved"),1200);
     toast(`Цена обновлена: ${fmt(+v)}`);
   }catch(ex){ toast(ex.message); input.value = p.price; }
@@ -505,7 +575,7 @@ document.addEventListener("submit", async e => {
   state.pass = pw;
   try{
     const d = await rpc("adal_admin_products", {p_pass:pw});
-    state.products = d.products; store.set(pw); state.busy = false; setTab(state.tab); loadLeaders();
+    state.products = d.products; state.settings = d.settings; store.set(pw); state.busy = false; setTab(state.tab); loadLeaders();
   }catch(ex){ state.pass = null; state.busy = false; viewLogin(ex.message); }
 });
 
@@ -529,6 +599,7 @@ document.addEventListener("click", async e => {
     return;
   }
   if(b.dataset.act==="new"){ openEditor(null); return; }
+  if(b.dataset.act==="calcset"){ openCalcSettings(); return; }
   if(b.dataset.act==="logout"){ state.pass=null; store.del(); viewLogin(); return; }
   if(b.dataset.act==="settings"){ openPassword(); return; }
 });
@@ -552,10 +623,35 @@ document.addEventListener("input", e => {
   if(e.target.id === "q"){ state.q = e.target.value; const pos = e.target.selectionStart; viewList(); const q=$("#q"); q.focus(); q.setSelectionRange(pos,pos); }
 });
 document.addEventListener("keydown", e => {
-  if(e.key === "Enter" && e.target.dataset && e.target.dataset.price){ e.preventDefault(); e.target.blur(); }
+  if(e.key === "Enter" && e.target.dataset && (e.target.dataset.price || e.target.dataset.cost)){ e.preventDefault(); e.target.blur(); }
 });
-document.addEventListener("focusout", e => { if(e.target.dataset && e.target.dataset.price) savePrice(e.target); });
+document.addEventListener("focusout", e => { if(e.target.dataset && e.target.dataset.price) savePrice(e.target); if(e.target.dataset && e.target.dataset.cost) saveCost(e.target); });
 
+function openCalcSettings(){
+  const st = S();
+  const bg = document.createElement("div"); bg.className="sheet-bg";
+  bg.innerHTML = `<form class="sheet" id="csForm" role="dialog" aria-label="Параметры расчёта" novalidate>
+    <div class="sheet-head"><h2>Параметры расчёта</h2><button type="button" class="ghost" data-close>Закрыть</button></div>
+    <p class="muted" style="margin:0">Эти расходы вычитаются из цены каждого товара при расчёте прибыли.</p>
+    <div class="two">
+      <div class="field"><label for="csLeader">Комиссия лидера, %</label><input id="csLeader" inputmode="decimal" value="${st.leader}"></div>
+      <div class="field"><label for="csAcq">Эквайринг, %</label><input id="csAcq" inputmode="decimal" value="${st.acq}"></div>
+      <div class="field"><label for="csTax">Налог, % от цены</label><input id="csTax" inputmode="decimal" value="${st.tax}"><span class="hint">ИП на упрощёнке — 4%.</span></div>
+      <div class="field"><label for="csLog">Доставка на 1 шт., ₸</label><input id="csLog" inputmode="decimal" value="${st.logistics}"><span class="hint">Расходы на машину ÷ число штук в рейсе.</span></div>
+      <div class="field" style="grid-column:1/-1"><label for="csTarget">Желаемая маржа, %</label><input id="csTarget" inputmode="decimal" value="${st.target}"><span class="hint">По ней считается рекомендуемая цена.</span></div>
+    </div>
+    <p class="err" id="csErr" hidden></p>
+    <button class="btn block" type="submit">Сохранить</button></form>`;
+  document.body.appendChild(bg);
+  bg.addEventListener("click", e => { if(e.target===bg || e.target.closest("[data-close]")) bg.remove(); });
+  bg.querySelector("#csForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const num = id => bg.querySelector(id).value.replace(",",".").trim();
+    const body = {leader:num("#csLeader"), acq:num("#csAcq"), tax:num("#csTax"), logistics:num("#csLog"), target:num("#csTarget")};
+    try{ const r = await rpc("adal_admin_save_settings", {p_pass:state.pass, p:body}); state.settings = r.settings; bg.remove(); toast("Параметры сохранены"); render(); }
+    catch(ex){ const er=bg.querySelector("#csErr"); er.textContent=ex.message; er.hidden=false; }
+  });
+}
 function openPassword(){
   const bg = document.createElement("div"); bg.className="sheet-bg";
   bg.innerHTML = `<form class="sheet" id="pwForm" role="dialog" aria-label="Смена пароля" novalidate>
