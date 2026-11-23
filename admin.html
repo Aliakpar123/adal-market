@@ -28,7 +28,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body)
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1,h2{margin:0;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
 h1{font-size:24px} h2{font-size:19px}
 .muted{color:var(--muted)}
@@ -120,6 +120,34 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .inputs .price-in{width:104px;flex-direction:column;align-items:stretch}
 .inputs .price-in .r{display:flex;align-items:center}
 .inputs .price-in input{padding:2px 0 7px 10px}
+.plan-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:900px){.plan-grid{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start}}
+.plan-out{display:flex;flex-direction:column;gap:14px}
+.goal .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.goal .mini div{background:rgba(255,255,255,.12);border-radius:12px;padding:8px 10px}
+.goal .mini b{display:block;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.goal .mini span{font-size:11.5px;opacity:.8}
+@media (min-width:900px){.goal .mini{display:none}}
+.calc .cl>:last-child{white-space:nowrap}
+.list,.toolbar,.summary{max-width:760px}
+.goal{background:var(--brand);color:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.goal label{font-weight:700;opacity:.85;font-size:14px}
+.goal .gin{display:flex;align-items:baseline;gap:8px;background:rgba(255,255,255,.12);border-radius:14px;padding:6px 14px}
+.goal input{border:0;background:transparent;color:#fff;font-size:30px;font-weight:800;width:100%;min-width:0;outline:none;font-variant-numeric:tabular-nums}
+.goal em{font-style:normal;font-size:22px;font-weight:800;opacity:.8}
+.big-res{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big-res .stat b{font-size:24px}
+.big-res .stat.hl{background:var(--brand);color:#fff}.big-res .stat.hl span{color:rgba(255,255,255,.8)}
+.bar{height:12px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:999px}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) 130px 36px;gap:8px;align-items:center}
+.srow input{border:1.5px solid transparent;background:var(--bg);border-radius:12px;padding:10px;width:100%;min-width:0}
+.srow input:focus{border-color:var(--brand);outline:none}
+.srow input.num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.lever{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.lever:last-child{border-bottom:0}
+.lever b{white-space:nowrap}
+.dirty{color:var(--warn);font-weight:700;font-size:13px}
 .tabs{display:flex;gap:4px;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:4px}
 .tabs button{flex:1;border:0;background:transparent;border-radius:12px;padding:10px 6px;font-weight:800;font-size:14px;color:var(--muted);position:relative}
 .tabs button[aria-selected="true"]{background:var(--brand);color:var(--brand-ink)}
@@ -191,7 +219,7 @@ const store = {
 };
 
 const state = { pass: store.get(), products: [], q:"", filter:"all", busy:false, loading:false,
-  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","leaders"].includes(h)?h:"products"; })(),
+  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","leaders","plan"].includes(h)?h:"products"; })(),
   orders: [], days: 7, ozk: "all", ost: "all", apps: [], zks: [], confirm: null };
 const DEF_SET = {leader:7, acq:1.5, tax:4, logistics:0, target:15};
 const S = () => ({...DEF_SET, ...(state.settings||{})});
@@ -233,10 +261,10 @@ const dt = s => new Date(s).toLocaleString("ru-RU",{day:"numeric",month:"short",
 function tabsHtml(){
   const n = state.apps.filter(a=>a.status==="new").length;
   return `<div class="tabs" role="tablist">
-    ${[["products","Товары"],["orders","Заказы"],["leaders","Лидеры"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
+    ${[["products","Товары"],["orders","Заказы"],["leaders","Лидеры"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
   </div>`;
 }
-function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else viewList(); }
+function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else if(state.tab==="plan") viewPlan(); else viewList(); }
 const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = n => Math.round(n).toLocaleString("ru-RU").replace(/ |,/g," ") + " ₸";
@@ -514,7 +542,157 @@ async function loadLeaders(){
   if(state.pass) render();
 }
 function authFail(ex){ if(/пароль|попыток/i.test(ex.message)){ state.pass=null; store.del(); viewLogin(ex.message); return true; } return false; }
-function setTab(t){ state.tab=t; history.replaceState(null,"","#"+t); state.confirm=null; render(); if(t==="orders") loadOrders(); if(t==="leaders") loadLeaders(); }
+function setTab(t){ state.tab=t; history.replaceState(null,"","#"+t); state.confirm=null; render(); if(t==="orders") loadOrders(); if(t==="leaders") loadLeaders(); if(t==="plan") loadPlanData(); }
+
+
+/* ===================== План: сколько нужно продавать ===================== */
+const PLAN_DEF = {goal:1000000, staff:[["Закупщик-кладовщик",250000],["Водитель",250000],["Менеджер по лидерам",250000]],
+  payrollTax:17.5, rent:200000, utilities:40000, transport:0, marketing:150000, other:50000,
+  avgCheck:"", margin:"", perZk:20, rounds:3};
+const WEEKS = 4.33;
+function plan(){ if(!state.plan) state.plan = JSON.parse(JSON.stringify({...PLAN_DEF, ...((state.settings||{}).plan||{})})); return state.plan; }
+async function loadPlanData(){
+  try{ const d = await rpc("adal_admin_orders", {p_pass:state.pass, p_days:30}); state.orders30 = d.orders; }
+  catch(ex){ if(!authFail(ex)) toast(ex.message); }
+  if(state.pass && state.tab==="plan") viewPlan();
+}
+function autoMargin(){
+  const w = state.products.filter(p=>p.active && p.cost!=null);
+  if(!w.length) return null;
+  const tot = w.reduce((s,p)=>s+(+p.sold30||0),0);
+  return tot ? w.reduce((s,p)=>s+econ(p.price,p.cost).margin*(+p.sold30||0),0)/tot
+             : w.reduce((s,p)=>s+econ(p.price,p.cost).margin,0)/w.length;
+}
+function actual30(){
+  const o = (state.orders30||[]);
+  if(!o.length) return {n:0, rev:0, profit:0, avg:null};
+  const rev = o.reduce((s,x)=>s+x.total,0);
+  const fallback = autoMargin() ?? 15;
+  let profit = 0;
+  o.forEach(x=>Object.entries(x.items||{}).forEach(([id,q])=>{
+    const p = state.products.find(z=>z.id==id); if(!p) return;
+    profit += (p.cost!=null ? econ(p.price,p.cost).profit : p.price*fallback/100) * q;
+  }));
+  return {n:o.length, rev, profit, avg: rev/o.length};
+}
+function planCalc(over={}){
+  const P = {...plan(), ...over}, act = actual30();
+  const staff = P.staff.reduce((s,[,v])=>s+(+v||0),0);
+  const fixed = staff*(1+(+P.payrollTax||0)/100) + (+P.rent||0)+(+P.utilities||0)+(+P.transport||0)+(+P.marketing||0)+(+P.other||0);
+  const goal = +P.goal||0, need = goal + fixed;
+  const avgCheck = +P.avgCheck || (act.avg ? Math.round(act.avg) : 5000);
+  const am = autoMargin();
+  const margin = P.margin!=="" && P.margin!=null ? +P.margin : (am ?? 15);
+  const perOrder = avgCheck*margin/100;
+  const roundsM = (+P.rounds||0)*WEEKS;
+  const ordersM = perOrder>0 ? need/perOrder : Infinity;
+  const perRound = roundsM ? ordersM/roundsM : Infinity;
+  const zk = (+P.perZk>0 && isFinite(perRound)) ? Math.ceil(perRound/(+P.perZk)) : Infinity;
+  const rev = ordersM*avgCheck;
+  return {P, staff, staffTax: staff*(+P.payrollTax||0)/100, fixed, goal, need, avgCheck, margin, am, perOrder, ordersM, perRound, zk, rev,
+          leaderPay: rev*S().leader/100, act, actNet: act.profit - fixed, autoCheck: !+P.avgCheck, autoMarginUsed: !(P.margin!=="" && P.margin!=null)};
+}
+const big = n => isFinite(n) ? fmt(n) : "—";
+const cnt = n => isFinite(n) ? Math.ceil(n).toLocaleString("ru-RU") : "—";
+
+function planOutHtml(){
+  const c = planCalc();
+  const progress = c.goal>0 ? Math.max(0, Math.min(100, c.actNet/c.goal*100)) : 0;
+  const lev = (label, over) => { const x = planCalc(over); return `<div class="lever"><span>${label}</span><b>${isFinite(x.zk)?x.zk+" ЖК":"—"} · ${cnt(x.ordersM)} заказов</b></div>`; };
+  return `
+  <div class="big-res">
+    <div class="stat hl"><b>${isFinite(c.zk)?c.zk:"—"}</b><span>ЖК нужно подключить</span></div>
+    <div class="stat"><b>${cnt(c.ordersM)}</b><span>заказов в месяц</span></div>
+    <div class="stat"><b>${cnt(c.perRound)}</b><span>заказов за один сбор</span></div>
+    <div class="stat"><b>${big(c.rev)}</b><span>выручка в месяц</span></div>
+  </div>
+  <section class="panel">
+    <h2>Откуда берутся цифры</h2>
+    <div class="calc">
+      <div class="cl"><span>Хочу заработать</span><b>${fmt(c.goal)}</b></div>
+      <div class="cl"><span>+ Зарплаты</span><span>${fmt(c.staff)}</span></div>
+      <div class="cl"><span>+ Налоги на зарплаты ${pct(+c.P.payrollTax||0)}</span><span>${fmt(c.staffTax)}</span></div>
+      <div class="cl"><span>+ Аренда, коммуналка, транспорт, маркетинг, прочее</span><span>${fmt(c.fixed-c.staff-c.staffTax)}</span></div>
+      <div class="cl res"><span>Нужно заработать на товарах</span><span>${fmt(c.need)}</span></div>
+      <div class="cl"><span>Средний чек${c.autoCheck?(c.act.avg?" (по заказам за 30 дней)":" (по умолчанию)"):""}</span><b>${fmt(c.avgCheck)}</b></div>
+      <div class="cl"><span>Чистая маржа${c.autoMarginUsed?(c.am!=null?" (по себестоимости товаров)":" (по умолчанию)"):""}</span><b>${pct(c.margin)}</b></div>
+      <div class="cl"><span>Прибыль с одного заказа</span><b class="${c.perOrder>0?"good":"bad"}">${fmt(c.perOrder)}</b></div>
+      <div class="cl res"><span>Заказов в месяц = ${fmt(c.need).replace(" ₸","")} ÷ ${fmt(c.perOrder).replace(" ₸","")}</span><span>${cnt(c.ordersM)}</span></div>
+      <div class="cl"><span>Сборов в месяц (${c.P.rounds} в неделю)</span><span>${(Math.round((+c.P.rounds||0)*WEEKS*10)/10).toLocaleString("ru-RU")}</span></div>
+      <div class="cl"><span>ЖК при ${c.P.perZk} заказах с ЖК за сбор</span><b>${isFinite(c.zk)?c.zk:"—"}</b></div>
+      <div class="cl"><span>Лидерам выплатите в месяц</span><span>${big(c.leaderPay)}</span></div>
+    </div>
+    ${c.am==null?`<p class="muted" style="margin:0;font-size:13px">Маржа взята по умолчанию 15%. Заполните себестоимость во вкладке «Товары», и расчёт станет точным.</p>`:""}
+  </section>
+  <section class="panel">
+    <h2>Сейчас, за последние 30 дней</h2>
+    <div class="calc">
+      <div class="cl"><span>Заказов</span><b>${c.act.n}</b></div>
+      <div class="cl"><span>Выручка</span><span>${fmt(c.act.rev)}</span></div>
+      <div class="cl"><span>Заработано на товарах (оценка)</span><span>${fmt(c.act.profit)}</span></div>
+      <div class="cl"><span>− Постоянные расходы</span><span>${fmt(c.fixed)}</span></div>
+      <div class="cl res"><span>Осталось вам</span><span class="${c.actNet>=0?"good":"bad"}">${c.actNet<0?"−":""}${fmt(Math.abs(c.actNet))}</span></div>
+    </div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}"><i style="width:${progress}%"></i></div>
+    <span class="muted" style="font-size:13px">${Math.round(progress)}% от цели ${fmt(c.goal)} в месяц</span>
+  </section>
+  <section class="panel">
+    <h2>Что быстрее приблизит к цели</h2>
+    <div class="lever"><span><b>Сейчас по плану</b></span><b>${isFinite(c.zk)?c.zk+" ЖК":"—"} · ${cnt(c.ordersM)} заказов</b></div>
+    ${lev(`Средний чек +1 000 ₸ (${fmt(c.avgCheck+1000)})`, {avgCheck:c.avgCheck+1000})}
+    ${lev(`Маржа +3% (${pct(c.margin+3)})`, {margin:c.margin+3})}
+    ${lev(`${(+c.P.perZk||0)+10} заказов с ЖК за сбор`, {perZk:(+c.P.perZk||0)+10})}
+    ${lev(`Постоянные расходы −20%`, {staff:c.P.staff.map(([n,v])=>[n,(+v||0)*0.8]), rent:(+c.P.rent||0)*.8, utilities:(+c.P.utilities||0)*.8, transport:(+c.P.transport||0)*.8, marketing:(+c.P.marketing||0)*.8, other:(+c.P.other||0)*.8})}
+  </section>`;
+}
+
+function viewPlan(){
+  $("#topActions").hidden = false;
+  const P = plan(), act = actual30(), am = autoMargin();
+  const nf = (id,label,val,hint,ph) => `<div class="field"><label for="${id}">${label}</label><input id="${id}" data-plan="${id}" inputmode="numeric" value="${esc(val)}" ${ph?`placeholder="${esc(ph)}"`:""}>${hint?`<span class="hint">${hint}</span>`:""}</div>`;
+  $("#view").innerHTML = tabsHtml() + `
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+    <div><h1>План дохода</h1><p class="muted" style="margin:4px 0 0">Сколько нужно продавать, чтобы зарабатывать столько, сколько вы хотите.</p></div>
+    <div class="acts"><span class="dirty" id="planDirty" hidden>Есть несохранённые изменения</span><button class="btn" data-act="saveplan">Сохранить план</button></div>
+  </div>
+  <div class="plan-grid">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="goal"><label for="goal">Хочу зарабатывать чистыми в месяц</label>
+        <div class="gin"><input id="goal" data-plan="goal" inputmode="numeric" value="${esc(P.goal)}"><em>₸</em></div>
+        <span style="font-size:13px;opacity:.8">После зарплат, аренды, налогов и выплат лидерам.</span>
+        <div class="mini" id="planMini">${planMiniHtml()}</div></div>
+      <section class="panel">
+        <div class="sec-h"><h2>Зарплаты</h2><span class="muted" style="font-size:13px">в месяц, на руки</span></div>
+        ${P.staff.map(([n,v],i)=>`<div class="srow"><input data-staffname="${i}" value="${esc(n)}" aria-label="Должность"><input class="num" data-staffsal="${i}" inputmode="numeric" value="${esc(v)}" aria-label="Оклад"><button class="icon" data-staffdel="${i}" aria-label="Удалить"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`).join("")}
+        <button class="btn light" data-act="staffadd">+ Сотрудник</button>
+        ${nf("payrollTax","Налоги на зарплаты сверху, %",P.payrollTax,"В РК ≈ 17,5%: соцналог, соцотчисления, ОПВР, ОСМС. Если сотрудники на ГПХ или самозанятые — поставьте 0.")}
+      </section>
+      <section class="panel">
+        <h2>Другие расходы в месяц</h2>
+        <div class="two">
+          ${nf("rent","Аренда склада, ₸",P.rent)}
+          ${nf("utilities","Коммунальные, ₸",P.utilities)}
+          ${nf("transport","Машина, бензин, ₸",P.transport,"Если доставка не учтена в цене товара.")}
+          ${nf("marketing","Маркетинг, ₸",P.marketing)}
+          ${nf("other","Связь, сайт, прочее, ₸",P.other)}
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Экономика заказа</h2>
+        <div class="two">
+          ${nf("avgCheck","Средний чек, ₸",P.avgCheck,act.avg?`Пусто = по заказам: ${fmt(act.avg)}`:"Пусто = 5 000 ₸","авто")}
+          ${nf("margin","Чистая маржа, %",P.margin,am!=null?`Пусто = по товарам: ${pct(am)}`:"Пусто = 15%. Заполните себестоимость товаров.","авто")}
+          ${nf("perZk","Заказов с ЖК за сбор",P.perZk)}
+          ${nf("rounds","Сборов в неделю",P.rounds)}
+        </div>
+        <p class="muted" style="margin:0;font-size:13px">Маржа уже за вычетом лидера ${pct(S().leader)}, эквайринга ${pct(S().acq)}, налога ${pct(S().tax)} и доставки — как в «Параметрах расчёта».</p>
+      </section>
+    </div>
+    <div class="plan-out" id="planOut">${planOutHtml()}</div>
+  </div>`;
+}
+function planMiniHtml(){ const c=planCalc(); return `<div><b>${isFinite(c.zk)?c.zk:"—"}</b><span>ЖК нужно</span></div><div><b>${cnt(c.ordersM)}</b><span>заказов в мес.</span></div><div><b>${cnt(c.perRound)}</b><span>за один сбор</span></div>`; }
+function planChanged(){ const m=$("#planMini"); if(m) m.innerHTML=planMiniHtml(); const d=$("#planDirty"); if(d) d.hidden=false; const o=$("#planOut"); if(o) o.innerHTML = planOutHtml(); }
 
 /* сжатие фото в браузере: максимум 1000 px по длинной стороне, JPEG */
 function shrink(file){
@@ -600,6 +778,14 @@ document.addEventListener("click", async e => {
   }
   if(b.dataset.act==="new"){ openEditor(null); return; }
   if(b.dataset.act==="calcset"){ openCalcSettings(); return; }
+  if(b.dataset.act==="staffadd"){ plan().staff.push(["Новый сотрудник",200000]); viewPlan(); planChanged(); return; }
+  if(b.dataset.staffdel){ plan().staff.splice(+b.dataset.staffdel,1); viewPlan(); planChanged(); return; }
+  if(b.dataset.act==="saveplan"){
+    b.disabled = true;
+    try{ await rpc("adal_admin_save_plan",{p_pass:state.pass,p:plan()}); state.settings = {...(state.settings||{}), plan:JSON.parse(JSON.stringify(plan()))}; const d=$("#planDirty"); if(d) d.hidden=true; toast("План сохранён"); }
+    catch(ex){ toast(ex.message); }
+    b.disabled = false; return;
+  }
   if(b.dataset.act==="logout"){ state.pass=null; store.del(); viewLogin(); return; }
   if(b.dataset.act==="settings"){ openPassword(); return; }
 });
@@ -620,6 +806,10 @@ document.addEventListener("change", async e => {
   }
 });
 document.addEventListener("input", e => {
+  const t = e.target, P = state.tab==="plan" ? plan() : null;
+  if(P && t.dataset.plan){ const v=t.value.replace(",",".").replace(/[^\d.]/g,""); P[t.dataset.plan] = (t.dataset.plan==="avgCheck"||t.dataset.plan==="margin") && v==="" ? "" : (v===""?0:+v); planChanged(); return; }
+  if(P && t.dataset.staffname!==undefined){ P.staff[+t.dataset.staffname][0]=t.value; planChanged(); return; }
+  if(P && t.dataset.staffsal!==undefined){ P.staff[+t.dataset.staffsal][1]=+t.value.replace(/\D/g,"")||0; planChanged(); return; }
   if(e.target.id === "q"){ state.q = e.target.value; const pos = e.target.selectionStart; viewList(); const q=$("#q"); q.focus(); q.setSelectionRange(pos,pos); }
 });
 document.addEventListener("keydown", e => {
@@ -673,7 +863,7 @@ function openPassword(){
   });
 }
 
-if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); } }); } else { viewLogin(); }
+if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); } }); } else { viewLogin(); }
 </script>
 </body>
 </html>
