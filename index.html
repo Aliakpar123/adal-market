@@ -320,6 +320,7 @@ function toast(msg){
   const t=document.createElement("div"); t.className="toast"; t.textContent=msg; t.setAttribute("role","status");
   document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
 }
+const imgOf = (p,id) => esc((p&&p.image_url) || `img/${p&&p.id||id}.jpg`);
 const tile = p => `background:linear-gradient(150deg,${esc(p.color||"#0F4C4A")},${esc(p.color2||p.color||"#0F4C4A")})`;
 
 /* ---------- views ---------- */
@@ -354,7 +355,7 @@ function viewShop(){
     <div class="grid">
       ${list.map(p=>`<article class="card ${state.cart[p.id]?"in":""}">
         <div class="photo" style="${tile(p)}">
-          <img src="img/${p.id}.jpg" alt="${esc(p.name)}${p.variant?" "+esc(p.variant):""}" loading="lazy" onerror="this.remove()">
+          <img src="${imgOf(p)}" alt="${esc(p.name)}${p.variant?" "+esc(p.variant):""}" loading="lazy" onerror="this.remove()">
           <span class="w">${esc(p.weight)}</span>
           <div class="ctl">${cardCtl(p.id)}</div>
         </div>
@@ -379,7 +380,7 @@ function viewCart(){
     <h1>Корзина</h1>
     <div class="panel" style="padding-block:4px">
       ${ids.map(id=>{const p=prod(id);return `<div class="line">
-        <div class="mini" style="${tile(p)}"><img src="img/${p.id}.jpg" alt="" onerror="this.remove()">${esc(p.weight)}</div>
+        <div class="mini" style="${tile(p)}"><img src="${imgOf(p)}" alt="" onerror="this.remove()">${esc(p.weight)}</div>
         <div class="grow"><div class="name">${esc(p.name)}</div><div class="muted" style="font-size:13px">${esc(p.variant||"")}${p.variant?" · ":""}${fmt(p.price)} / шт</div></div>
         <div class="qty"><button data-dec="${id}" aria-label="Меньше">−</button><span>${state.cart[id]}</span><button data-add="${id}" aria-label="Больше">+</button></div>
       </div>`}).join("")}
@@ -495,7 +496,7 @@ function viewLeader(){
     const agg={}; orders.filter(o=>o.st!=="done").forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>agg[id]=(agg[id]||0)+q));
     const rows=Object.entries(agg).sort((a,b)=>b[1]-a[1]);
     body = rows.length ? `<div class="panel" style="padding-block:4px">${rows.map(([id,q])=>{const p=prod(id)||{weight:"",price:0};return `<div class="line">
-      <div class="mini" style="${tile(p)}"><img src="img/${id}.jpg" alt="" onerror="this.remove()">${esc(p.weight)}</div><div class="grow"><div class="name">${esc(pName(id))}</div><div class="muted" style="font-size:13px">${fmt(p.price*q)}</div></div><b style="font-size:18px;font-variant-numeric:tabular-nums">×${q}</b></div>`}).join("")}</div>
+      <div class="mini" style="${tile(p)}"><img src="${imgOf(prod(id),id)}" alt="" onerror="this.remove()">${esc(p.weight)}</div><div class="grow"><div class="name">${esc(pName(id))}</div><div class="muted" style="font-size:13px">${fmt(p.price*q)}</div></div><b style="font-size:18px;font-variant-numeric:tabular-nums">×${q}</b></div>`}).join("")}</div>
       <p class="muted" style="margin:0;font-size:13px">По этой сводке мы закупаем и собираем коробки для вашего ЖК.</p>` : `<div class="empty"><p class="muted">Нет невыданных заказов.</p></div>`;
   } else {
     body = `<div class="panel">
@@ -641,7 +642,7 @@ async function loadCatalog(){
   try{
     const [zks, prods] = await Promise.all([
       api("adal_zk?select=id,name,leader_name,flats,city&active=eq.true&order=name"),
-      api("adal_products?select=id,cat,brand,name,variant,weight,price,old_price,color,color2&active=eq.true&order=sort")
+      api("adal_products?select=id,cat,brand,name,variant,weight,price,old_price,color,color2,image_url&active=eq.true&order=sort")
     ]);
     ZKS=zks; PRODUCTS=prods;
     if(!ZKS.some(z=>z.id===state.zk) && ZKS[0]) state.zk=ZKS[0].id;
