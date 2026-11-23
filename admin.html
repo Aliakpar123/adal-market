@@ -247,7 +247,7 @@ const store = {
 };
 
 const state = { pass: store.get(), products: [], q:"", filter:"all", busy:false, loading:false,
-  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","finance","leaders","plan"].includes(h)?h:"products"; })(),
+  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","finance","plan"].includes(h)?h:"products"; })(),
   orders: [], days: 7, ozk: "all", ost: "all", apps: [], zks: [], confirm: null };
 const DEF_SET = {leader:7, acq:1.5, tax:4, logistics:0, target:15};
 const S = () => ({...DEF_SET, ...(state.settings||{})});
@@ -283,14 +283,14 @@ function profitTag(p){
   const e = econ(p.price, p.cost);
   return `<span class="tag ${e.profit>=0?"profit":"loss"}">${e.profit>=0?"прибыль":"убыток"} ${fmt(Math.abs(e.profit))} · ${pct(e.margin)}</span>`;
 }
-const STATUS = {paid:"Новый", sent:"У поставщика", ready:"Привезли", done:"Выдан"};
+const STATUS = {paid:"Новый", sent:"Собирается", ready:"В пути", done:"Доставлен"};
 const PAY = {kaspi:"Kaspi", cash:"Наличные", card:"Карта"};
 const pname = id => { const p=state.products.find(x=>x.id==id); return p ? p.name+(p.variant?" · "+p.variant:"") : "Товар №"+id; };
 const dt = s => new Date(s).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 function tabsHtml(){
   const n = state.apps.filter(a=>a.status==="new").length;
   return `<div class="tabs" role="tablist">
-    ${[["products","Товары"],["orders","Заказы"],["finance","Финансы"],["leaders","Лидеры"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
+    ${[["products","Товары"],["orders","Заказы"],["finance","Финансы"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
   </div>`;
 }
 function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else if(state.tab==="plan") viewPlan(); else if(state.tab==="finance") viewFinance(); else viewList(); }
@@ -462,10 +462,9 @@ function viewOrders(){
   const buyRows = Object.entries(buy).sort((a,b)=>b[1]-a[1]);
   const buySum = buyRows.reduce((s,[id,q])=>s+(state.products.find(p=>p.id==id)?.price||0)*q,0);
   $("#view").innerHTML = tabsHtml() + `
-    <div><h1>Заказы</h1><p class="muted" style="margin:4px 0 0">Все ЖК вместе. Статус можно поменять прямо в карточке заказа.</p></div>
+    <div><h1>Заказы</h1><p class="muted" style="margin:4px 0 0">Статус и оплату можно поменять прямо в карточке заказа.</p></div>
     <div class="filters">
       <div class="chips" role="group" aria-label="Период">${[[1,"Сегодня"],[7,"7 дней"],[30,"30 дней"],[365,"Год"]].map(([d,v])=>`<button class="chip" data-days="${d}" aria-pressed="${state.days===d}">${v}</button>`).join("")}</div>
-      <select id="oZk" aria-label="ЖК"><option value="all">Все ЖК</option>${zkNames.map(([id,n])=>`<option value="${esc(id)}" ${state.ozk===id?"selected":""}>${esc(n)}</option>`).join("")}</select>
       <select id="oSt" aria-label="Статус"><option value="all">Все статусы</option>${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${state.ost===k?"selected":""}>${v}</option>`).join("")}</select>
     </div>
     <div class="summary">
@@ -474,7 +473,7 @@ function viewOrders(){
       <div class="stat"><b>${list.length?fmt(sum/list.length):"—"}</b><span>средний чек</span></div>
     </div>
     <section class="panel">
-      <div class="sec-h"><h2>Что закупить</h2><span class="muted" style="font-size:13px">заказы «Новый» и «У поставщика»</span></div>
+      <div class="sec-h"><h2>Что закупить</h2><span class="muted" style="font-size:13px">заказы «Новый» и «Собирается»</span></div>
       ${buyRows.length?`<div class="buy">${buyRows.map(([id,q])=>`<div class="ln"><span>${esc(pname(id))}</span><b>×${q}</b></div>`).join("")}
         <div class="ln" style="font-weight:800"><span>Итого по ценам сайта</span><span>${fmt(buySum)}</span></div>
         ${(()=>{ const miss=buyRows.filter(([id])=>state.products.find(p=>p.id==id)?.cost==null).length;
@@ -483,9 +482,10 @@ function viewOrders(){
       :`<p class="muted" style="margin:0">Нет заказов, которые ждут закупки.</p>`}
     </section>
     <div class="list">${list.length?list.map(o=>`<div class="ocard">
-      <div class="top-l"><div><div class="who">${esc(o.customer_name)}, кв. ${esc(o.apt)}</div>
-        <div class="sub">№${o.id} · ${esc(o.zk_name)} · лидер ${esc(o.leader_name)} · ${dt(o.created_at)}</div>
-        ${o.phone?`<div class="sub">${esc(o.phone)}</div>`:""}</div>
+      <div class="top-l"><div><div class="who">${esc(o.customer_name)}${o.phone?` · ${esc(o.phone)}`:""}</div>
+        <div class="sub">${o.address?`${esc(o.address)}${o.apt&&o.apt!=="—"?", кв. "+esc(o.apt):""}${o.entrance?", "+esc(o.entrance):""}`:`${esc(o.zk_name||"")}, кв. ${esc(o.apt)}`}</div>
+        ${o.comment?`<div class="sub">Комментарий: ${esc(o.comment)}</div>`:""}
+        <div class="sub">№${o.id} · ${dt(o.created_at)}${o.delivery_fee?` · доставка ${fmt(o.delivery_fee)}`:""}</div></div>
         <select class="st st-${o.status}" data-ostatus="${o.id}" aria-label="Статус заказа ${o.id}">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${o.status===k?"selected":""}>${v}</option>`).join("")}</select></div>
       <div class="items">${Object.entries(o.items||{}).map(([id,q])=>`${esc(pname(id))} ×${q}`).join(", ")}</div>
       <div class="bot"><b>${fmt(o.total)}</b>
@@ -752,7 +752,7 @@ function viewFinance(){
     <div style="display:flex;flex-direction:column;gap:14px">
       <section class="panel">
         <div class="sec-h"><h2>Ждут оплаты</h2><span class="muted" style="font-size:13px">${F.unpaid.length} заказов</span></div>
-        ${F.unpaid.length?F.unpaid.map(o=>`<div class="entry"><div><b>${esc(o.customer_name)}, кв. ${esc(o.apt)}</b><div class="sub">№${o.id} · ${esc(o.zk_name)} · ${STATUS[o.status]}${o.phone?" · "+esc(o.phone):""}</div></div>
+        ${F.unpaid.length?F.unpaid.map(o=>`<div class="entry"><div><b>${esc(o.customer_name)}${o.apt&&o.apt!=="—"?", кв. "+esc(o.apt):""}</b><div class="sub">№${o.id} · ${esc(o.zk_name||"")} · ${STATUS[o.status]}${o.phone?" · "+esc(o.phone):""}</div></div>
           <div class="am">${fmt(o.total)}</div>
           <div class="acts" style="grid-column:1/-1"><button class="btn light" data-markpaid="${o.id}" data-m="kaspi" style="padding:7px 12px">Оплатил Kaspi</button><button class="btn light" data-markpaid="${o.id}" data-m="cash" style="padding:7px 12px">Наличными</button></div></div>`).join("")
           :`<p class="muted" style="margin:0">Все выданные заказы оплачены.</p>`}
@@ -862,7 +862,7 @@ document.addEventListener("submit", async e => {
   state.pass = pw;
   try{
     const d = await rpc("adal_admin_products", {p_pass:pw});
-    state.products = d.products; state.settings = d.settings; store.set(pw); state.busy = false; setTab(state.tab); loadLeaders();
+    state.products = d.products; state.settings = d.settings; store.set(pw); state.busy = false; setTab(state.tab);
   }catch(ex){ state.pass = null; state.busy = false; viewLogin(ex.message); }
 });
 
@@ -907,7 +907,7 @@ document.addEventListener("click", async e => {
 
 document.addEventListener("change", async e => {
   const t = e.target;
-  if(t.id==="oZk"){ state.ozk=t.value; render(); return; }
+  
   if(t.id==="oSt"){ state.ost=t.value; render(); return; }
   if(t.dataset.ostatus){
     const id=+t.dataset.ostatus, o=state.orders.find(x=>x.id===id), prev=o.status;
@@ -1036,7 +1036,7 @@ function openPassword(){
   });
 }
 
-if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); if(state.tab==='finance') loadFinance(); } }); } else { viewLogin(); }
+if(state.pass){ load().then(ok=>{ if(ok){ if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); if(state.tab==='finance') loadFinance(); } }); } else { viewLogin(); }
 </script>
 </body>
 </html>
