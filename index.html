@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="ADAL market — совместные закупки для жителей ЖК по оптовым ценам.">
+<meta name="theme-color" content="#0F4C4A">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>ADAL market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: phone app shell (max 480px), sticky top bar, fixed bottom tabs; four views — Магазин, Корзина, Как это работает, Кабинет лидера */
+:root{
+  --bg:#F3F6F5; --surface:#FFFFFF; --ink:#0E2B2C; --muted:#5D7273; --line:#DCE5E3;
+  --brand:#0F4C4A; --brand-ink:#FFFFFF; --accent:#E9A23B; --accent-soft:#FBEBD2;
+  --ok:#2E8B57; --ok-soft:#DDF1E5; --warn:#B7701A; --info:#2F6FB0; --info-soft:#DDE9F6;
+  --font-display:"Unbounded", "Manrope", system-ui, sans-serif;
+  --font-body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1817; --surface:#132422; --ink:#E6F0EE; --muted:#93A9A6; --line:#233A38;
+  --brand:#5FC1B6; --brand-ink:#05201E; --accent:#F0B45A; --accent-soft:#3A2C16;
+  --ok:#5CC98B; --ok-soft:#173527; --warn:#E9A64D; --info:#7FB2E8; --info-soft:#18293C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1817; --surface:#132422; --ink:#E6F0EE; --muted:#93A9A6; --line:#233A38;
+  --brand:#5FC1B6; --brand-ink:#05201E; --accent:#F0B45A; --accent-soft:#3A2C16;
+  --ok:#5CC98B; --ok-soft:#173527; --warn:#E9A64D; --info:#7FB2E8; --info-soft:#18293C; color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brand)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--brand);color:var(--brand-ink);padding-block:12px}
+.top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-family:var(--font-display);font-weight:700;font-size:19px;letter-spacing:.02em}
+.logo small{font-weight:500;opacity:.75;font-size:12px;margin-left:4px}
+.zk{display:flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--brand-ink) 14%,transparent);border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--brand-ink);max-width:60%}
+.zk span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deadline{margin-top:10px;display:flex;gap:10px;align-items:center;background:var(--accent);color:#2A1A03;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600}
+.deadline b{font-variant-numeric:tabular-nums;font-size:15px}
+
+h1,h2,h3{font-family:var(--font-display);font-weight:700;text-wrap:balance;margin:0}
+h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
+.muted{color:var(--muted)}
+.section{display:flex;flex-direction:column;gap:14px;padding-block:18px}
+.label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--muted)}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.thumb{aspect-ratio:4/3;max-width:100%;border-radius:10px;display:flex;flex-direction:column;justify-content:space-between;padding:10px;color:#fff}
+.thumb .w{font-family:var(--font-display);font-size:22px;font-weight:700;line-height:1}
+.thumb .c{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+.c-groc{background:linear-gradient(140deg,#B9802F,#8A5A1B)}
+.c-oil{background:linear-gradient(140deg,#C49A1E,#8F6C0C)}
+.c-can{background:linear-gradient(140deg,#A0453B,#6E2A23)}
+.c-tea{background:linear-gradient(140deg,#3E7A55,#245038)}
+.c-home{background:linear-gradient(140deg,#3E6FA3,#24476F)}
+.name{font-weight:700;font-size:14px;line-height:1.25}
+.price-row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.price{font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.old{color:var(--muted);text-decoration:line-through;font-size:12px;font-variant-numeric:tabular-nums}
+.save{font-size:11px;font-weight:800;color:var(--ok);background:var(--ok-soft);padding:2px 6px;border-radius:6px}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:700;background:var(--brand);color:var(--brand-ink)}
+.btn.block{width:100%;padding:14px;font-size:16px}
+.btn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+.btn.accent{background:var(--accent);color:#2A1A03}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.qty{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--brand);border-radius:10px;overflow:hidden}
+.qty button{border:0;background:transparent;width:38px;height:38px;font-size:20px;font-weight:700;color:var(--brand)}
+.qty span{font-weight:800;font-variant-numeric:tabular-nums}
+
+.line{display:flex;gap:12px;align-items:center;padding-block:12px;border-bottom:1px solid var(--line)}
+.line:last-child{border-bottom:0}
+.line .mini{width:52px;height:52px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-display);font-size:12px;font-weight:700;text-align:center}
+.line .grow{flex:1;min-width:0}
+.line .qty{width:112px;flex:none}
+.sum-row{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+.sum-row.total{font-weight:800;font-size:18px;padding-top:8px;border-top:1px solid var(--line)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;font-weight:700}
+.field input,.field select{border:1.5px solid var(--line);background:var(--bg);border-radius:10px;padding:12px;font:inherit;color:var(--ink);width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;font-size:13px}
+.empty{text-align:center;padding:40px 16px;display:flex;flex-direction:column;gap:12px;align-items:center}
+
+/* how it works */
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:40px 1fr;gap:12px;position:relative;padding-bottom:18px}
+.step:not(:last-child)::before{content:"";position:absolute;left:19px;top:40px;bottom:0;width:2px;background:var(--line)}
+.step .n{width:40px;height:40px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700}
+.step .t{font-weight:800}
+.step .time{display:inline-block;font-size:12px;font-weight:700;color:var(--warn);margin-bottom:2px}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.compare .panel{gap:6px}
+.big{font-family:var(--font-display);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.who{display:grid;grid-template-columns:1fr;gap:10px}
+
+/* leader */
+.hero-l{background:var(--brand);color:var(--brand-ink);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.hero-l .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hero-l .s{background:color-mix(in srgb,var(--brand-ink) 12%,transparent);border-radius:10px;padding:10px}
+.hero-l .s b{display:block;font-family:var(--font-display);font-size:17px;font-variant-numeric:tabular-nums}
+.hero-l .s small{font-size:11px;opacity:.85}
+.invite{display:flex;gap:8px;align-items:center;background:color-mix(in srgb,var(--brand-ink) 12%,transparent);border-radius:10px;padding:8px 8px 8px 12px}
+.invite code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.invite button{border:0;background:var(--accent);color:#2A1A03;border-radius:8px;padding:8px 12px;font-weight:700;font-size:13px}
+.progress{display:flex;gap:4px}
+.progress i{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.progress i.on{background:var(--brand)}
+.stage{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:var(--muted);gap:4px}
+.stage .cur{color:var(--brand)}
+.order{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.order-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.p-paid{background:var(--info-soft);color:var(--info)}
+.p-sent{background:var(--accent-soft);color:var(--warn)}
+.p-ready{background:var(--ok-soft);color:var(--ok)}
+.p-done{background:var(--line);color:var(--muted)}
+.order .items{font-size:13px;color:var(--muted)}
+.order .bot{display:flex;justify-content:space-between;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.order .bot .btn{padding:7px 12px;font-size:13px}
+.new{animation:flash 1.6s ease-out}
+@keyframes flash{from{box-shadow:0 0 0 3px var(--accent)}to{box-shadow:0 0 0 0 transparent}}
+.tabs-l{display:flex;gap:8px}
+
+/* bottom nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.nav-in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.nav button{border:0;background:transparent;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--muted);position:relative}
+.nav button[aria-current="page"]{color:var(--brand)}
+.nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.badge{position:absolute;top:5px;left:calc(50% + 6px);background:var(--accent);color:#2A1A03;border-radius:999px;font-size:10px;font-weight:800;min-width:18px;height:18px;padding:0 5px;display:flex;align-items:center;justify-content:center}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:700;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:480px;border-radius:18px 18px 0 0;padding:20px max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:12px 14px;text-align:left}
+.opt[aria-pressed="true"]{border-color:var(--brand)}
+.demo{font-size:12px;color:var(--muted);text-align:center;padding-block:4px 10px}
+.reg-hero{background:var(--brand);color:var(--brand-ink);border-radius:var(--r);padding:18px 16px;display:flex;flex-direction:column;gap:10px}
+.calc{background:color-mix(in srgb,var(--brand-ink) 12%,transparent);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.calc input{width:100%;accent-color:var(--accent)}
+.calc-out{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.calc-out b{font-family:var(--font-display);font-size:20px;color:var(--accent);font-variant-numeric:tabular-nums}
+.calc small{opacity:.8;font-size:12px}
+.duties{display:grid;gap:8px}
+.duty{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-left:3px solid var(--accent);background:var(--surface);border-radius:0 10px 10px 0}
+.flabel{font-size:13px;font-weight:700}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{border:1.5px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 4px;font-size:13px;font-weight:700}
+.seg button[aria-pressed="true"]{border-color:var(--brand);background:var(--brand);color:var(--brand-ink)}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13px}
+.check input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--brand)}
+.err{background:var(--accent-soft);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600}
+.field input.bad,.field select.bad{border-color:var(--warn)}
+.logout{border:0;background:color-mix(in srgb,var(--brand-ink) 14%,transparent);color:var(--brand-ink);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;flex:none}
+@media (prefers-reduced-motion:reduce){.new{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top wrap">
+    <div class="top-row">
+      <div class="logo">ADAL<small>market</small></div>
+      <button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+        <span id="zkName"></span>
+      </button>
+    </div>
+    <div class="deadline" id="deadline">Приём заказов до 21:00 · осталось <b id="cd">--:--:--</b></div>
+  </header>
+
+  <main id="view"></main>
+  <p class="demo wrap">Демо-прототип: товары, цены и заказы ненастоящие.</p>
+</div>
+
+<nav class="nav" aria-label="Разделы">
+  <div class="nav-in">
+    <button data-go="shop"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M3 9h18v11H3zM9 13h6"/></svg>Магазин</button>
+    <button data-go="cart"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>Корзина<span class="badge" id="cartBadge" hidden>0</span></button>
+    <button data-go="how"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5h.01"/></svg>Как это работает</button>
+    <button data-go="leader"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Лидер ЖК</button>
+  </div>
+</nav>
+
+<script>
+const COMMISSION = 0.07;
+const ZKS = [
+  {id:"sp", name:"ЖК Северный парк", leader:"Айгерим", flats:"блоки 1–4"},
+  {id:"ak", name:"ЖК Акбулак", leader:"Ерлан", flats:"блоки А–В"},
+  {id:"nr", name:"ЖК Нурлы", leader:"Динара", flats:"дома 7, 9"}
+];
+const CATS = {groc:"Бакалея", oil:"Масло и соусы", can:"Консервы", tea:"Чай и кофе", home:"Для дома"};
+const PRODUCTS = [
+  {id:1, cat:"groc", name:"Рис длиннозёрный", w:"5 кг", p:3990, old:4850},
+  {id:2, cat:"groc", name:"Гречка ядрица", w:"3 кг", p:2290, old:2790},
+  {id:3, cat:"groc", name:"Сахар-песок", w:"5 кг", p:2450, old:2990},
+  {id:4, cat:"groc", name:"Мука высший сорт", w:"10 кг", p:3600, old:4400},
+  {id:5, cat:"groc", name:"Макароны рожки", w:"3 кг", p:1890, old:2400},
+  {id:6, cat:"oil", name:"Масло подсолнечное", w:"5 л", p:4290, old:5200},
+  {id:7, cat:"oil", name:"Томатная паста", w:"3×380 г", p:1350, old:1680},
+  {id:8, cat:"can", name:"Тушёнка говяжья", w:"6×325 г", p:5400, old:6600},
+  {id:9, cat:"can", name:"Горошек и кукуруза", w:"8 банок", p:2990, old:3700},
+  {id:10, cat:"tea", name:"Чай чёрный гранулированный", w:"1 кг", p:3250, old:3990},
+  {id:11, cat:"home", name:"Стиральный порошок", w:"9 кг", p:6490, old:7990},
+  {id:12, cat:"home", name:"Туалетная бумага", w:"24 рул.", p:3490, old:4290},
+  {id:13, cat:"home", name:"Средство для посуды", w:"5 л", p:2190, old:2790},
+  {id:14, cat:"home", name:"Мусорные пакеты 120 л", w:"50 шт", p:1590, old:1990}
+];
+const STATUS = {
+  paid:{t:"Оплачен", c:"p-paid"}, sent:{t:"У поставщика", c:"p-sent"},
+  ready:{t:"Привезли · выдать", c:"p-ready"}, done:{t:"Выдан", c:"p-done"}
+};
+
+const state = {
+  view:"shop", cat:"all", zk:"sp", cart:{}, leaderTab:"orders", lastNew:null,
+  leaderIn:false, myZk:"sp", regDone:false, calc:30,
+  reg:{name:"",phone:"",city:"Алматы",zk:"",addr:"",flats:"200–500",chat:"WhatsApp",members:"",spot:"Холл или консьерж",pay:"Самозанятый",agree:false},
+  byZk:{ sp:{ batch:0,
+  orders:[
+    {id:1041, who:"Мадина, кв. 12", items:{1:1,6:1,12:1}, st:"paid"},
+    {id:1042, who:"Сергей, кв. 87", items:{8:1,3:2}, st:"paid"},
+    {id:1043, who:"Жанар, кв. 140", items:{11:1,13:1,14:2}, st:"paid"},
+    {id:1044, who:"Олег, кв. 33", items:{2:2,5:1,10:1}, st:"paid"},
+    {id:1045, who:"Асель, кв. 61", items:{4:1,7:2}, st:"paid"}
+  ],
+  history:[{d:"20 ноября", n:23, sum:184300},{d:"18 ноября", n:19, sum:151900},{d:"15 ноября", n:14, sum:109600}] } }
+};
+
+
+const $ = s => document.querySelector(s);
+const fmt = n => n.toLocaleString("ru-RU").replace(/,/g," ") + " ₸";
+const prod = id => PRODUCTS.find(p=>p.id==id);
+const orderSum = it => Object.entries(it).reduce((s,[id,q])=>s+prod(id).p*q,0);
+const orderOld = it => Object.entries(it).reduce((s,[id,q])=>s+prod(id).old*q,0);
+const cartCount = () => Object.values(state.cart).reduce((a,b)=>a+b,0);
+const zk = () => ZKS.find(z=>z.id===state.zk);
+const D = id => (state.byZk[id] ||= {batch:0, orders:[], history:[]});
+const L = () => D(state.myZk);
+const mz = () => ZKS.find(z=>z.id===state.myZk);
+const allOrders = () => Object.values(state.byZk).flatMap(d=>d.orders);
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function toast(msg){
+  const t=document.createElement("div"); t.className="toast"; t.textContent=msg; t.setAttribute("role","status");
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2200);
+}
+
+/* ---------- views ---------- */
+function qtyCtl(id){
+  const q=state.cart[id]||0;
+  if(!q) return `<button class="btn" data-add="${id}">В корзину</button>`;
+  return `<div class="qty"><button data-dec="${id}" aria-label="Меньше">−</button><span>${q}</span><button data-add="${id}" aria-label="Больше">+</button></div>`;
+}
+
+function viewShop(){
+  const list = PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
+  return `<section class="section wrap">
+    <div>
+      <h1>Оптовые цены для вашего дома</h1>
+      <p class="muted" style="margin:6px 0 0">Заказывайте сегодня, завтра заберёте у лидера ${esc(zk().name)} — ${esc(zk().leader)}.</p>
+    </div>
+    <div class="chips" role="group" aria-label="Категории">
+      <button class="chip" data-cat="all" aria-pressed="${state.cat==="all"}">Все</button>
+      ${Object.entries(CATS).map(([k,v])=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cat===k}">${v}</button>`).join("")}
+    </div>
+    <div class="grid">
+      ${list.map(p=>`<article class="card">
+        <div class="thumb c-${p.cat}"><span class="c">${CATS[p.cat]}</span><span class="w">${p.w}</span></div>
+        <div class="name">${p.name}</div>
+        <div class="price-row"><span class="price">${fmt(p.p)}</span><span class="old">${fmt(p.old)}</span></div>
+        <div><span class="save">−${Math.round((1-p.p/p.old)*100)}% к магазину</span></div>
+        ${qtyCtl(p.id)}
+      </article>`).join("")}
+    </div>
+  </section>`;
+}
+
+function viewCart(){
+  const ids = Object.keys(state.cart);
+  if(!ids.length) return `<section class="wrap empty">
+    <h2>Корзина пуста</h2>
+    <p class="muted">Добавьте товары из каталога. Заказы, оформленные до 21:00, приедут в ваш ЖК завтра.</p>
+    <button class="btn" data-go="shop">Перейти в магазин</button></section>`;
+  const sum=orderSum(state.cart), old=orderOld(state.cart);
+  return `<section class="section wrap">
+    <h1>Корзина</h1>
+    <div class="panel" style="padding-block:4px">
+      ${ids.map(id=>{const p=prod(id);return `<div class="line">
+        <div class="mini c-${p.cat}">${p.w}</div>
+        <div class="grow"><div class="name">${p.name}</div><div class="muted" style="font-size:13px">${fmt(p.p)} / шт</div></div>
+        <div class="qty"><button data-dec="${id}" aria-label="Меньше">−</button><span>${state.cart[id]}</span><button data-add="${id}" aria-label="Больше">+</button></div>
+      </div>`}).join("")}
+    </div>
+    <div class="panel">
+      <div class="sum-row"><span class="muted">В обычном магазине</span><span class="old" style="font-size:15px">${fmt(old)}</span></div>
+      <div class="sum-row"><span>Ваша экономия</span><b style="color:var(--ok)">−${fmt(old-sum)}</b></div>
+      <div class="sum-row"><span class="muted">Доставка до ЖК</span><span>0 ₸</span></div>
+      <div class="sum-row total"><span>Итого</span><span>${fmt(sum)}</span></div>
+    </div>
+    <form class="panel" id="checkout" novalidate>
+      <h2>Получатель</h2>
+      <div class="field"><label for="f-zk">Ваш ЖК и лидер</label>
+        <select id="f-zk">${ZKS.map(z=>`<option value="${z.id}" ${z.id===state.zk?"selected":""}>${z.name} — ${z.leader}</option>`).join("")}</select></div>
+      <div class="two">
+        <div class="field"><label for="f-name">Имя</label><input id="f-name" autocomplete="given-name" placeholder="Например, Алия" required></div>
+        <div class="field"><label for="f-apt">Квартира</label><input id="f-apt" inputmode="numeric" placeholder="кв. 45" required></div>
+      </div>
+      <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" type="tel" autocomplete="tel" placeholder="+7 7__ ___ __ __"></div>
+      <div class="note"><b>Выдача завтра с 18:00 до 21:00</b> у лидера ЖК. Мы пришлём уведомление, когда заказ приедет.</div>
+      <p id="formErr" class="muted" style="color:var(--warn);margin:0" hidden>Укажите имя и номер квартиры, чтобы лидер знал, кому отдать заказ.</p>
+      <button class="btn block" type="submit">Оплатить ${fmt(sum)}</button>
+    </form>
+  </section>`;
+}
+
+function viewDone(o){
+  return `<section class="section wrap" style="text-align:center;align-items:center;padding-top:40px">
+    <div style="width:72px;height:72px;border-radius:50%;background:var(--ok-soft);display:flex;align-items:center;justify-content:center">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+    <h1>Заказ №${o.id} оплачен</h1>
+    <p class="muted" style="margin:0">${esc(zk().leader)} уже видит ваш заказ в кабинете лидера.<br>Забрать: завтра, 18:00–21:00, ${esc(zk().name)}.</p>
+    <div class="panel" style="width:100%;text-align:left">
+      <div class="sum-row"><span>Сумма</span><b>${fmt(orderSum(o.items))}</b></div>
+      <div class="sum-row"><span>Сэкономили</span><b style="color:var(--ok)">${fmt(orderOld(o.items)-orderSum(o.items))}</b></div>
+    </div>
+    <button class="btn block" data-act="asleader">Посмотреть глазами лидера</button>
+    <button class="btn ghost block" data-go="shop">Вернуться в магазин</button>
+  </section>`;
+}
+
+function viewHow(){
+  return `<section class="section wrap">
+    <div>
+      <span class="label">Как устроен ADAL market</span>
+      <h1 style="margin-top:6px">Соседи заказывают вместе, поэтому дешевле</h1>
+    </div>
+    <div class="steps">
+      ${[
+        ["Сегодня до 21:00","Соседи делают заказы","Через сайт или по ссылке от лидера своего ЖК. Оплата сразу онлайн."],
+        ["21:00","Лидер ЖК закрывает сбор","В кабинете лидер видит все заказы дома и одной кнопкой передаёт их нам."],
+        ["Ночью","ADAL закупает оптом","Складываем заказы всех ЖК и берём товар у поставщиков большими партиями."],
+        ["Завтра днём","Одна машина на весь ЖК","Вместо десятков курьеров везём всё одной доставкой лидеру."],
+        ["Завтра 18:00–21:00","Соседи забирают заказы","Лидер отмечает выдачу, а свой процент получает на карту."]
+      ].map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${s[0]}</span><div class="t">${s[1]}</div><div class="muted">${s[2]}</div></div></div>`).join("")}
+    </div>
+
+    <h2>Откуда низкая цена</h2>
+    <div class="compare">
+      <div class="panel"><span class="label">Обычный магазин</span><span class="big">4 850 ₸</span><span class="muted" style="font-size:13px">Рис 5 кг: аренда зала, кассиры, списания</span></div>
+      <div class="panel" style="border-color:var(--brand)"><span class="label" style="color:var(--brand)">ADAL market</span><span class="big">3 990 ₸</span><span class="muted" style="font-size:13px">Закупка под готовый заказ, без зала и остатков</span></div>
+    </div>
+
+    <h2>Кто что получает</h2>
+    <div class="who">
+      <div class="panel"><h3>Покупатель</h3><span class="muted">Цены на 15–25% ниже магазина, доставка в свой двор бесплатно.</span></div>
+      <div class="panel"><h3>Лидер ЖК</h3><span class="muted">${Math.round(COMMISSION*100)}% от всех заказов своего дома. 30 заказов по 8 000 ₸ дают ${fmt(Math.round(30*8000*COMMISSION))} за один сбор.</span></div>
+      <div class="panel"><h3>ADAL market</h3><span class="muted">Предсказуемый объём закупки, почти нет склада и списаний.</span></div>
+    </div>
+    <button class="btn accent block" data-act="becomeleader">Стать лидером своего ЖК</button>
+  </section>`;
+}
+
+function viewLeader(){
+  if(!state.leaderIn) return state.regDone ? viewRegDone() : viewReg();
+  const z=mz();
+  const active=L().orders.filter(o=>o.st!=="done");
+  const sumAll=L().orders.reduce((s,o)=>s+orderSum(o.items),0);
+  const paid=L().orders.filter(o=>o.st==="paid");
+  const stageIdx=L().batch; // 0 сбор, 1 у поставщика, 2 привезли, 3 выдано
+  const stages=["Сбор","Закупка","Привезли","Выдано"];
+  let action="";
+  if(L().batch===0) action=`<button class="btn accent block" data-act="close" ${paid.length?"":"disabled"}>Закрыть сбор и отправить ${paid.length} заказов в ADAL</button>`;
+  else if(L().batch===1) action=`<button class="btn accent block" data-act="arrive">Демо: машина приехала в ЖК</button>`;
+  else if(L().batch===2) action=`<p class="note" style="margin:0">Отмечайте выдачу у каждого соседа. Осталось выдать: <b>${L().orders.filter(o=>o.st==="ready").length}</b></p>`;
+  else action=`<button class="btn block" data-act="newround">Начать новый сбор на завтра</button>`;
+
+  const tabs=`<div class="tabs-l chips" role="group" aria-label="Разделы кабинета">
+    <button class="chip" data-ltab="orders" aria-pressed="${state.leaderTab==="orders"}">Заказы соседей</button>
+    <button class="chip" data-ltab="summary" aria-pressed="${state.leaderTab==="summary"}">Сводка для закупки</button>
+    <button class="chip" data-ltab="money" aria-pressed="${state.leaderTab==="money"}">Мой доход</button></div>`;
+
+  let body="";
+  if(state.leaderTab==="orders"){
+    body = L().orders.length ? L().orders.slice().reverse().map(o=>{
+      const s=STATUS[o.st];
+      const btn = o.st==="ready" ? `<button class="btn" data-give="${o.id}">Выдал</button>` : "";
+      return `<div class="order ${state.lastNew===o.id?"new":""}">
+        <div class="order-top"><b>${esc(o.who)}</b><span class="pill ${s.c}">${s.t}</span></div>
+        <div class="items">${Object.entries(o.items).map(([id,q])=>`${prod(id).name} ×${q}`).join(", ")}</div>
+        <div class="bot"><span>№${o.id} · <b>${fmt(orderSum(o.items))}</b></span>${btn}</div>
+      </div>`}).join("") : `<div class="empty"><h3>Пока нет заказов</h3><p class="muted">Отправьте ссылку-приглашение в чат дома.</p></div>`;
+    body += `<button class="btn ghost block" data-go="shop">+ Оформить заказ за соседа</button>`;
+  } else if(state.leaderTab==="summary"){
+    const agg={}; L().orders.forEach(o=>Object.entries(o.items).forEach(([id,q])=>agg[id]=(agg[id]||0)+q));
+    body = `<div class="panel" style="padding-block:4px">${Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([id,q])=>{const p=prod(id);return `<div class="line">
+      <div class="mini c-${p.cat}">${p.w}</div><div class="grow"><div class="name">${p.name}</div><div class="muted" style="font-size:13px">${fmt(p.p*q)}</div></div><b style="font-size:18px;font-variant-numeric:tabular-nums">×${q}</b></div>`}).join("")}</div>
+      <p class="muted" style="margin:0;font-size:13px">Эта сводка уходит в ADAL, когда вы закрываете сбор. По ней мы закупаем и собираем коробки для вашего ЖК.</p>`;
+  } else {
+    body = `<div class="panel">
+      <div class="sum-row"><span>Текущий сбор · ${L().orders.length} заказов</span><b>${fmt(Math.round(sumAll*COMMISSION))}</b></div>
+      ${L().history.map(h=>`<div class="sum-row"><span class="muted">${h.d} · ${h.n} заказов</span><span>${fmt(Math.round(h.sum*COMMISSION))}</span></div>`).join("")}
+      <div class="sum-row total"><span>За ноябрь</span><span>${fmt(Math.round((sumAll+L().history.reduce((s,h)=>s+h.sum,0))*COMMISSION))}</span></div>
+    </div>
+    <p class="muted" style="margin:0;font-size:13px">Вы получаете ${Math.round(COMMISSION*100)}% от суммы выданных заказов. Выплата на карту каждый понедельник.</p>`;
+  }
+
+  return `<section class="section wrap">
+    <div class="hero-l">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><span style="font-size:13px;opacity:.85">Кабинет лидера · ${esc(z.flats)}</span><h2 style="margin-top:2px">${esc(z.leader)}, ${esc(z.name)}</h2></div><button class="logout" data-act="logout">Выйти</button></div>
+      <div class="stats">
+        <div class="s"><b>${L().orders.length}</b><small>заказов в сборе</small></div>
+        <div class="s"><b>${(sumAll/1000).toFixed(1).replace(".",",")}к</b><small>сумма, ₸</small></div>
+        <div class="s"><b>${fmt(Math.round(sumAll*COMMISSION)).replace(" ₸","")}</b><small>ваш доход, ₸</small></div>
+      </div>
+      <div class="invite"><code id="inviteLink">adal.market/j/${z.id}-${z.leader.toLowerCase().replace(/[^a-zа-яё]/gi,"").slice(0,6)}</code><button data-act="copy">Копировать</button></div>
+    </div>
+    <div class="panel">
+      <div class="progress">${stages.map((_,i)=>`<i class="${i<=stageIdx?"on":""}"></i>`).join("")}</div>
+      <div class="stage">${stages.map((s,i)=>`<span class="${i===stageIdx?"cur":""}">${s}</span>`).join("")}</div>
+      ${action}
+    </div>
+    ${tabs}
+    ${body}
+  </section>`;
+}
+
+const CITIES=["Алматы","Астана","Шымкент","Караганда","Другой город"];
+const ROUNDS_PER_MONTH=12, AVG_CHECK=8000;
+const calcIncome = n => Math.round(n*AVG_CHECK*COMMISSION*ROUNDS_PER_MONTH);
+function opts(list,cur){ return list.map(o=>`<option ${o===cur?"selected":""}>${esc(o)}</option>`).join(""); }
+
+function viewReg(){
+  const r=state.reg;
+  return `<section class="section wrap">
+    <div class="reg-hero">
+      <span class="label" style="color:inherit;opacity:.8">Для активных соседей</span>
+      <h1>Станьте лидером своего ЖК</h1>
+      <p style="margin:0;opacity:.9">Собирайте заказы соседей в чате дома и получайте ${Math.round(COMMISSION*100)}% от каждого выданного заказа.</p>
+      <div class="calc">
+        <label for="calc">Сколько соседей будут заказывать: <b id="calcN">${state.calc}</b></label>
+        <input id="calc" type="range" min="10" max="100" step="5" value="${state.calc}">
+        <div class="calc-out"><span>Ваш доход в месяц</span><b id="calcOut">≈ ${fmt(calcIncome(state.calc))}</b></div>
+        <small>Расчёт: средний чек ${fmt(AVG_CHECK)}, ${ROUNDS_PER_MONTH} сборов в месяц (3 в неделю).</small>
+      </div>
+    </div>
+
+    <h2>Что нужно делать</h2>
+    <div class="duties">
+      <div class="duty"><b>Приглашать соседей</b><span class="muted">Отправить ссылку в чат дома и напоминать о сборе.</span></div>
+      <div class="duty"><b>Закрывать сбор</b><span class="muted">Одна кнопка в кабинете в 21:00. Оплату и закупку берём на себя.</span></div>
+      <div class="duty"><b>Выдавать заказы</b><span class="muted">Принять машину и раздать пакеты соседям вечером, 1–2 часа.</span></div>
+    </div>
+
+    <form class="panel" id="regForm" novalidate>
+      <h2>Заявка</h2>
+      <span class="label">О вас</span>
+      <div class="field"><label for="r-name">Имя и фамилия</label><input id="r-name" data-reg="name" autocomplete="name" value="${esc(r.name)}" placeholder="Например, Айгерим Сапарова"></div>
+      <div class="field"><label for="r-phone">Телефон</label><input id="r-phone" data-reg="phone" type="tel" autocomplete="tel" value="${esc(r.phone)}" placeholder="+7 7__ ___ __ __"></div>
+
+      <span class="label" style="margin-top:6px">Ваш жилой комплекс</span>
+      <div class="field"><label for="r-city">Город</label><select id="r-city" data-reg="city">${opts(CITIES,r.city)}</select></div>
+      <div class="field"><label for="r-zk">Название ЖК</label><input id="r-zk" data-reg="zk" value="${esc(r.zk)}" placeholder="Например, ЖК Алатау Сити"></div>
+      <div class="field"><label for="r-addr">Адрес или блоки</label><input id="r-addr" data-reg="addr" value="${esc(r.addr)}" placeholder="ул. Розыбакиева 250, блоки 1–3"></div>
+      <div class="two">
+        <div class="field"><label for="r-flats">Квартир в ЖК</label><select id="r-flats" data-reg="flats">${opts(["до 200","200–500","500–1000","больше 1000"],r.flats)}</select></div>
+        <div class="field"><label for="r-chat">Чат дома</label><select id="r-chat" data-reg="chat">${opts(["WhatsApp","Telegram","Нет чата"],r.chat)}</select></div>
+      </div>
+      <div class="field"><label for="r-members">Сколько людей в чате (примерно)</label><input id="r-members" data-reg="members" inputmode="numeric" value="${esc(r.members)}" placeholder="например, 350"></div>
+
+      <span class="label" style="margin-top:6px">Выдача и выплаты</span>
+      <div class="field"><label for="r-spot">Где будете выдавать заказы</label><select id="r-spot" data-reg="spot">${opts(["У себя в квартире","Холл или консьерж","Колясочная или кладовая","У подъезда"],r.spot)}</select></div>
+      <div class="field"><span class="flabel">Как получать вознаграждение</span>
+        <div class="seg" role="group" aria-label="Как получать вознаграждение">
+          ${["Самозанятый","ИП","Помогите оформить"].map(o=>`<button type="button" data-pay="${o}" aria-pressed="${r.pay===o}">${o}</button>`).join("")}
+        </div></div>
+      <label class="check" for="r-agree"><input id="r-agree" type="checkbox" data-reg="agree" ${r.agree?"checked":""}><span>Согласен с условиями агентского договора и обработкой персональных данных</span></label>
+      <div id="regErr" class="err" hidden></div>
+      <button class="btn accent block" type="submit">Отправить заявку</button>
+    </form>
+    <button class="btn ghost block" data-act="demologin">Уже лидер? Войти в демо-кабинет</button>
+  </section>`;
+}
+
+function viewRegDone(){
+  const r=state.reg;
+  return `<section class="section wrap">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding-top:16px">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--ok-soft);display:flex;align-items:center;justify-content:center">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+      <h1>Заявка отправлена</h1>
+      <p class="muted" style="margin:0">${esc(r.name.split(" ")[0])}, спасибо! ${esc(r.zk)}, ${esc(r.city)}.</p>
+    </div>
+    <div class="panel"><h2>Что дальше</h2>
+      <div class="steps">
+        ${[["Сегодня","Менеджер позвонит","Расскажет об условиях и ответит на вопросы."],
+           ["1–2 дня","Проверим ЖК и место выдачи","Убедимся, что машина может подъехать, а заказы есть где хранить пару часов."],
+           ["Онлайн","Подпишем агентский договор","Через телефон, без визита в офис. Поможем оформить самозанятость."],
+           ["Старт","Получите кабинет и ссылку","Отправите её в чат дома, и соседи начнут заказывать."]]
+          .map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${s[0]}</span><div class="t">${s[1]}</div><div class="muted">${s[2]}</div></div></div>`).join("")}
+      </div>
+    </div>
+    <button class="btn block" data-act="openmine">Демо: открыть мой кабинет</button>
+    <p class="muted" style="margin:0;font-size:13px;text-align:center">В демо проверку пропускаем, чтобы вы сразу увидели кабинет нового лидера.</p>
+  </section>`;
+}
+
+/* ---------- render & events ---------- */
+let doneOrder=null;
+function render(){
+  $("#zkName").textContent=zk().name;
+  let html;
+  if(state.view==="done"&&doneOrder) html=viewDone(doneOrder);
+  else html={shop:viewShop,cart:viewCart,how:viewHow,leader:viewLeader}[state.view]();
+  $("#view").innerHTML=html;
+  const nav=state.view==="done"?"cart":state.view;
+  document.querySelectorAll(".nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===nav?"page":"false"));
+  const c=cartCount(); const bd=$("#cartBadge"); bd.hidden=!c; bd.textContent=c;
+  $("#deadline").hidden = state.view==="leader";
+}
+function go(v){ state.view=v; if(location.hash!=="#"+v && v!=="done") history.replaceState(null,"","#"+v); render(); window.scrollTo(0,0); }
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button"); if(!t) return;
+  const d=t.dataset;
+  if(d.go){ go(d.go); return; }
+  if(d.add){ state.cart[d.add]=(state.cart[d.add]||0)+1; render(); return; }
+  if(d.dec){ state.cart[d.dec]--; if(state.cart[d.dec]<=0) delete state.cart[d.dec]; render(); return; }
+  if(d.cat){ state.cat=d.cat; render(); return; }
+  if(d.ltab){ state.leaderTab=d.ltab; state.lastNew=null; render(); return; }
+  if(d.give){ const o=L().orders.find(o=>o.id==d.give); o.st="done"; if(!L().orders.some(o=>o.st==="ready")) L().batch=3; toast("Отмечено: заказ выдан"); render(); return; }
+  if(d.pay){ state.reg.pay=d.pay; document.querySelectorAll("[data-pay]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pay===d.pay)); return; }
+  if(d.act==="asleader"){ state.myZk=state.zk; state.leaderIn=true; state.leaderTab="orders"; go("leader"); return; }
+  if(d.act==="becomeleader"){ state.leaderIn=false; state.regDone=false; go("leader"); return; }
+  if(d.act==="demologin"){ state.myZk="sp"; state.leaderIn=true; state.leaderTab="orders"; go("leader"); return; }
+  if(d.act==="logout"){ state.leaderIn=false; state.regDone=false; go("leader"); return; }
+  if(d.act==="openmine"){ const r=state.reg;
+    const id="z"+(ZKS.length+1);
+    ZKS.push({id, name:r.zk.startsWith("ЖК")?r.zk:"ЖК "+r.zk, leader:r.name.split(" ")[0], flats:r.addr||r.city});
+    D(id); state.myZk=id; state.leaderIn=true; state.leaderTab="orders"; toast("Кабинет открыт"); go("leader"); return; }
+  if(d.act==="close"){ L().orders.forEach(o=>{if(o.st==="paid")o.st="sent"}); L().batch=1; state.lastNew=null; toast("Сбор закрыт, сводка ушла в ADAL"); render(); return; }
+  if(d.act==="arrive"){ L().orders.forEach(o=>{if(o.st==="sent")o.st="ready"}); L().batch=2; toast("Заказы привезли в ЖК"); render(); return; }
+  if(d.act==="newround"){ const n=L().orders.length, s=L().orders.reduce((a,o)=>a+orderSum(o.items),0);
+    L().history.unshift({d:"Сегодня",n,sum:s}); L().orders=[]; L().batch=0; toast("Новый сбор открыт"); render(); return; }
+  if(d.act==="copy"){ const txt="https://"+$("#inviteLink").textContent;
+    const done=()=>toast("Ссылка скопирована, отправьте её в чат дома");
+    try{ navigator.clipboard.writeText(txt).then(done,()=>{selectInvite();toast("Выделил ссылку, скопируйте её вручную")}); }catch(_){ selectInvite(); }
+    return; }
+  if(t.id==="zkBtn"){ openZk(); return; }
+});
+function selectInvite(){ const r=document.createRange(); r.selectNodeContents($("#inviteLink")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
+
+document.addEventListener("change",e=>{ if(e.target.id==="f-zk"){ state.zk=e.target.value; $("#zkName").textContent=zk().name; }});
+document.addEventListener("submit",e=>{
+  if(e.target.id!=="checkout") return; e.preventDefault();
+  const name=$("#f-name").value.trim(), apt=$("#f-apt").value.trim().replace(/^кв\.?\s*/i,"");
+  if(!name||!apt){ $("#formErr").hidden=false; return; }
+  state.zk=$("#f-zk").value;
+  const B=D(state.zk);
+  const id=Math.max(1045,...allOrders().map(o=>o.id))+1;
+  if(B.batch===3){ // прошлый сбор полностью выдан — открываем новый
+    const n=B.orders.length, s=B.orders.reduce((a,o)=>a+orderSum(o.items),0);
+    B.history.unshift({d:"Сегодня",n,sum:s}); B.orders=[]; B.batch=0;
+  }
+  const o={id, who:`${name}, кв. ${apt}`, items:{...state.cart}, st:"paid"};
+  B.orders.push(o); state.lastNew=id; state.cart={}; state.leaderTab="orders"; doneOrder=o; go("done");
+});
+
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.id==="calc"){ state.calc=+t.value; $("#calcN").textContent=t.value; $("#calcOut").textContent="≈ "+fmt(calcIncome(+t.value)); return; }
+  if(t.dataset.reg){ state.reg[t.dataset.reg]= t.type==="checkbox" ? t.checked : t.value; t.classList.remove("bad"); }
+});
+document.addEventListener("submit",e=>{
+  if(e.target.id!=="regForm") return; e.preventDefault();
+  const r=state.reg, errs=[], bad=[];
+  if(r.name.trim().length<2){ errs.push("имя"); bad.push("r-name"); }
+  if(r.phone.replace(/\D/g,"").length<10){ errs.push("телефон (10–11 цифр)"); bad.push("r-phone"); }
+  if(!r.zk.trim()){ errs.push("название ЖК"); bad.push("r-zk"); }
+  const box=$("#regErr");
+  bad.forEach(id=>$("#"+id).classList.add("bad"));
+  if(errs.length){ box.textContent="Заполните: "+errs.join(", ")+"."; box.hidden=false; $("#"+bad[0]).focus(); return; }
+  if(!r.agree){ box.textContent="Отметьте согласие с условиями, чтобы отправить заявку."; box.hidden=false; return; }
+  r.name=r.name.trim(); r.zk=r.zk.trim(); state.regDone=true; render(); window.scrollTo(0,0);
+});
+
+function openZk(){
+  const bg=document.createElement("div"); bg.className="sheet-bg";
+  bg.innerHTML=`<div class="sheet" role="dialog" aria-label="Выбор ЖК"><h2>Ваш жилой комплекс</h2>
+    <p class="muted" style="margin:0">Заказ привезут лидеру выбранного ЖК.</p>
+    ${ZKS.map(z=>`<button class="opt" data-zk="${z.id}" aria-pressed="${z.id===state.zk}"><span><b>${z.name}</b><br><span class="muted" style="font-size:13px">Лидер: ${z.leader} · ${z.flats}</span></span>${z.id===state.zk?"✓":""}</button>`).join("")}
+    <button class="btn ghost block" data-close>Закрыть</button></div>`;
+  bg.addEventListener("click",ev=>{
+    const b=ev.target.closest("[data-zk]");
+    if(b){ state.zk=b.dataset.zk; render(); bg.remove(); toast("ЖК выбран: "+zk().name); ev.stopPropagation(); return; }
+    if(ev.target===bg||ev.target.closest("[data-close]")){ bg.remove(); ev.stopPropagation(); }
+  });
+  document.body.appendChild(bg); bg.querySelector(".opt").focus();
+}
+
+function tick(){
+  const now=new Date(), end=new Date(now); end.setHours(21,0,0,0);
+  if(now>=end) end.setDate(end.getDate()+1);
+  const s=Math.floor((end-now)/1000), p=n=>String(n).padStart(2,"0");
+  $("#cd").textContent=`${p(Math.floor(s/3600))}:${p(Math.floor(s%3600/60))}:${p(s%60)}`;
+}
+setInterval(tick,1000); tick();
+
+function fromHash(){ const h=location.hash.slice(1); if(["shop","cart","how","leader"].includes(h)){ state.view=h; render(); } }
+window.addEventListener("hashchange",fromHash);
+const h0=location.hash.slice(1); if(["shop","cart","how","leader"].includes(h0)) state.view=h0;
+render();
+</script>
+</body>
+</html>
