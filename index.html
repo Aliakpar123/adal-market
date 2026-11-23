@@ -61,6 +61,13 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
 .thumb{aspect-ratio:4/3;max-width:100%;border-radius:10px;display:flex;flex-direction:column;justify-content:space-between;padding:10px;color:#fff}
 .thumb .w{font-family:var(--font-display);font-size:22px;font-weight:700;line-height:1}
 .thumb .c{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.9}
+.thumb .br{display:block;font-family:var(--font-display);font-size:22px;font-weight:700;line-height:1.05;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.thumb .v{display:block;font-size:12px;font-weight:700;opacity:.95;margin-top:2px}
+.thumb .w{font-size:15px;align-self:flex-start;background:rgba(0,0,0,.22);padding:3px 8px;border-radius:6px}
+.err{background:var(--accent-soft);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;margin:0}
+.skel .thumb{background:var(--line)}
+.sk{height:12px;border-radius:6px;background:var(--line)}
+.sk.short{width:60%}
 .c-groc{background:linear-gradient(140deg,#B9802F,#8A5A1B)}
 .c-oil{background:linear-gradient(140deg,#C49A1E,#8F6C0C)}
 .c-can{background:linear-gradient(140deg,#A0453B,#6E2A23)}
@@ -183,7 +190,7 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
   </header>
 
   <main id="view"></main>
-  <p class="demo wrap">Демо-прототип: товары, цены и заказы ненастоящие.</p>
+  <p class="demo wrap">Тестовый запуск: оплата при получении, фото товаров скоро появятся.</p>
 </div>
 
 <nav class="nav" aria-label="Разделы">
@@ -196,67 +203,59 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
 </nav>
 
 <script>
+/* ===== Supabase (публичный ключ, доступ ограничен RLS и RPC-функциями) ===== */
+const SB_URL = "https://fakhibznbnfycafgvfiw.supabase.co";
+const SB_KEY = "sb_publishable_CtZFCSLjUTde5NRtGizYyQ_nSJ7LQU2";
+async function api(path, body){
+  const res = await fetch(SB_URL + "/rest/v1/" + path, {
+    method: body===undefined ? "GET" : "POST",
+    headers: {"apikey": SB_KEY, "Content-Type":"application/json"},
+    body: body===undefined ? undefined : JSON.stringify(body)
+  });
+  const data = await res.json().catch(()=>null);
+  if(!res.ok) throw new Error((data && (data.message||data.hint)) || "Ошибка сети");
+  return data;
+}
+const rpc = (fn, args) => api("rpc/" + fn, args);
+
 const COMMISSION = 0.07;
-const ZKS = [
-  {id:"sp", name:"ЖК Северный парк", leader:"Айгерим", flats:"блоки 1–4"},
-  {id:"ak", name:"ЖК Акбулак", leader:"Ерлан", flats:"блоки А–В"},
-  {id:"nr", name:"ЖК Нурлы", leader:"Динара", flats:"дома 7, 9"}
-];
-const CATS = {groc:"Бакалея", oil:"Масло и соусы", can:"Консервы", tea:"Чай и кофе", home:"Для дома"};
-const PRODUCTS = [
-  {id:1, cat:"groc", name:"Рис длиннозёрный", w:"5 кг", p:3990, old:4850},
-  {id:2, cat:"groc", name:"Гречка ядрица", w:"3 кг", p:2290, old:2790},
-  {id:3, cat:"groc", name:"Сахар-песок", w:"5 кг", p:2450, old:2990},
-  {id:4, cat:"groc", name:"Мука высший сорт", w:"10 кг", p:3600, old:4400},
-  {id:5, cat:"groc", name:"Макароны рожки", w:"3 кг", p:1890, old:2400},
-  {id:6, cat:"oil", name:"Масло подсолнечное", w:"5 л", p:4290, old:5200},
-  {id:7, cat:"oil", name:"Томатная паста", w:"3×380 г", p:1350, old:1680},
-  {id:8, cat:"can", name:"Тушёнка говяжья", w:"6×325 г", p:5400, old:6600},
-  {id:9, cat:"can", name:"Горошек и кукуруза", w:"8 банок", p:2990, old:3700},
-  {id:10, cat:"tea", name:"Чай чёрный гранулированный", w:"1 кг", p:3250, old:3990},
-  {id:11, cat:"home", name:"Стиральный порошок", w:"9 кг", p:6490, old:7990},
-  {id:12, cat:"home", name:"Туалетная бумага", w:"24 рул.", p:3490, old:4290},
-  {id:13, cat:"home", name:"Средство для посуды", w:"5 л", p:2190, old:2790},
-  {id:14, cat:"home", name:"Мусорные пакеты 120 л", w:"50 шт", p:1590, old:1990}
-];
+const CATS = {clean:"Чистящие средства", soap:"Мыло", dish:"Для посуды", wash:"Для стирки"};
 const STATUS = {
   paid:{t:"Оплачен", c:"p-paid"}, sent:{t:"У поставщика", c:"p-sent"},
   ready:{t:"Привезли · выдать", c:"p-ready"}, done:{t:"Выдан", c:"p-done"}
 };
+let ZKS = [], PRODUCTS = [];
 
-const state = {
-  view:"shop", cat:"all", zk:"sp", cart:{}, leaderTab:"orders", lastNew:null,
-  leaderIn:false, myZk:"sp", regDone:false, calc:30,
-  reg:{name:"",phone:"",city:"Алматы",zk:"",addr:"",flats:"200–500",chat:"WhatsApp",members:"",spot:"Холл или консьерж",pay:"Самозанятый",agree:false},
-  byZk:{ sp:{ batch:0,
-  orders:[
-    {id:1041, who:"Мадина, кв. 12", items:{1:1,6:1,12:1}, st:"paid"},
-    {id:1042, who:"Сергей, кв. 87", items:{8:1,3:2}, st:"paid"},
-    {id:1043, who:"Жанар, кв. 140", items:{11:1,13:1,14:2}, st:"paid"},
-    {id:1044, who:"Олег, кв. 33", items:{2:2,5:1,10:1}, st:"paid"},
-    {id:1045, who:"Асель, кв. 61", items:{4:1,7:2}, st:"paid"}
-  ],
-  history:[{d:"20 ноября", n:23, sum:184300},{d:"18 ноября", n:19, sum:151900},{d:"15 ноября", n:14, sum:109600}] } }
+const ss = {
+  get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(_){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(_){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(_){} }
 };
 
+const state = {
+  view:"shop", cat:"all", zk: ss.get("adal-zk") || "sp", cart: ss.get("adal-cart") || {},
+  loading:true, loadError:null, busy:false,
+  leaderTab:"orders", lastNew:null, leader: ss.get("adal-leader"), // {zk, code}
+  ld:null, ldError:null, leaderMode:"reg", regDone:false, calc:30,
+  reg:{name:"",phone:"",city:"Алматы",zk:"",addr:"",flats:"200–500",chat:"WhatsApp",members:"",spot:"Холл или консьерж",pay:"Самозанятый",agree:false}
+};
 
 const $ = s => document.querySelector(s);
-const fmt = n => n.toLocaleString("ru-RU").replace(/,/g," ") + " ₸";
+const fmt = n => Math.round(n).toLocaleString("ru-RU").replace(/ |,/g," ") + " ₸";
 const prod = id => PRODUCTS.find(p=>p.id==id);
-const orderSum = it => Object.entries(it).reduce((s,[id,q])=>s+prod(id).p*q,0);
-const orderOld = it => Object.entries(it).reduce((s,[id,q])=>s+prod(id).old*q,0);
+const pName = id => { const p=prod(id); return p ? `${p.name}${p.variant?" · "+p.variant:""}` : `Товар №${id}`; };
+const cartSum = () => Object.entries(state.cart).reduce((s,[id,q])=>s+(prod(id)?.price||0)*q,0);
+const cartOld = () => Object.entries(state.cart).reduce((s,[id,q])=>{const p=prod(id); return s+((p?.old_price||p?.price||0))*q;},0);
 const cartCount = () => Object.values(state.cart).reduce((a,b)=>a+b,0);
-const zk = () => ZKS.find(z=>z.id===state.zk);
-const D = id => (state.byZk[id] ||= {batch:0, orders:[], history:[]});
-const L = () => D(state.myZk);
-const mz = () => ZKS.find(z=>z.id===state.myZk);
-const allOrders = () => Object.values(state.byZk).flatMap(d=>d.orders);
-const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const zk = () => ZKS.find(z=>z.id===state.zk) || ZKS[0] || {id:"",name:"Выберите ЖК",leader_name:""};
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const saveCart = () => ss.set("adal-cart", state.cart);
 
 function toast(msg){
   const t=document.createElement("div"); t.className="toast"; t.textContent=msg; t.setAttribute("role","status");
-  document.body.appendChild(t); setTimeout(()=>t.remove(),2200);
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
 }
+const tile = p => `background:linear-gradient(150deg,${esc(p.color||"#0F4C4A")},${esc(p.color2||p.color||"#0F4C4A")})`;
 
 /* ---------- views ---------- */
 function qtyCtl(id){
@@ -266,22 +265,29 @@ function qtyCtl(id){
 }
 
 function viewShop(){
+  if(state.loading) return `<section class="section wrap"><div class="grid">${Array.from({length:4},()=>`<div class="card skel"><div class="thumb"></div><div class="sk"></div><div class="sk short"></div></div>`).join("")}</div></section>`;
+  if(state.loadError) return `<section class="wrap empty"><h2>Не удалось загрузить каталог</h2><p class="muted">${esc(state.loadError)}. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-act="reload">Обновить</button></section>`;
+  const cats = Object.keys(CATS).filter(k=>PRODUCTS.some(p=>p.cat===k));
   const list = PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
   return `<section class="section wrap">
     <div>
-      <h1>Оптовые цены для вашего дома</h1>
-      <p class="muted" style="margin:6px 0 0">Заказывайте сегодня, завтра заберёте у лидера ${esc(zk().name)} — ${esc(zk().leader)}.</p>
+      <h1>Бытовая химия по оптовым ценам</h1>
+      <p class="muted" style="margin:6px 0 0">Заказывайте сегодня, завтра заберёте у лидера ${esc(zk().name)}${zk().leader_name?" — "+esc(zk().leader_name):""}.</p>
     </div>
     <div class="chips" role="group" aria-label="Категории">
       <button class="chip" data-cat="all" aria-pressed="${state.cat==="all"}">Все</button>
-      ${Object.entries(CATS).map(([k,v])=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cat===k}">${v}</button>`).join("")}
+      ${cats.map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cat===k}">${CATS[k]}</button>`).join("")}
     </div>
     <div class="grid">
       ${list.map(p=>`<article class="card">
-        <div class="thumb c-${p.cat}"><span class="c">${CATS[p.cat]}</span><span class="w">${p.w}</span></div>
-        <div class="name">${p.name}</div>
-        <div class="price-row"><span class="price">${fmt(p.p)}</span><span class="old">${fmt(p.old)}</span></div>
-        <div><span class="save">−${Math.round((1-p.p/p.old)*100)}% к магазину</span></div>
+        <div class="thumb" style="${tile(p)}">
+          <span class="c">${CATS[p.cat]||""}</span>
+          <span><span class="br">${esc(p.brand||"")}</span><span class="v">${esc(p.variant||"")}</span></span>
+          <span class="w">${esc(p.weight)}</span>
+        </div>
+        <div class="name">${esc(p.name)}${p.variant?`<span class="muted"> · ${esc(p.variant)}</span>`:""}</div>
+        <div class="price-row"><span class="price">${fmt(p.price)}</span>${p.old_price?`<span class="old">${fmt(p.old_price)}</span>`:""}</div>
+        ${p.old_price?`<div><span class="save">−${Math.round((1-p.price/p.old_price)*100)}% к магазину</span></div>`:""}
         ${qtyCtl(p.id)}
       </article>`).join("")}
     </div>
@@ -289,54 +295,54 @@ function viewShop(){
 }
 
 function viewCart(){
-  const ids = Object.keys(state.cart);
+  const ids = Object.keys(state.cart).filter(id=>prod(id));
   if(!ids.length) return `<section class="wrap empty">
     <h2>Корзина пуста</h2>
     <p class="muted">Добавьте товары из каталога. Заказы, оформленные до 21:00, приедут в ваш ЖК завтра.</p>
     <button class="btn" data-go="shop">Перейти в магазин</button></section>`;
-  const sum=orderSum(state.cart), old=orderOld(state.cart);
+  const sum=cartSum(), old=cartOld();
   return `<section class="section wrap">
     <h1>Корзина</h1>
     <div class="panel" style="padding-block:4px">
       ${ids.map(id=>{const p=prod(id);return `<div class="line">
-        <div class="mini c-${p.cat}">${p.w}</div>
-        <div class="grow"><div class="name">${p.name}</div><div class="muted" style="font-size:13px">${fmt(p.p)} / шт</div></div>
+        <div class="mini" style="${tile(p)}">${esc(p.weight)}</div>
+        <div class="grow"><div class="name">${esc(p.name)}</div><div class="muted" style="font-size:13px">${esc(p.variant||"")}${p.variant?" · ":""}${fmt(p.price)} / шт</div></div>
         <div class="qty"><button data-dec="${id}" aria-label="Меньше">−</button><span>${state.cart[id]}</span><button data-add="${id}" aria-label="Больше">+</button></div>
       </div>`}).join("")}
     </div>
     <div class="panel">
-      <div class="sum-row"><span class="muted">В обычном магазине</span><span class="old" style="font-size:15px">${fmt(old)}</span></div>
-      <div class="sum-row"><span>Ваша экономия</span><b style="color:var(--ok)">−${fmt(old-sum)}</b></div>
+      ${old>sum?`<div class="sum-row"><span class="muted">В обычном магазине</span><span class="old" style="font-size:15px">${fmt(old)}</span></div>
+      <div class="sum-row"><span>Ваша экономия</span><b style="color:var(--ok)">−${fmt(old-sum)}</b></div>`:""}
       <div class="sum-row"><span class="muted">Доставка до ЖК</span><span>0 ₸</span></div>
       <div class="sum-row total"><span>Итого</span><span>${fmt(sum)}</span></div>
     </div>
     <form class="panel" id="checkout" novalidate>
       <h2>Получатель</h2>
       <div class="field"><label for="f-zk">Ваш ЖК и лидер</label>
-        <select id="f-zk">${ZKS.map(z=>`<option value="${z.id}" ${z.id===state.zk?"selected":""}>${z.name} — ${z.leader}</option>`).join("")}</select></div>
+        <select id="f-zk">${ZKS.map(z=>`<option value="${esc(z.id)}" ${z.id===state.zk?"selected":""}>${esc(z.name)} — ${esc(z.leader_name)}</option>`).join("")}</select></div>
       <div class="two">
-        <div class="field"><label for="f-name">Имя</label><input id="f-name" autocomplete="given-name" placeholder="Например, Алия" required></div>
-        <div class="field"><label for="f-apt">Квартира</label><input id="f-apt" inputmode="numeric" placeholder="кв. 45" required></div>
+        <div class="field"><label for="f-name">Имя</label><input id="f-name" autocomplete="given-name" maxlength="80" placeholder="Например, Алия" required></div>
+        <div class="field"><label for="f-apt">Квартира</label><input id="f-apt" inputmode="numeric" maxlength="20" placeholder="кв. 45" required></div>
       </div>
-      <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" type="tel" autocomplete="tel" placeholder="+7 7__ ___ __ __"></div>
-      <div class="note"><b>Выдача завтра с 18:00 до 21:00</b> у лидера ЖК. Мы пришлём уведомление, когда заказ приедет.</div>
-      <p id="formErr" class="muted" style="color:var(--warn);margin:0" hidden>Укажите имя и номер квартиры, чтобы лидер знал, кому отдать заказ.</p>
-      <button class="btn block" type="submit">Оплатить ${fmt(sum)}</button>
+      <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __"></div>
+      <div class="note"><b>Выдача завтра с 18:00 до 21:00</b> у лидера ЖК. Оплата при получении, пока онлайн-оплата не подключена.</div>
+      <p id="formErr" class="err" hidden></p>
+      <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Отправляем…":"Оформить заказ на "+fmt(sum)}</button>
     </form>
   </section>`;
 }
 
+let doneOrder=null;
 function viewDone(o){
   return `<section class="section wrap" style="text-align:center;align-items:center;padding-top:40px">
     <div style="width:72px;height:72px;border-radius:50%;background:var(--ok-soft);display:flex;align-items:center;justify-content:center">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
-    <h1>Заказ №${o.id} оплачен</h1>
-    <p class="muted" style="margin:0">${esc(zk().leader)} уже видит ваш заказ в кабинете лидера.<br>Забрать: завтра, 18:00–21:00, ${esc(zk().name)}.</p>
+    <h1>Заказ №${o.id} принят</h1>
+    <p class="muted" style="margin:0">${esc(o.leader)} уже видит ваш заказ в кабинете лидера.<br>Забрать: завтра, 18:00–21:00, ${esc(o.zkName)}.</p>
     <div class="panel" style="width:100%;text-align:left">
-      <div class="sum-row"><span>Сумма</span><b>${fmt(orderSum(o.items))}</b></div>
-      <div class="sum-row"><span>Сэкономили</span><b style="color:var(--ok)">${fmt(orderOld(o.items)-orderSum(o.items))}</b></div>
+      <div class="sum-row"><span>Сумма к оплате</span><b>${fmt(o.total)}</b></div>
+      ${o.old_total>o.total?`<div class="sum-row"><span>Сэкономили</span><b style="color:var(--ok)">${fmt(o.old_total-o.total)}</b></div>`:""}
     </div>
-    <button class="btn block" data-act="asleader">Посмотреть глазами лидера</button>
     <button class="btn ghost block" data-go="shop">Вернуться в магазин</button>
   </section>`;
 }
@@ -349,83 +355,92 @@ function viewHow(){
     </div>
     <div class="steps">
       ${[
-        ["Сегодня до 21:00","Соседи делают заказы","Через сайт или по ссылке от лидера своего ЖК. Оплата сразу онлайн."],
+        ["Сегодня до 21:00","Соседи делают заказы","Через сайт или по ссылке от лидера своего ЖК."],
         ["21:00","Лидер ЖК закрывает сбор","В кабинете лидер видит все заказы дома и одной кнопкой передаёт их нам."],
         ["Ночью","ADAL закупает оптом","Складываем заказы всех ЖК и берём товар у поставщиков большими партиями."],
         ["Завтра днём","Одна машина на весь ЖК","Вместо десятков курьеров везём всё одной доставкой лидеру."],
         ["Завтра 18:00–21:00","Соседи забирают заказы","Лидер отмечает выдачу, а свой процент получает на карту."]
       ].map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${s[0]}</span><div class="t">${s[1]}</div><div class="muted">${s[2]}</div></div></div>`).join("")}
     </div>
-
     <h2>Откуда низкая цена</h2>
-    <div class="compare">
-      <div class="panel"><span class="label">Обычный магазин</span><span class="big">4 850 ₸</span><span class="muted" style="font-size:13px">Рис 5 кг: аренда зала, кассиры, списания</span></div>
-      <div class="panel" style="border-color:var(--brand)"><span class="label" style="color:var(--brand)">ADAL market</span><span class="big">3 990 ₸</span><span class="muted" style="font-size:13px">Закупка под готовый заказ, без зала и остатков</span></div>
-    </div>
-
+    <div class="panel"><span class="muted">Мы закупаем только под уже собранные заказы. Нет торгового зала, кассиров, остатков на полках и курьера на каждый заказ, поэтому цена ближе к оптовой.</span></div>
     <h2>Кто что получает</h2>
     <div class="who">
-      <div class="panel"><h3>Покупатель</h3><span class="muted">Цены на 15–25% ниже магазина, доставка в свой двор бесплатно.</span></div>
-      <div class="panel"><h3>Лидер ЖК</h3><span class="muted">${Math.round(COMMISSION*100)}% от всех заказов своего дома. 30 заказов по 8 000 ₸ дают ${fmt(Math.round(30*8000*COMMISSION))} за один сбор.</span></div>
+      <div class="panel"><h3>Покупатель</h3><span class="muted">Оптовые цены и бесплатная доставка в свой двор.</span></div>
+      <div class="panel"><h3>Лидер ЖК</h3><span class="muted">${Math.round(COMMISSION*100)}% от всех заказов своего дома. 30 заказов по 5 000 ₸ дают ${fmt(30*5000*COMMISSION)} за один сбор.</span></div>
       <div class="panel"><h3>ADAL market</h3><span class="muted">Предсказуемый объём закупки, почти нет склада и списаний.</span></div>
     </div>
     <button class="btn accent block" data-act="becomeleader">Стать лидером своего ЖК</button>
   </section>`;
 }
 
+/* ----- кабинет лидера ----- */
+function stageOf(orders){
+  if(!orders.length) return 0;
+  if(orders.every(o=>o.st==="done")) return 3;
+  if(orders.some(o=>o.st==="ready")) return 2;
+  if(orders.some(o=>o.st==="sent")) return 1;
+  return 0;
+}
 function viewLeader(){
-  if(!state.leaderIn) return state.regDone ? viewRegDone() : viewReg();
-  const z=mz();
-  const active=L().orders.filter(o=>o.st!=="done");
-  const sumAll=L().orders.reduce((s,o)=>s+orderSum(o.items),0);
-  const paid=L().orders.filter(o=>o.st==="paid");
-  const stageIdx=L().batch; // 0 сбор, 1 у поставщика, 2 привезли, 3 выдано
+  if(!state.leader) return state.leaderMode==="login" ? viewLogin() : (state.regDone ? viewRegDone() : viewReg());
+  if(state.ldError) return `<section class="wrap empty"><h2>Не удалось открыть кабинет</h2><p class="muted">${esc(state.ldError)}</p><button class="btn" data-act="loadleader">Повторить</button><button class="btn ghost" data-act="logout">Выйти</button></section>`;
+  if(!state.ld) return `<section class="wrap empty"><p class="muted">Загружаем заказы…</p></section>`;
+  const {zk:z, orders, history} = state.ld;
+  const sumAll=orders.reduce((s,o)=>s+o.total,0);
+  const paid=orders.filter(o=>o.st==="paid");
+  const stageIdx=stageOf(orders);
   const stages=["Сбор","Закупка","Привезли","Выдано"];
+  const dis = state.busy?"disabled":"";
   let action="";
-  if(L().batch===0) action=`<button class="btn accent block" data-act="close" ${paid.length?"":"disabled"}>Закрыть сбор и отправить ${paid.length} заказов в ADAL</button>`;
-  else if(L().batch===1) action=`<button class="btn accent block" data-act="arrive">Демо: машина приехала в ЖК</button>`;
-  else if(L().batch===2) action=`<p class="note" style="margin:0">Отмечайте выдачу у каждого соседа. Осталось выдать: <b>${L().orders.filter(o=>o.st==="ready").length}</b></p>`;
-  else action=`<button class="btn block" data-act="newround">Начать новый сбор на завтра</button>`;
+  if(stageIdx===0) action=`<button class="btn accent block" data-act="close" ${paid.length&&!state.busy?"":"disabled"}>Закрыть сбор и отправить ${paid.length} заказов в ADAL</button>`;
+  else if(stageIdx===1) action=`<button class="btn accent block" data-act="arrive" ${dis}>Машина приехала в ЖК</button>`;
+  else if(stageIdx===2) action=`<p class="note" style="margin:0">Отмечайте выдачу у каждого соседа. Осталось выдать: <b>${orders.filter(o=>o.st==="ready").length}</b></p>`;
+  else action=`<button class="btn block" data-act="newround" ${dis}>Начать новый сбор</button>`;
+  if(paid.length && stageIdx>0) action += `<p class="muted" style="margin:0;font-size:13px">Новых заказов после закрытия сбора: ${paid.length}. Они уйдут в следующий сбор.</p>`;
 
   const tabs=`<div class="tabs-l chips" role="group" aria-label="Разделы кабинета">
     <button class="chip" data-ltab="orders" aria-pressed="${state.leaderTab==="orders"}">Заказы соседей</button>
     <button class="chip" data-ltab="summary" aria-pressed="${state.leaderTab==="summary"}">Сводка для закупки</button>
-    <button class="chip" data-ltab="money" aria-pressed="${state.leaderTab==="money"}">Мой доход</button></div>`;
+    <button class="chip" data-ltab="money" aria-pressed="${state.leaderTab==="money"}">Мой доход</button>
+    <button class="chip" data-act="loadleader">Обновить</button></div>`;
 
   let body="";
   if(state.leaderTab==="orders"){
-    body = L().orders.length ? L().orders.slice().reverse().map(o=>{
+    body = orders.length ? orders.slice().reverse().map(o=>{
       const s=STATUS[o.st];
-      const btn = o.st==="ready" ? `<button class="btn" data-give="${o.id}">Выдал</button>` : "";
-      return `<div class="order ${state.lastNew===o.id?"new":""}">
+      const btn = o.st==="ready" ? `<button class="btn" data-give="${o.id}" ${dis}>Выдал</button>` : "";
+      return `<div class="order">
         <div class="order-top"><b>${esc(o.who)}</b><span class="pill ${s.c}">${s.t}</span></div>
-        <div class="items">${Object.entries(o.items).map(([id,q])=>`${prod(id).name} ×${q}`).join(", ")}</div>
-        <div class="bot"><span>№${o.id} · <b>${fmt(orderSum(o.items))}</b></span>${btn}</div>
+        ${o.phone?`<div class="items">${esc(o.phone)}</div>`:""}
+        <div class="items">${Object.entries(o.items||{}).map(([id,q])=>`${esc(pName(id))} ×${q}`).join(", ")}</div>
+        <div class="bot"><span>№${o.id} · <b>${fmt(o.total)}</b></span>${btn}</div>
       </div>`}).join("") : `<div class="empty"><h3>Пока нет заказов</h3><p class="muted">Отправьте ссылку-приглашение в чат дома.</p></div>`;
-    body += `<button class="btn ghost block" data-go="shop">+ Оформить заказ за соседа</button>`;
+    body += `<button class="btn ghost block" data-act="ordfor">+ Оформить заказ за соседа</button>`;
   } else if(state.leaderTab==="summary"){
-    const agg={}; L().orders.forEach(o=>Object.entries(o.items).forEach(([id,q])=>agg[id]=(agg[id]||0)+q));
-    body = `<div class="panel" style="padding-block:4px">${Object.entries(agg).sort((a,b)=>b[1]-a[1]).map(([id,q])=>{const p=prod(id);return `<div class="line">
-      <div class="mini c-${p.cat}">${p.w}</div><div class="grow"><div class="name">${p.name}</div><div class="muted" style="font-size:13px">${fmt(p.p*q)}</div></div><b style="font-size:18px;font-variant-numeric:tabular-nums">×${q}</b></div>`}).join("")}</div>
-      <p class="muted" style="margin:0;font-size:13px">Эта сводка уходит в ADAL, когда вы закрываете сбор. По ней мы закупаем и собираем коробки для вашего ЖК.</p>`;
+    const agg={}; orders.filter(o=>o.st!=="done").forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>agg[id]=(agg[id]||0)+q));
+    const rows=Object.entries(agg).sort((a,b)=>b[1]-a[1]);
+    body = rows.length ? `<div class="panel" style="padding-block:4px">${rows.map(([id,q])=>{const p=prod(id)||{weight:"",price:0};return `<div class="line">
+      <div class="mini" style="${tile(p)}">${esc(p.weight)}</div><div class="grow"><div class="name">${esc(pName(id))}</div><div class="muted" style="font-size:13px">${fmt(p.price*q)}</div></div><b style="font-size:18px;font-variant-numeric:tabular-nums">×${q}</b></div>`}).join("")}</div>
+      <p class="muted" style="margin:0;font-size:13px">По этой сводке мы закупаем и собираем коробки для вашего ЖК.</p>` : `<div class="empty"><p class="muted">Нет невыданных заказов.</p></div>`;
   } else {
     body = `<div class="panel">
-      <div class="sum-row"><span>Текущий сбор · ${L().orders.length} заказов</span><b>${fmt(Math.round(sumAll*COMMISSION))}</b></div>
-      ${L().history.map(h=>`<div class="sum-row"><span class="muted">${h.d} · ${h.n} заказов</span><span>${fmt(Math.round(h.sum*COMMISSION))}</span></div>`).join("")}
-      <div class="sum-row total"><span>За ноябрь</span><span>${fmt(Math.round((sumAll+L().history.reduce((s,h)=>s+h.sum,0))*COMMISSION))}</span></div>
+      <div class="sum-row"><span>Текущий сбор · ${orders.length} заказов</span><b>${fmt(sumAll*COMMISSION)}</b></div>
+      ${history.map(h=>`<div class="sum-row"><span class="muted">${new Date(h.d).toLocaleDateString("ru-RU",{day:"numeric",month:"long"})} · ${h.n} заказов</span><span>${fmt(h.sum*COMMISSION)}</span></div>`).join("")}
+      <div class="sum-row total"><span>За 60 дней</span><span>${fmt((sumAll+history.reduce((s,h)=>s+(+h.sum),0))*COMMISSION)}</span></div>
     </div>
-    <p class="muted" style="margin:0;font-size:13px">Вы получаете ${Math.round(COMMISSION*100)}% от суммы выданных заказов. Выплата на карту каждый понедельник.</p>`;
+    <p class="muted" style="margin:0;font-size:13px">Вы получаете ${Math.round(COMMISSION*100)}% от суммы выданных заказов.</p>`;
   }
-
+  const invite = location.origin + location.pathname + "?zk=" + encodeURIComponent(z.id);
   return `<section class="section wrap">
     <div class="hero-l">
-      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><span style="font-size:13px;opacity:.85">Кабинет лидера · ${esc(z.flats)}</span><h2 style="margin-top:2px">${esc(z.leader)}, ${esc(z.name)}</h2></div><button class="logout" data-act="logout">Выйти</button></div>
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><span style="font-size:13px;opacity:.85">Кабинет лидера${z.flats?" · "+esc(z.flats):""}</span><h2 style="margin-top:2px">${esc(z.leader_name)}, ${esc(z.name)}</h2></div><button class="logout" data-act="logout">Выйти</button></div>
       <div class="stats">
-        <div class="s"><b>${L().orders.length}</b><small>заказов в сборе</small></div>
+        <div class="s"><b>${orders.length}</b><small>заказов в сборе</small></div>
         <div class="s"><b>${(sumAll/1000).toFixed(1).replace(".",",")}к</b><small>сумма, ₸</small></div>
-        <div class="s"><b>${fmt(Math.round(sumAll*COMMISSION)).replace(" ₸","")}</b><small>ваш доход, ₸</small></div>
+        <div class="s"><b>${fmt(sumAll*COMMISSION).replace(" ₸","")}</b><small>ваш доход, ₸</small></div>
       </div>
-      <div class="invite"><code id="inviteLink">adal.market/j/${z.id}-${z.leader.toLowerCase().replace(/[^a-zа-яё]/gi,"").slice(0,6)}</code><button data-act="copy">Копировать</button></div>
+      <div class="invite"><code id="inviteLink">${esc(invite)}</code><button data-act="copy">Копировать</button></div>
     </div>
     <div class="panel">
       <div class="progress">${stages.map((_,i)=>`<i class="${i<=stageIdx?"on":""}"></i>`).join("")}</div>
@@ -437,8 +452,22 @@ function viewLeader(){
   </section>`;
 }
 
+function viewLogin(){
+  return `<section class="section wrap">
+    <h1>Вход для лидера ЖК</h1>
+    <form class="panel" id="loginForm" novalidate>
+      <div class="field"><label for="l-zk">Ваш ЖК</label><select id="l-zk">${ZKS.map(z=>`<option value="${esc(z.id)}" ${z.id===state.zk?"selected":""}>${esc(z.name)} — ${esc(z.leader_name)}</option>`).join("")}</select></div>
+      <div class="field"><label for="l-code">Код доступа</label><input id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="6 символов от менеджера ADAL"></div>
+      <p id="loginErr" class="err" hidden></p>
+      <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Проверяем…":"Войти"}</button>
+    </form>
+    <div class="note">Демо-доступ: <b>ЖК Северный парк</b>, код <b>123456</b>.</div>
+    <button class="btn ghost block" data-act="becomeleader">Ещё не лидер? Оставить заявку</button>
+  </section>`;
+}
+
 const CITIES=["Алматы","Астана","Шымкент","Караганда","Другой город"];
-const ROUNDS_PER_MONTH=12, AVG_CHECK=8000;
+const ROUNDS_PER_MONTH=12, AVG_CHECK=5000;
 const calcIncome = n => Math.round(n*AVG_CHECK*COMMISSION*ROUNDS_PER_MONTH);
 function opts(list,cur){ return list.map(o=>`<option ${o===cur?"selected":""}>${esc(o)}</option>`).join(""); }
 
@@ -456,30 +485,26 @@ function viewReg(){
         <small>Расчёт: средний чек ${fmt(AVG_CHECK)}, ${ROUNDS_PER_MONTH} сборов в месяц (3 в неделю).</small>
       </div>
     </div>
-
     <h2>Что нужно делать</h2>
     <div class="duties">
       <div class="duty"><b>Приглашать соседей</b><span class="muted">Отправить ссылку в чат дома и напоминать о сборе.</span></div>
-      <div class="duty"><b>Закрывать сбор</b><span class="muted">Одна кнопка в кабинете в 21:00. Оплату и закупку берём на себя.</span></div>
+      <div class="duty"><b>Закрывать сбор</b><span class="muted">Одна кнопка в кабинете в 21:00. Закупку берём на себя.</span></div>
       <div class="duty"><b>Выдавать заказы</b><span class="muted">Принять машину и раздать пакеты соседям вечером, 1–2 часа.</span></div>
     </div>
-
     <form class="panel" id="regForm" novalidate>
       <h2>Заявка</h2>
       <span class="label">О вас</span>
-      <div class="field"><label for="r-name">Имя и фамилия</label><input id="r-name" data-reg="name" autocomplete="name" value="${esc(r.name)}" placeholder="Например, Айгерим Сапарова"></div>
-      <div class="field"><label for="r-phone">Телефон</label><input id="r-phone" data-reg="phone" type="tel" autocomplete="tel" value="${esc(r.phone)}" placeholder="+7 7__ ___ __ __"></div>
-
+      <div class="field"><label for="r-name">Имя и фамилия</label><input id="r-name" data-reg="name" maxlength="80" autocomplete="name" value="${esc(r.name)}" placeholder="Например, Айгерим Сапарова"></div>
+      <div class="field"><label for="r-phone">Телефон</label><input id="r-phone" data-reg="phone" maxlength="30" type="tel" autocomplete="tel" value="${esc(r.phone)}" placeholder="+7 7__ ___ __ __"></div>
       <span class="label" style="margin-top:6px">Ваш жилой комплекс</span>
       <div class="field"><label for="r-city">Город</label><select id="r-city" data-reg="city">${opts(CITIES,r.city)}</select></div>
-      <div class="field"><label for="r-zk">Название ЖК</label><input id="r-zk" data-reg="zk" value="${esc(r.zk)}" placeholder="Например, ЖК Алатау Сити"></div>
-      <div class="field"><label for="r-addr">Адрес или блоки</label><input id="r-addr" data-reg="addr" value="${esc(r.addr)}" placeholder="ул. Розыбакиева 250, блоки 1–3"></div>
+      <div class="field"><label for="r-zk">Название ЖК</label><input id="r-zk" data-reg="zk" maxlength="80" value="${esc(r.zk)}" placeholder="Например, ЖК Алатау Сити"></div>
+      <div class="field"><label for="r-addr">Адрес или блоки</label><input id="r-addr" data-reg="addr" maxlength="120" value="${esc(r.addr)}" placeholder="ул. Розыбакиева 250, блоки 1–3"></div>
       <div class="two">
         <div class="field"><label for="r-flats">Квартир в ЖК</label><select id="r-flats" data-reg="flats">${opts(["до 200","200–500","500–1000","больше 1000"],r.flats)}</select></div>
         <div class="field"><label for="r-chat">Чат дома</label><select id="r-chat" data-reg="chat">${opts(["WhatsApp","Telegram","Нет чата"],r.chat)}</select></div>
       </div>
-      <div class="field"><label for="r-members">Сколько людей в чате (примерно)</label><input id="r-members" data-reg="members" inputmode="numeric" value="${esc(r.members)}" placeholder="например, 350"></div>
-
+      <div class="field"><label for="r-members">Сколько людей в чате (примерно)</label><input id="r-members" data-reg="members" maxlength="10" inputmode="numeric" value="${esc(r.members)}" placeholder="например, 350"></div>
       <span class="label" style="margin-top:6px">Выдача и выплаты</span>
       <div class="field"><label for="r-spot">Где будете выдавать заказы</label><select id="r-spot" data-reg="spot">${opts(["У себя в квартире","Холл или консьерж","Колясочная или кладовая","У подъезда"],r.spot)}</select></div>
       <div class="field"><span class="flabel">Как получать вознаграждение</span>
@@ -488,9 +513,9 @@ function viewReg(){
         </div></div>
       <label class="check" for="r-agree"><input id="r-agree" type="checkbox" data-reg="agree" ${r.agree?"checked":""}><span>Согласен с условиями агентского договора и обработкой персональных данных</span></label>
       <div id="regErr" class="err" hidden></div>
-      <button class="btn accent block" type="submit">Отправить заявку</button>
+      <button class="btn accent block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Отправляем…":"Отправить заявку"}</button>
     </form>
-    <button class="btn ghost block" data-act="demologin">Уже лидер? Войти в демо-кабинет</button>
+    <button class="btn ghost block" data-act="tologin">Уже лидер? Войти по коду</button>
   </section>`;
 }
 
@@ -508,17 +533,15 @@ function viewRegDone(){
         ${[["Сегодня","Менеджер позвонит","Расскажет об условиях и ответит на вопросы."],
            ["1–2 дня","Проверим ЖК и место выдачи","Убедимся, что машина может подъехать, а заказы есть где хранить пару часов."],
            ["Онлайн","Подпишем агентский договор","Через телефон, без визита в офис. Поможем оформить самозанятость."],
-           ["Старт","Получите кабинет и ссылку","Отправите её в чат дома, и соседи начнут заказывать."]]
+           ["Старт","Получите код доступа","Войдёте в кабинет, отправите ссылку в чат дома, и соседи начнут заказывать."]]
           .map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${s[0]}</span><div class="t">${s[1]}</div><div class="muted">${s[2]}</div></div></div>`).join("")}
       </div>
     </div>
-    <button class="btn block" data-act="openmine">Демо: открыть мой кабинет</button>
-    <p class="muted" style="margin:0;font-size:13px;text-align:center">В демо проверку пропускаем, чтобы вы сразу увидели кабинет нового лидера.</p>
+    <button class="btn ghost block" data-act="tologin">У меня есть код доступа</button>
   </section>`;
 }
 
-/* ---------- render & events ---------- */
-let doneOrder=null;
+/* ---------- render & data ---------- */
 function render(){
   $("#zkName").textContent=zk().name;
   let html;
@@ -530,31 +553,65 @@ function render(){
   const c=cartCount(); const bd=$("#cartBadge"); bd.hidden=!c; bd.textContent=c;
   $("#deadline").hidden = state.view==="leader";
 }
-function go(v){ state.view=v; if(location.hash!=="#"+v && v!=="done") history.replaceState(null,"","#"+v); render(); window.scrollTo(0,0); }
+function go(v){
+  state.view=v; if(location.hash!=="#"+v && v!=="done") history.replaceState(null,"",location.pathname+location.search+"#"+v);
+  if(v==="leader" && state.leader && !state.ld) loadLeader();
+  render(); window.scrollTo(0,0);
+}
+
+async function loadCatalog(){
+  state.loading=true; state.loadError=null; render();
+  try{
+    const [zks, prods] = await Promise.all([
+      api("adal_zk?select=id,name,leader_name,flats,city&active=eq.true&order=name"),
+      api("adal_products?select=id,cat,brand,name,variant,weight,price,old_price,color,color2&active=eq.true&order=sort")
+    ]);
+    ZKS=zks; PRODUCTS=prods;
+    if(!ZKS.some(z=>z.id===state.zk) && ZKS[0]) state.zk=ZKS[0].id;
+    for(const id of Object.keys(state.cart)) if(!prod(id)) delete state.cart[id];
+    saveCart();
+  }catch(e){ state.loadError=e.message; }
+  state.loading=false; render();
+}
+
+async function loadLeader(){
+  if(!state.leader) return;
+  state.ldError=null;
+  try{
+    const d = await rpc("adal_leader_data",{p_zk:state.leader.zk, p_code:state.leader.code});
+    if(d && d.error){ state.ld=null; state.ldError=d.error; if(/Неверный код/.test(d.error)){ state.leader=null; ss.del("adal-leader"); state.leaderMode="login"; toast(d.error); } }
+    else state.ld=d;
+  }catch(e){ state.ldError=e.message; }
+  render();
+}
+async function leaderAction(action, order){
+  state.busy=true; render();
+  try{
+    const r = await rpc("adal_leader_action",{p_zk:state.leader.zk, p_code:state.leader.code, p_action:action, p_order:order??null});
+    if(r && r.error) toast(r.error);
+    else toast({close:"Сбор закрыт, сводка ушла в ADAL", arrive:"Отмечено: заказы привезли", give:"Отмечено: заказ выдан", newround:"Новый сбор открыт"}[action]);
+  }catch(e){ toast(e.message); }
+  state.busy=false; await loadLeader();
+}
 
 document.addEventListener("click",e=>{
   const t=e.target.closest("button"); if(!t) return;
   const d=t.dataset;
   if(d.go){ go(d.go); return; }
-  if(d.add){ state.cart[d.add]=(state.cart[d.add]||0)+1; render(); return; }
-  if(d.dec){ state.cart[d.dec]--; if(state.cart[d.dec]<=0) delete state.cart[d.dec]; render(); return; }
+  if(d.add){ state.cart[d.add]=Math.min(50,(state.cart[d.add]||0)+1); saveCart(); render(); return; }
+  if(d.dec){ state.cart[d.dec]--; if(state.cart[d.dec]<=0) delete state.cart[d.dec]; saveCart(); render(); return; }
   if(d.cat){ state.cat=d.cat; render(); return; }
-  if(d.ltab){ state.leaderTab=d.ltab; state.lastNew=null; render(); return; }
-  if(d.give){ const o=L().orders.find(o=>o.id==d.give); o.st="done"; if(!L().orders.some(o=>o.st==="ready")) L().batch=3; toast("Отмечено: заказ выдан"); render(); return; }
+  if(d.ltab){ state.leaderTab=d.ltab; render(); return; }
+  if(d.give){ leaderAction("give", +d.give); return; }
   if(d.pay){ state.reg.pay=d.pay; document.querySelectorAll("[data-pay]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pay===d.pay)); return; }
-  if(d.act==="asleader"){ state.myZk=state.zk; state.leaderIn=true; state.leaderTab="orders"; go("leader"); return; }
-  if(d.act==="becomeleader"){ state.leaderIn=false; state.regDone=false; go("leader"); return; }
-  if(d.act==="demologin"){ state.myZk="sp"; state.leaderIn=true; state.leaderTab="orders"; go("leader"); return; }
-  if(d.act==="logout"){ state.leaderIn=false; state.regDone=false; go("leader"); return; }
-  if(d.act==="openmine"){ const r=state.reg;
-    const id="z"+(ZKS.length+1);
-    ZKS.push({id, name:r.zk.startsWith("ЖК")?r.zk:"ЖК "+r.zk, leader:r.name.split(" ")[0], flats:r.addr||r.city});
-    D(id); state.myZk=id; state.leaderIn=true; state.leaderTab="orders"; toast("Кабинет открыт"); go("leader"); return; }
-  if(d.act==="close"){ L().orders.forEach(o=>{if(o.st==="paid")o.st="sent"}); L().batch=1; state.lastNew=null; toast("Сбор закрыт, сводка ушла в ADAL"); render(); return; }
-  if(d.act==="arrive"){ L().orders.forEach(o=>{if(o.st==="sent")o.st="ready"}); L().batch=2; toast("Заказы привезли в ЖК"); render(); return; }
-  if(d.act==="newround"){ const n=L().orders.length, s=L().orders.reduce((a,o)=>a+orderSum(o.items),0);
-    L().history.unshift({d:"Сегодня",n,sum:s}); L().orders=[]; L().batch=0; toast("Новый сбор открыт"); render(); return; }
-  if(d.act==="copy"){ const txt="https://"+$("#inviteLink").textContent;
+  if(d.act==="reload"){ loadCatalog(); return; }
+  if(d.act==="becomeleader"){ state.leaderMode="reg"; state.regDone=false; go("leader"); return; }
+  if(d.act==="tologin"){ state.leaderMode="login"; go("leader"); return; }
+  if(d.act==="logout"){ state.leader=null; state.ld=null; state.ldError=null; ss.del("adal-leader"); state.leaderMode="login"; go("leader"); return; }
+  if(d.act==="loadleader"){ loadLeader(); return; }
+  if(d.act==="ordfor"){ if(state.ld) state.zk=state.ld.zk.id; go("shop"); return; }
+  if(["close","arrive","newround"].includes(d.act)){ leaderAction(d.act); return; }
+  if(d.act==="copy"){ const txt=$("#inviteLink").textContent;
     const done=()=>toast("Ссылка скопирована, отправьте её в чат дома");
     try{ navigator.clipboard.writeText(txt).then(done,()=>{selectInvite();toast("Выделил ссылку, скопируйте её вручную")}); }catch(_){ selectInvite(); }
     return; }
@@ -562,20 +619,58 @@ document.addEventListener("click",e=>{
 });
 function selectInvite(){ const r=document.createRange(); r.selectNodeContents($("#inviteLink")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
 
-document.addEventListener("change",e=>{ if(e.target.id==="f-zk"){ state.zk=e.target.value; $("#zkName").textContent=zk().name; }});
-document.addEventListener("submit",e=>{
-  if(e.target.id!=="checkout") return; e.preventDefault();
-  const name=$("#f-name").value.trim(), apt=$("#f-apt").value.trim().replace(/^кв\.?\s*/i,"");
-  if(!name||!apt){ $("#formErr").hidden=false; return; }
-  state.zk=$("#f-zk").value;
-  const B=D(state.zk);
-  const id=Math.max(1045,...allOrders().map(o=>o.id))+1;
-  if(B.batch===3){ // прошлый сбор полностью выдан — открываем новый
-    const n=B.orders.length, s=B.orders.reduce((a,o)=>a+orderSum(o.items),0);
-    B.history.unshift({d:"Сегодня",n,sum:s}); B.orders=[]; B.batch=0;
+document.addEventListener("change",e=>{ if(e.target.id==="f-zk"){ state.zk=e.target.value; ss.set("adal-zk",state.zk); $("#zkName").textContent=zk().name; }});
+
+document.addEventListener("submit",async e=>{
+  const id=e.target.id; if(!["checkout","regForm","loginForm"].includes(id)) return;
+  e.preventDefault(); if(state.busy) return;
+
+  if(id==="checkout"){
+    const name=$("#f-name").value.trim(), apt=$("#f-apt").value.trim().replace(/^кв\.?\s*/i,""), phone=$("#f-phone").value.trim();
+    const err=$("#formErr");
+    if(!name||!apt){ err.textContent="Укажите имя и номер квартиры, чтобы лидер знал, кому отдать заказ."; err.hidden=false; return; }
+    state.zk=$("#f-zk").value; ss.set("adal-zk",state.zk);
+    const keep={name,apt,phone}; state.busy=true; render(); $("#f-name").value=keep.name; $("#f-apt").value=keep.apt; $("#f-phone").value=keep.phone;
+    try{
+      const r = await rpc("adal_place_order",{p_zk:state.zk, p_name:name, p_apt:apt, p_phone:phone||null, p_items:state.cart});
+      const z=zk();
+      doneOrder={...r, zkName:z.name, leader:z.leader_name};
+      state.cart={}; saveCart(); state.busy=false; state.ld=null; go("done");
+    }catch(ex){
+      state.busy=false; render(); $("#f-name").value=keep.name; $("#f-apt").value=keep.apt; $("#f-phone").value=keep.phone;
+      const er=$("#formErr"); er.textContent="Не получилось оформить заказ: "+ex.message; er.hidden=false;
+    }
+    return;
   }
-  const o={id, who:`${name}, кв. ${apt}`, items:{...state.cart}, st:"paid"};
-  B.orders.push(o); state.lastNew=id; state.cart={}; state.leaderTab="orders"; doneOrder=o; go("done");
+
+  if(id==="loginForm"){
+    const z=$("#l-zk").value, code=$("#l-code").value.trim(), err=$("#loginErr");
+    if(!code){ err.textContent="Введите код доступа."; err.hidden=false; return; }
+    state.busy=true; render();
+    try{
+      const d = await rpc("adal_leader_data",{p_zk:z, p_code:code});
+      state.busy=false;
+      if(d && d.error){ render(); $("#l-zk").value=z; const er=$("#loginErr"); er.textContent=d.error; er.hidden=false; return; }
+      state.leader={zk:z, code}; ss.set("adal-leader", state.leader); state.ld=d; state.leaderTab="orders"; render();
+    }catch(ex){ state.busy=false; render(); const er=$("#loginErr"); er.textContent=ex.message; er.hidden=false; }
+    return;
+  }
+
+  if(id==="regForm"){
+    const r=state.reg, errs=[], bad=[];
+    if(r.name.trim().length<2){ errs.push("имя"); bad.push("r-name"); }
+    if(r.phone.replace(/\D/g,"").length<10){ errs.push("телефон (10–11 цифр)"); bad.push("r-phone"); }
+    if(!r.zk.trim()){ errs.push("название ЖК"); bad.push("r-zk"); }
+    const box=$("#regErr");
+    bad.forEach(i=>$("#"+i).classList.add("bad"));
+    if(errs.length){ box.textContent="Заполните: "+errs.join(", ")+"."; box.hidden=false; $("#"+bad[0]).focus(); return; }
+    if(!r.agree){ box.textContent="Отметьте согласие с условиями, чтобы отправить заявку."; box.hidden=false; return; }
+    state.busy=true; render();
+    try{
+      await rpc("adal_submit_application",{p:{...r, name:r.name.trim(), zk:r.zk.trim()}});
+      state.busy=false; state.regDone=true; render(); window.scrollTo(0,0);
+    }catch(ex){ state.busy=false; render(); const b=$("#regErr"); b.textContent="Не получилось отправить заявку: "+ex.message; b.hidden=false; }
+  }
 });
 
 document.addEventListener("input",e=>{
@@ -583,28 +678,17 @@ document.addEventListener("input",e=>{
   if(t.id==="calc"){ state.calc=+t.value; $("#calcN").textContent=t.value; $("#calcOut").textContent="≈ "+fmt(calcIncome(+t.value)); return; }
   if(t.dataset.reg){ state.reg[t.dataset.reg]= t.type==="checkbox" ? t.checked : t.value; t.classList.remove("bad"); }
 });
-document.addEventListener("submit",e=>{
-  if(e.target.id!=="regForm") return; e.preventDefault();
-  const r=state.reg, errs=[], bad=[];
-  if(r.name.trim().length<2){ errs.push("имя"); bad.push("r-name"); }
-  if(r.phone.replace(/\D/g,"").length<10){ errs.push("телефон (10–11 цифр)"); bad.push("r-phone"); }
-  if(!r.zk.trim()){ errs.push("название ЖК"); bad.push("r-zk"); }
-  const box=$("#regErr");
-  bad.forEach(id=>$("#"+id).classList.add("bad"));
-  if(errs.length){ box.textContent="Заполните: "+errs.join(", ")+"."; box.hidden=false; $("#"+bad[0]).focus(); return; }
-  if(!r.agree){ box.textContent="Отметьте согласие с условиями, чтобы отправить заявку."; box.hidden=false; return; }
-  r.name=r.name.trim(); r.zk=r.zk.trim(); state.regDone=true; render(); window.scrollTo(0,0);
-});
 
 function openZk(){
+  if(!ZKS.length) return;
   const bg=document.createElement("div"); bg.className="sheet-bg";
   bg.innerHTML=`<div class="sheet" role="dialog" aria-label="Выбор ЖК"><h2>Ваш жилой комплекс</h2>
     <p class="muted" style="margin:0">Заказ привезут лидеру выбранного ЖК.</p>
-    ${ZKS.map(z=>`<button class="opt" data-zk="${z.id}" aria-pressed="${z.id===state.zk}"><span><b>${z.name}</b><br><span class="muted" style="font-size:13px">Лидер: ${z.leader} · ${z.flats}</span></span>${z.id===state.zk?"✓":""}</button>`).join("")}
+    ${ZKS.map(z=>`<button class="opt" data-zk="${esc(z.id)}" aria-pressed="${z.id===state.zk}"><span><b>${esc(z.name)}</b><br><span class="muted" style="font-size:13px">Лидер: ${esc(z.leader_name)}${z.flats?" · "+esc(z.flats):""}</span></span>${z.id===state.zk?"✓":""}</button>`).join("")}
     <button class="btn ghost block" data-close>Закрыть</button></div>`;
   bg.addEventListener("click",ev=>{
     const b=ev.target.closest("[data-zk]");
-    if(b){ state.zk=b.dataset.zk; render(); bg.remove(); toast("ЖК выбран: "+zk().name); ev.stopPropagation(); return; }
+    if(b){ state.zk=b.dataset.zk; ss.set("adal-zk",state.zk); render(); bg.remove(); toast("ЖК выбран: "+zk().name); ev.stopPropagation(); return; }
     if(ev.target===bg||ev.target.closest("[data-close]")){ bg.remove(); ev.stopPropagation(); }
   });
   document.body.appendChild(bg); bg.querySelector(".opt").focus();
@@ -618,10 +702,16 @@ function tick(){
 }
 setInterval(tick,1000); tick();
 
-function fromHash(){ const h=location.hash.slice(1); if(["shop","cart","how","leader"].includes(h)){ state.view=h; render(); } }
-window.addEventListener("hashchange",fromHash);
-const h0=location.hash.slice(1); if(["shop","cart","how","leader"].includes(h0)) state.view=h0;
-render();
+const VIEWS=["shop","cart","how","leader"];
+window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(VIEWS.includes(h)) go(h); });
+(function boot(){
+  const q=new URLSearchParams(location.search).get("zk");
+  if(q){ state.zk=q; ss.set("adal-zk",q); }
+  const h=location.hash.slice(1); if(VIEWS.includes(h)) state.view=h;
+  if(state.leader) state.leaderMode="login";
+  loadCatalog().then(()=>{ if(state.view==="leader" && state.leader) loadLeader(); });
+})();
 </script>
+
 </body>
 </html>
