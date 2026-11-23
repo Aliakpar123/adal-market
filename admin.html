@@ -106,6 +106,31 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .photo-edit .acts{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 16px;border-radius:14px;font-weight:700;font-size:14px;z-index:40;max-width:calc(100% - 32px)}
 .empty{text-align:center;padding:36px 16px;color:var(--muted)}
+.tabs{display:flex;gap:4px;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:4px}
+.tabs button{flex:1;border:0;background:transparent;border-radius:12px;padding:10px 6px;font-weight:800;font-size:14px;color:var(--muted);position:relative}
+.tabs button[aria-selected="true"]{background:var(--brand);color:var(--brand-ink)}
+.tabs .cnt{display:inline-flex;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--accent);color:#2A1A03;font-size:11px;align-items:center;justify-content:center;margin-left:6px;vertical-align:1px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.filters select{border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:14px;padding:9px 12px;font-weight:700;font-size:13px;max-width:100%}
+.ocard{background:var(--surface);box-shadow:var(--shadow);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.ocard .top-l{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.ocard .who{font-weight:800}
+.ocard .sub{font-size:13px;color:var(--muted);font-weight:600}
+.ocard .items{font-size:13.5px}
+.ocard .bot{display:flex;justify-content:space-between;align-items:center;gap:10px;font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.st{border:0;border-radius:999px;padding:6px 10px;font-weight:800;font-size:12.5px}
+.st-paid{background:#DDE9F6;color:#2F6FB0}.st-sent{background:var(--accent-soft);color:var(--warn)}.st-ready{background:var(--ok-soft);color:var(--ok)}.st-done{background:var(--line);color:var(--muted)}
+.buy{display:flex;flex-direction:column}
+.buy .ln{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.buy .ln:last-child{border-bottom:0}
+.buy .ln b{font-size:17px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
+.kv dt{color:var(--muted);font-weight:600}.kv dd{margin:0;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.code{font-family:ui-monospace,Menlo,monospace;font-weight:800;font-size:17px;letter-spacing:.12em;background:var(--bg);padding:4px 10px;border-radius:10px}
+.acts{display:flex;gap:8px;flex-wrap:wrap}
+.tag.new{background:var(--accent-soft);color:var(--warn)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-top:6px}
 @media (max-width:520px){
   .row{grid-template-columns:56px minmax(0,1fr);grid-template-areas:"t i" "s s"}
   .row .thumb{grid-area:t;width:56px;height:68px}
@@ -151,7 +176,19 @@ const store = {
   del(){ try{ sessionStorage.removeItem("adal-admin"); }catch(_){} }
 };
 
-const state = { pass: store.get(), products: [], q:"", filter:"all", busy:false, loading:false };
+const state = { pass: store.get(), products: [], q:"", filter:"all", busy:false, loading:false,
+  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","leaders"].includes(h)?h:"products"; })(),
+  orders: [], days: 7, ozk: "all", ost: "all", apps: [], zks: [], confirm: null };
+const STATUS = {paid:"Оплачен", sent:"У поставщика", ready:"Привезли", done:"Выдан"};
+const pname = id => { const p=state.products.find(x=>x.id==id); return p ? p.name+(p.variant?" · "+p.variant:"") : "Товар №"+id; };
+const dt = s => new Date(s).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+function tabsHtml(){
+  const n = state.apps.filter(a=>a.status==="new").length;
+  return `<div class="tabs" role="tablist">
+    ${[["products","Товары"],["orders","Заказы"],["leaders","Лидеры"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
+  </div>`;
+}
+function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else viewList(); }
 const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = n => Math.round(n).toLocaleString("ru-RU").replace(/ |,/g," ") + " ₸";
@@ -206,7 +243,7 @@ function viewList(){
   const list = visible();
   const on = state.products.filter(p=>p.active).length;
   const sold = state.products.reduce((s,p)=>s+(+p.sold30||0),0);
-  $("#view").innerHTML = `
+  $("#view").innerHTML = tabsHtml() + `
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
       <div><h1>Товары и цены</h1><p class="muted" style="margin:4px 0 0">Цена сохраняется, когда вы уходите из поля или нажимаете Enter.</p></div>
       <button class="btn" data-act="new">+ Новый товар</button>
@@ -300,6 +337,124 @@ function openEditor(p){
   });
 }
 
+
+function viewOrders(){
+  $("#topActions").hidden = false;
+  const zkNames = [...new Map(state.orders.map(o=>[o.zk_id,o.zk_name])).entries()];
+  const list = state.orders.filter(o => (state.ozk==="all"||o.zk_id===state.ozk) && (state.ost==="all"||o.status===state.ost));
+  const sum = list.reduce((s,o)=>s+o.total,0);
+  const buy = {}; list.filter(o=>o.status==="paid"||o.status==="sent").forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>buy[id]=(buy[id]||0)+q));
+  const buyRows = Object.entries(buy).sort((a,b)=>b[1]-a[1]);
+  const buySum = buyRows.reduce((s,[id,q])=>s+(state.products.find(p=>p.id==id)?.price||0)*q,0);
+  $("#view").innerHTML = tabsHtml() + `
+    <div><h1>Заказы</h1><p class="muted" style="margin:4px 0 0">Все ЖК вместе. Статус можно поменять прямо в карточке заказа.</p></div>
+    <div class="filters">
+      <div class="chips" role="group" aria-label="Период">${[[1,"Сегодня"],[7,"7 дней"],[30,"30 дней"],[365,"Год"]].map(([d,v])=>`<button class="chip" data-days="${d}" aria-pressed="${state.days===d}">${v}</button>`).join("")}</div>
+      <select id="oZk" aria-label="ЖК"><option value="all">Все ЖК</option>${zkNames.map(([id,n])=>`<option value="${esc(id)}" ${state.ozk===id?"selected":""}>${esc(n)}</option>`).join("")}</select>
+      <select id="oSt" aria-label="Статус"><option value="all">Все статусы</option>${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${state.ost===k?"selected":""}>${v}</option>`).join("")}</select>
+    </div>
+    <div class="summary">
+      <div class="stat"><b>${list.length}</b><span>заказов</span></div>
+      <div class="stat"><b>${fmt(sum)}</b><span>сумма</span></div>
+      <div class="stat"><b>${list.length?fmt(sum/list.length):"—"}</b><span>средний чек</span></div>
+    </div>
+    <section class="panel">
+      <div class="sec-h"><h2>Что закупить</h2><span class="muted" style="font-size:13px">заказы «Оплачен» и «У поставщика»</span></div>
+      ${buyRows.length?`<div class="buy">${buyRows.map(([id,q])=>`<div class="ln"><span>${esc(pname(id))}</span><b>×${q}</b></div>`).join("")}
+        <div class="ln" style="font-weight:800"><span>Итого по ценам сайта</span><span>${fmt(buySum)}</span></div></div>`
+      :`<p class="muted" style="margin:0">Нет заказов, которые ждут закупки.</p>`}
+    </section>
+    <div class="list">${list.length?list.map(o=>`<div class="ocard">
+      <div class="top-l"><div><div class="who">${esc(o.customer_name)}, кв. ${esc(o.apt)}</div>
+        <div class="sub">№${o.id} · ${esc(o.zk_name)} · лидер ${esc(o.leader_name)} · ${dt(o.created_at)}</div>
+        ${o.phone?`<div class="sub">${esc(o.phone)}</div>`:""}</div>
+        <select class="st st-${o.status}" data-ostatus="${o.id}" aria-label="Статус заказа ${o.id}">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${o.status===k?"selected":""}>${v}</option>`).join("")}</select></div>
+      <div class="items">${Object.entries(o.items||{}).map(([id,q])=>`${esc(pname(id))} ×${q}`).join(", ")}</div>
+      <div class="bot"><b>${fmt(o.total)}</b>${o.archived?`<span class="tag">в архиве лидера</span>`:""}</div>
+    </div>`).join(""):`<div class="empty">${state.loading?"Загружаем…":"Заказов за этот период нет"}</div>`}</div>`;
+}
+
+function viewLeaders(){
+  $("#topActions").hidden = false;
+  const c = state.confirm;
+  const apps = state.apps;
+  $("#view").innerHTML = tabsHtml() + `
+    <div><h1>Лидеры ЖК</h1><p class="muted" style="margin:4px 0 0">Одобрите заявку, и лидер получит код доступа в кабинет. Код передайте ему лично.</p></div>
+    <div class="sec-h"><h2>Заявки</h2><span class="muted" style="font-size:13px">${apps.filter(a=>a.status==="new").length} новых</span></div>
+    <div class="list">${apps.length?apps.map(a=>`<div class="ocard">
+      <div class="top-l"><div><div class="who">${esc(a.name)}</div><div class="sub">${esc(a.zk_name)}, ${esc(a.city||"")} · ${dt(a.created_at)}</div></div>
+        <span class="tag ${a.status==="new"?"new":a.status==="approved"?"ok":"off"}">${a.status==="new"?"Новая":a.status==="approved"?"Одобрена":"Отклонена"}</span></div>
+      <dl class="kv">
+        <dt>Телефон</dt><dd>${esc(a.phone)}</dd>
+        ${a.addr?`<dt>Адрес</dt><dd>${esc(a.addr)}</dd>`:""}
+        <dt>Квартир</dt><dd>${esc(a.flats||"—")}</dd>
+        <dt>Чат дома</dt><dd>${esc(a.chat||"—")}${a.members?`, ~${esc(a.members)} чел.`:""}</dd>
+        <dt>Выдача</dt><dd>${esc(a.spot||"—")}</dd>
+        <dt>Выплаты</dt><dd>${esc(a.pay||"—")}</dd>
+      </dl>
+      ${a.status==="new"?`<div class="acts">
+        <button class="btn" data-approve="${a.id}">Одобрить</button>
+        ${c===("rej"+a.id)?`<button class="btn danger" data-reject="${a.id}">Точно отклонить</button><button class="ghost" data-cancel>Отмена</button>`
+          :`<button class="btn light" data-askreject="${a.id}">Отклонить</button>`}
+      </div>`:""}
+    </div>`).join(""):`<div class="empty">Заявок пока нет. Они появятся, когда кто-то заполнит форму «Стать лидером» на сайте.</div>`}</div>
+
+    <div class="sec-h"><h2>Действующие ЖК</h2><span class="muted" style="font-size:13px">${state.zks.filter(z=>z.active).length} активных</span></div>
+    <div class="list">${state.zks.map(z=>`<div class="ocard" style="${z.active?"":"opacity:.6"}">
+      <div class="top-l"><div><div class="who">${esc(z.name)}</div><div class="sub">Лидер: ${esc(z.leader_name)}${z.phone?" · "+esc(z.phone):""}${z.flats?" · "+esc(z.flats):""}</div></div>
+        <label class="switch"><input type="checkbox" data-zkactive="${esc(z.id)}" ${z.active?"checked":""} aria-label="ЖК активен"><span class="tr"></span></label></div>
+      <div class="bot"><span>Код доступа: <span class="code">${esc(z.leader_code)}</span></span><span class="sub">30 дней: ${z.orders30} заказов · ${fmt(+z.sum30)}</span></div>
+      <div class="acts">
+        <button class="ghost" data-copycode="${esc(z.leader_code)}">Копировать код</button>
+        ${c===("code"+z.id)?`<button class="btn danger" data-newcode="${esc(z.id)}">Сменить код — старый перестанет работать</button><button class="ghost" data-cancel>Отмена</button>`
+          :`<button class="ghost" data-asknewcode="${esc(z.id)}">Новый код</button>`}
+      </div>
+    </div>`).join("")}</div>`;
+}
+
+function openApprove(a){
+  const bg = document.createElement("div"); bg.className="sheet-bg";
+  bg.innerHTML = `<form class="sheet" id="apForm" role="dialog" aria-label="Одобрить заявку" novalidate>
+    <div class="sheet-head"><h2>Одобрить заявку</h2><button type="button" class="ghost" data-close>Закрыть</button></div>
+    <p class="muted" style="margin:0">Так ЖК будет называться на сайте. Покупатели увидят его в списке.</p>
+    <div class="field"><label for="apZk">Название ЖК</label><input id="apZk" maxlength="80" value="${esc(/^ЖК/i.test(a.zk_name)?a.zk_name:"ЖК "+a.zk_name)}"></div>
+    <div class="two">
+      <div class="field"><label for="apLeader">Имя лидера</label><input id="apLeader" maxlength="60" value="${esc((a.name||"").split(" ")[0])}"></div>
+      <div class="field"><label for="apFlats">Блоки / дома</label><input id="apFlats" maxlength="80" value="${esc(a.addr||"")}"></div>
+    </div>
+    <p class="err" id="apErr" hidden></p>
+    <button class="btn block" type="submit">Одобрить и выдать код</button></form>`;
+  document.body.appendChild(bg);
+  bg.addEventListener("click", e => { if(e.target===bg || e.target.closest("[data-close]")) bg.remove(); });
+  bg.querySelector("#apForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const er = bg.querySelector("#apErr"); er.hidden = true;
+    try{
+      const r = await rpc("adal_admin_approve", {p_pass:state.pass, p_app:a.id, p_zk_name:bg.querySelector("#apZk").value, p_leader:bg.querySelector("#apLeader").value, p_flats:bg.querySelector("#apFlats").value});
+      bg.querySelector(".sheet").innerHTML = `<div class="sheet-head"><h2>Готово</h2><button type="button" class="ghost" data-close>Закрыть</button></div>
+        <p style="margin:0">ЖК появился на сайте. Передайте лидеру код для входа в кабинет:</p>
+        <div style="text-align:center;padding:10px 0"><span class="code" style="font-size:30px">${esc(r.code)}</span></div>
+        <p class="muted" style="margin:0">Лидер входит на сайте: «Лидер ЖК» → «Войти по коду», выбирает свой ЖК и вводит этот код. Код всегда виден во вкладке «Лидеры».</p>`;
+      await loadLeaders();
+    }catch(ex){ er.textContent = ex.message; er.hidden = false; }
+  });
+  bg.querySelector("#apZk").focus();
+}
+
+async function loadOrders(){
+  state.loading = true; render();
+  try{ const d = await rpc("adal_admin_orders", {p_pass:state.pass, p_days:state.days}); state.orders = d.orders; }
+  catch(ex){ if(!authFail(ex)) toast(ex.message); }
+  state.loading = false; if(state.pass) render();
+}
+async function loadLeaders(){
+  try{ const d = await rpc("adal_admin_leaders", {p_pass:state.pass}); state.apps = d.applications; state.zks = d.zks; }
+  catch(ex){ if(!authFail(ex)) toast(ex.message); }
+  if(state.pass) render();
+}
+function authFail(ex){ if(/пароль|попыток/i.test(ex.message)){ state.pass=null; store.del(); viewLogin(ex.message); return true; } return false; }
+function setTab(t){ state.tab=t; history.replaceState(null,"","#"+t); state.confirm=null; render(); if(t==="orders") loadOrders(); if(t==="leaders") loadLeaders(); }
+
 /* сжатие фото в браузере: максимум 1000 px по длинной стороне, JPEG */
 function shrink(file){
   return new Promise((resolve, reject) => {
@@ -325,7 +480,7 @@ async function load(){
     if(/пароль|попыток/i.test(ex.message)){ state.pass=null; store.del(); viewLogin(ex.message); state.loading=false; return false; }
     toast(ex.message);
   }
-  state.loading = false; viewList(); return true;
+  state.loading = false; render(); return true;
 }
 
 async function savePrice(input){
@@ -350,13 +505,22 @@ document.addEventListener("submit", async e => {
   state.pass = pw;
   try{
     const d = await rpc("adal_admin_products", {p_pass:pw});
-    state.products = d.products; store.set(pw); state.busy = false; viewList();
+    state.products = d.products; store.set(pw); state.busy = false; setTab(state.tab); loadLeaders();
   }catch(ex){ state.pass = null; state.busy = false; viewLogin(ex.message); }
 });
 
 document.addEventListener("click", async e => {
   const b = e.target.closest("button"); if(!b) return;
   if(b.dataset.filter){ state.filter = b.dataset.filter; viewList(); return; }
+  if(b.dataset.tab){ setTab(b.dataset.tab); return; }
+  if(b.dataset.days){ state.days = +b.dataset.days; loadOrders(); return; }
+  if(b.dataset.approve){ openApprove(state.apps.find(a=>a.id==b.dataset.approve)); return; }
+  if(b.dataset.askreject){ state.confirm = "rej"+b.dataset.askreject; render(); return; }
+  if(b.dataset.asknewcode){ state.confirm = "code"+b.dataset.asknewcode; render(); return; }
+  if(b.hasAttribute("data-cancel")){ state.confirm = null; render(); return; }
+  if(b.dataset.reject){ try{ await rpc("adal_admin_reject",{p_pass:state.pass,p_app:+b.dataset.reject}); state.confirm=null; toast("Заявка отклонена"); await loadLeaders(); }catch(ex){ toast(ex.message); } return; }
+  if(b.dataset.newcode){ try{ const r=await rpc("adal_admin_zk_update",{p_pass:state.pass,p_id:b.dataset.newcode,p_active:null,p_new_code:true}); state.confirm=null; toast("Новый код: "+r.code); await loadLeaders(); }catch(ex){ toast(ex.message); } return; }
+  if(b.dataset.copycode){ try{ await navigator.clipboard.writeText(b.dataset.copycode); toast("Код скопирован"); }catch(_){ toast("Код: "+b.dataset.copycode); } return; }
   if(b.dataset.edit){ openEditor(state.products.find(x=>x.id===+b.dataset.edit)); return; }
   if(b.dataset.move){
     b.disabled = true;
@@ -369,6 +533,21 @@ document.addEventListener("click", async e => {
   if(b.dataset.act==="settings"){ openPassword(); return; }
 });
 
+document.addEventListener("change", async e => {
+  const t = e.target;
+  if(t.id==="oZk"){ state.ozk=t.value; render(); return; }
+  if(t.id==="oSt"){ state.ost=t.value; render(); return; }
+  if(t.dataset.ostatus){
+    const id=+t.dataset.ostatus, o=state.orders.find(x=>x.id===id), prev=o.status;
+    try{ await rpc("adal_admin_order_status",{p_pass:state.pass,p_id:id,p_status:t.value}); o.status=t.value; toast(`Заказ №${id}: ${STATUS[t.value]}`); render(); }
+    catch(ex){ toast(ex.message); t.value=prev; }
+    return;
+  }
+  if(t.dataset.zkactive){
+    try{ await rpc("adal_admin_zk_update",{p_pass:state.pass,p_id:t.dataset.zkactive,p_active:t.checked,p_new_code:false}); toast(t.checked?"ЖК снова на сайте":"ЖК скрыт с сайта"); await loadLeaders(); }
+    catch(ex){ toast(ex.message); t.checked=!t.checked; }
+  }
+});
 document.addEventListener("input", e => {
   if(e.target.id === "q"){ state.q = e.target.value; const pos = e.target.selectionStart; viewList(); const q=$("#q"); q.focus(); q.setSelectionRange(pos,pos); }
 });
@@ -398,7 +577,7 @@ function openPassword(){
   });
 }
 
-if(state.pass){ load(); } else { viewLogin(); }
+if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); } }); } else { viewLogin(); }
 </script>
 </body>
 </html>
