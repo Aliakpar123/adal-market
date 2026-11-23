@@ -65,6 +65,12 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
 .thumb .v{display:block;font-size:12px;font-weight:700;opacity:.95;margin-top:2px}
 .thumb .w{font-size:15px;align-self:flex-start;background:rgba(0,0,0,.22);padding:3px 8px;border-radius:6px}
 .err{background:var(--accent-soft);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;margin:0}
+.photo{position:relative;aspect-ratio:4/5;max-width:100%;border-radius:10px;overflow:hidden}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#F0F2F1}
+.photo .w{position:absolute;left:8px;bottom:8px;background:rgba(14,43,44,.82);color:#fff;font-weight:800;font-size:13px;padding:3px 8px;border-radius:6px}
+.line .mini{position:relative;overflow:hidden}
+.line .mini img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#F0F2F1}
+.skel .photo{background:var(--line)}
 .skel .thumb{background:var(--line)}
 .sk{height:12px;border-radius:6px;background:var(--line)}
 .sk.short{width:60%}
@@ -190,7 +196,7 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
   </header>
 
   <main id="view"></main>
-  <p class="demo wrap">Тестовый запуск: оплата при получении, фото товаров скоро появятся.</p>
+  <p class="demo wrap">Тестовый запуск: оплата при получении.</p>
 </div>
 
 <nav class="nav" aria-label="Разделы">
@@ -265,7 +271,7 @@ function qtyCtl(id){
 }
 
 function viewShop(){
-  if(state.loading) return `<section class="section wrap"><div class="grid">${Array.from({length:4},()=>`<div class="card skel"><div class="thumb"></div><div class="sk"></div><div class="sk short"></div></div>`).join("")}</div></section>`;
+  if(state.loading) return `<section class="section wrap"><div class="grid">${Array.from({length:4},()=>`<div class="card skel"><div class="photo"></div><div class="sk"></div><div class="sk short"></div></div>`).join("")}</div></section>`;
   if(state.loadError) return `<section class="wrap empty"><h2>Не удалось загрузить каталог</h2><p class="muted">${esc(state.loadError)}. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-act="reload">Обновить</button></section>`;
   const cats = Object.keys(CATS).filter(k=>PRODUCTS.some(p=>p.cat===k));
   const list = PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
@@ -280,9 +286,8 @@ function viewShop(){
     </div>
     <div class="grid">
       ${list.map(p=>`<article class="card">
-        <div class="thumb" style="${tile(p)}">
-          <span class="c">${CATS[p.cat]||""}</span>
-          <span><span class="br">${esc(p.brand||"")}</span><span class="v">${esc(p.variant||"")}</span></span>
+        <div class="photo" style="${tile(p)}">
+          <img src="img/${p.id}.jpg" alt="${esc(p.name)}${p.variant?" "+esc(p.variant):""}" loading="lazy" onerror="this.remove()">
           <span class="w">${esc(p.weight)}</span>
         </div>
         <div class="name">${esc(p.name)}${p.variant?`<span class="muted"> · ${esc(p.variant)}</span>`:""}</div>
@@ -305,7 +310,7 @@ function viewCart(){
     <h1>Корзина</h1>
     <div class="panel" style="padding-block:4px">
       ${ids.map(id=>{const p=prod(id);return `<div class="line">
-        <div class="mini" style="${tile(p)}">${esc(p.weight)}</div>
+        <div class="mini" style="${tile(p)}"><img src="img/${p.id}.jpg" alt="" onerror="this.remove()">${esc(p.weight)}</div>
         <div class="grow"><div class="name">${esc(p.name)}</div><div class="muted" style="font-size:13px">${esc(p.variant||"")}${p.variant?" · ":""}${fmt(p.price)} / шт</div></div>
         <div class="qty"><button data-dec="${id}" aria-label="Меньше">−</button><span>${state.cart[id]}</span><button data-add="${id}" aria-label="Больше">+</button></div>
       </div>`}).join("")}
@@ -421,7 +426,7 @@ function viewLeader(){
     const agg={}; orders.filter(o=>o.st!=="done").forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>agg[id]=(agg[id]||0)+q));
     const rows=Object.entries(agg).sort((a,b)=>b[1]-a[1]);
     body = rows.length ? `<div class="panel" style="padding-block:4px">${rows.map(([id,q])=>{const p=prod(id)||{weight:"",price:0};return `<div class="line">
-      <div class="mini" style="${tile(p)}">${esc(p.weight)}</div><div class="grow"><div class="name">${esc(pName(id))}</div><div class="muted" style="font-size:13px">${fmt(p.price*q)}</div></div><b style="font-size:18px;font-variant-numeric:tabular-nums">×${q}</b></div>`}).join("")}</div>
+      <div class="mini" style="${tile(p)}"><img src="img/${id}.jpg" alt="" onerror="this.remove()">${esc(p.weight)}</div><div class="grow"><div class="name">${esc(pName(id))}</div><div class="muted" style="font-size:13px">${fmt(p.price*q)}</div></div><b style="font-size:18px;font-variant-numeric:tabular-nums">×${q}</b></div>`}).join("")}</div>
       <p class="muted" style="margin:0;font-size:13px">По этой сводке мы закупаем и собираем коробки для вашего ЖК.</p>` : `<div class="empty"><p class="muted">Нет невыданных заказов.</p></div>`;
   } else {
     body = `<div class="panel">
