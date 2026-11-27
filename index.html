@@ -540,6 +540,25 @@ body[data-hero="irbi"] .reg-hero>*:not(.himg){max-width:70%}
 .tip .rig.irbi{width:96px;height:96px}
 .reg-hero .rig.himg{width:auto}
 @media (prefers-reduced-motion:reduce){.rig .rin,.rg-tail,.rg-head,.rg-head .lid{animation:none!important}}
+
+/* живая Мақта қыз с котом */
+.rig.mrig{aspect-ratio:750/1400}
+.mg-head{transform-origin:40% 31.4%;animation:mnod 5.5s ease-in-out infinite}
+.mg-feather{position:absolute;inset:0;width:100%;height:100%;display:block;transform-origin:44% 9.1%;animation:mfeather 3.2s ease-in-out infinite}
+.mc-head{transform-origin:74.7% 81%;animation:mcat 6s ease-in-out infinite}
+.mrig .rg:nth-of-type(2){transform-origin:80% 100%;animation:mcbreath 3.2s ease-in-out infinite}
+.mg-head .lid,.mc-head .lid{transform:scaleY(0);animation:rblink 5.2s infinite}
+.mg-head .lid.gl{transform-origin:33.6% 22.7%}
+.mg-head .lid.gr{transform-origin:46% 23.9%}
+.mc-head .lid.cl{transform-origin:67.7% 68.7%;animation-delay:.4s}
+.mc-head .lid.cr{transform-origin:76.3% 71.1%;animation-delay:.4s}
+@keyframes mnod{0%,100%{transform:rotate(0) translateY(0)}22%{transform:rotate(2.2deg) translateY(1px)}45%{transform:rotate(-1.8deg)}68%{transform:rotate(0) translateY(1.5px)}85%{transform:rotate(1.4deg)}}
+@keyframes mfeather{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(5deg)}}
+@keyframes mcat{0%,100%{transform:rotate(0)}15%{transform:rotate(4deg)}35%{transform:rotate(-3deg)}55%{transform:rotate(3deg)}75%{transform:rotate(-2deg)}}
+@keyframes mcbreath{0%,100%{transform:scale(1,1)}50%{transform:scale(1.01,1.025)}}
+.hpick .rig.mrig{height:128px;width:auto}
+.hpick .rig:not(.mrig){height:128px;width:128px}
+@media (prefers-reduced-motion:reduce){.mg-head,.mg-feather,.mc-head,.mrig .rg:nth-of-type(2),.mg-head .lid,.mc-head .lid{animation:none!important}}
 </style>
 </head>
 <body>
@@ -899,6 +918,14 @@ function heroMedia(pose, cls, w, h, lazy){
     const L = lazy ? ' loading="lazy"' : "";
     return `<div class="rig ${cls}" role="img" aria-label="Ирби"><div class="rin"><img class="rg rg-body" src="img/rig/irbi-body.webp" alt=""${L}><img class="rg rg-tail" src="img/rig/irbi-tail.webp" alt=""${L}><div class="rg rg-head"><img src="img/rig/irbi-head.webp" alt=""${L}><img class="lid l" src="img/rig/irbi-lid_l.webp" alt=""${L}><img class="lid r" src="img/rig/irbi-lid_r.webp" alt=""${L}></div></div></div>`;
   }
+  if(state.hero==="makta" && !HEROES.makta.poses[pose]){
+    cls = cls.replace(/\ban-(sway|bob)\b/g,"").trim();
+    const L = lazy ? ' loading="lazy"' : "", R="img/rig/makta-";
+    return `<div class="rig mrig ${cls}" role="img" aria-label="Мақта қыз"><div class="rin"><img class="rg" src="${R}body.webp" alt=""${L}>
+      <img class="rg" src="${R}cat_body.webp" alt=""${L}>
+      <div class="rg mc-head"><img src="${R}cat_head.webp" alt=""${L}><img class="lid cl" src="${R}lid_c_l.webp" alt=""${L}><img class="lid cr" src="${R}lid_c_r.webp" alt=""${L}></div>
+      <div class="rg mg-head"><img src="${R}head.webp" alt=""${L}><img class="lid gl" src="${R}lid_g_l.webp" alt=""${L}><img class="lid gr" src="${R}lid_g_r.webp" alt=""${L}><img class="mg-feather" src="${R}feather.webp" alt=""${L}></div></div></div>`;
+  }
   return `<img class="${cls}" src="${heroImg(pose)}" alt="${esc(hero().name)}" width="${w}" height="${h}"${lazy?' loading="lazy"':""}>`;
 }
 function heroMediaFor(k){ const prev=state.hero; state.hero=k; const out=heroMedia("wave","pkrig"); state.hero=prev; return out; }
@@ -908,7 +935,7 @@ function heroPeek(pose){ const h=hero(); return `<div class="peek" aria-hidden="
 const hero = () => HEROES[state.hero] || HEROES.irbi;
 const greet = () => `Привет, я ${hero().name}!`;
 function heroBig(pose){ const h=hero(); const bh=Math.round(h.big*h.h/h.w); return heroMedia(pose,`irbi-big ${ANIM[pose]||"an-bob"}`,h.big,bh); }
-function heroPick(){ return Object.entries(HEROES).map(([k,h])=>`<button class="hpick" data-hero="${k}" aria-pressed="${!!ss.get("adal-hero")&&state.hero===k}">${k==="irbi"?heroMediaFor("irbi"):`<img src="${h.img}" alt="" width="${Math.round(h.w*.8)}" height="${Math.round(h.h*.8)}">`}<b>${h.name}</b><span>${h.desc}</span></button>`).join(""); }
+function heroPick(){ return Object.entries(HEROES).map(([k,h])=>`<button class="hpick" data-hero="${k}" aria-pressed="${!!ss.get("adal-hero")&&state.hero===k}">${heroMediaFor(k)}<b>${h.name}</b><span>${h.desc}</span></button>`).join(""); }
 function setHero(k){ if(!HEROES[k]) return; state.hero=k; ss.set("adal-hero",k); render(); }
 function openHeroPicker(){
   if(document.getElementById("hbg")) return;
