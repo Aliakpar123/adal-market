@@ -566,7 +566,8 @@ function collectSettingsHtml(){
       <div class="field"><label for="cName">Получатель</label><input id="cName" value="${esc(c.kaspi_name||"")}" placeholder="ИП или имя"></div>
     </div>
     <label class="switch" style="margin-bottom:4px"><input type="checkbox" id="cPre" ${c.prelaunch===false?"":"checked"}><span class="tr"></span>Режим «Скоро запуск»: магазин скрыт, идёт запись в список</label>
-    <div class="field"><label for="cWa">Группа WhatsApp</label><input id="cWa" value="${esc(c.wa||"")}" placeholder="https://chat.whatsapp.com/XXXXXXXXXXXX"><span class="hint">Ссылка-приглашение. Её увидят люди сразу после записи в список ожидания.</span></div>
+    <div class="field"><label for="cWa">Группа WhatsApp</label><input id="cWa" value="${esc(c.wa||"")}" placeholder="https://chat.whatsapp.com/XXXXXXXXXXXX"><span class="hint">Общая группа для всех. Ссылка видна на странице «Скоро запуск» и после записи, в профиле, на экране заказа и в «Как это работает».</span></div>
+    <div class="field"><label for="cWaL">Группа WhatsApp для лидеров</label><input id="cWaL" value="${esc(c.wa_leaders||"")}" placeholder="https://chat.whatsapp.com/XXXXXXXXXXXX"><span class="hint">Отдельный чат лидеров. Ссылка видна на странице «Стать лидером», после заявки, при входе и в кабинете лидера.</span></div>
     <div class="field"><label for="cGoal">Цель по людям до запуска</label><input id="cGoal" inputmode="numeric" value="${esc(c.goal??300)}"><span class="hint">Показывается полоской «N из цели» на странице «Скоро запуск».</span></div>
     <div class="field"><label for="cTg">Telegram Mini App</label><input id="cTg" value="${esc(c.tg||"")}" placeholder="https://t.me/имя_бота/shop"><span class="hint">Ссылка на ваше мини-приложение. Ссылки лидеров будут открывать его сразу на нужном ЖК. Пусто — ссылки на сайт.</span></div>
     <p class="err" id="cErr" hidden></p>
@@ -958,7 +959,7 @@ document.addEventListener("submit", async e => {
     e.preventDefault();
     const v = id => $("#"+id).value.trim().replace(",",".");
     try{
-      await rpc("adal_admin_save_collect",{p_pass:state.pass,p:{threshold:v("cThr").replace(/\s/g,""),commission:v("cRate"),kaspi:$("#cKaspi").value.trim(),kaspi_name:$("#cName").value.trim(),tg:$("#cTg").value.trim(),wa:$("#cWa").value.trim(),goal:$("#cGoal").value.replace(/\s/g,""),prelaunch:$("#cPre").checked}});
+      await rpc("adal_admin_save_collect",{p_pass:state.pass,p:{threshold:v("cThr").replace(/\s/g,""),commission:v("cRate"),kaspi:$("#cKaspi").value.trim(),kaspi_name:$("#cName").value.trim(),tg:$("#cTg").value.trim(),wa:$("#cWa").value.trim(),wa_leaders:$("#cWaL").value.trim(),goal:$("#cGoal").value.replace(/\s/g,""),prelaunch:$("#cPre").checked}});
       toast("Сохранено: на сайте обновится сразу"); await loadLeaders();
       state.settings = {...(state.settings||{}), leader:+v("cRate")};
     }catch(ex){ const er=$("#cErr"); er.textContent=ex.message; er.hidden=false; }
