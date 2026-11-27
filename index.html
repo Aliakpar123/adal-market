@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="ADAL market — бытовая химия по оптовым ценам: соседи покупают вместе, заказ вы забираете у лидера своего дома.">
+<meta name="description" content="Bereke store — бытовая химия по оптовым ценам: соседи покупают вместе, заказ вы забираете у лидера своего дома.">
 <meta name="theme-color" content="#FFFFFF">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <meta name="color-scheme" content="light only">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>ADAL market</title>
+<title>Bereke store</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%230F4C4A%27/%3E%3Cg transform=%27translate(9 13)%27%3E%3Cpath d=%27M3 34V17L14 7l11 10v17z%27 fill=%27%23fff%27/%3E%3Cpath d=%27M21 34V17l11-10 11 10v17z%27 fill=%27%23E9A23B%27/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700;800&display=swap">
@@ -34,9 +34,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brand)}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--brand);color:var(--brand-ink);padding-block:12px}
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.logo{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:23px;letter-spacing:-.01em;line-height:1;color:#fff}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:-.01em;line-height:1;color:#fff}
 .logo svg{flex:none;display:block}
-.logo small{font-family:var(--font-body);font-weight:600;font-size:15px;letter-spacing:.01em;opacity:.8;margin-left:5px}
+.logo small{font-family:var(--font-body);font-weight:600;font-size:14px;letter-spacing:.01em;opacity:.7;margin-left:4px}
 .zk{display:flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--brand-ink) 14%,transparent);border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--brand-ink);max-width:60%}
 .zk span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .deadline{margin-top:10px;display:flex;gap:10px;align-items:center;background:var(--accent);color:#2A1A03;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600}
@@ -274,7 +274,7 @@ body.in-tg .demo{display:none}
 <div class="app">
   <header class="top wrap">
     <div class="top-row">
-      <div class="logo" aria-label="adal market"><svg width="32" height="25" viewBox="0 0 46 36" aria-hidden="true"><path class="h1" d="M3 34 V17 L14 7 L25 17 V34 Z"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg><span>adal<small>market</small></span></div>
+      <div class="logo" aria-label="Bereke store"><svg width="32" height="25" viewBox="0 0 46 36" aria-hidden="true"><path class="h1" d="M3 34 V17 L14 7 L25 17 V34 Z"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg><span>bereke<small>store</small></span></div>
       <button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
         <span class="zk-txt"><small>Мой дом</small><span id="zkName"></span></span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -395,7 +395,7 @@ function collectCard(z, sum, title, toWhom){
 function payBlock(total){
   return `<section class="panel">
     <h2>Оплата</h2>
-    <p class="muted" style="margin:0">Когда будете забирать заказ у лидера, переведите ${total?`<b>${fmt(total)}</b> `:""}на Kaspi ADAL. Наличные не принимаем.</p>
+    <p class="muted" style="margin:0">Когда будете забирать заказ у лидера, переведите ${total?`<b>${fmt(total)}</b> `:""}на Kaspi Bereke store. Наличные не принимаем.</p>
     ${SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi${SET.kaspi_name?" · "+esc(SET.kaspi_name):""}</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`
       :`<div class="kaspi"><span class="muted">Реквизиты Kaspi появятся здесь</span></div>`}
   </section>`;
@@ -518,7 +518,7 @@ function viewOrders(){
         <div class="muted" style="font-size:13px">${itemsText(d.items)}</div>
         <div class="muted" style="font-size:13px">Лидер: ${esc(d.leader_name)} · ${esc(d.zk_name)}</div>
         ${d.status==="paid"?`<div class="free-hint"><span>Сбор дома: <b>${fmt(d.pool)}</b> из ${fmt(d.threshold)}</span><i><em style="width:${Math.min(100,d.threshold?d.pool/d.threshold*100:100)}%"></em></i></div>`:""}
-        ${d.status==="ready"&&SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi ADAL</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`:""}
+        ${d.status==="ready"&&SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi Bereke store</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`:""}
       </div>`;}).join("")}
   </section>`;
 }
@@ -526,13 +526,13 @@ function viewOrders(){
 /* ---------- как это работает ---------- */
 function viewHow(){
   return `<section class="section wrap">
-    <div><span class="label">Как устроен ADAL market</span><h1 style="margin-top:6px">Соседи покупают вместе, поэтому дешевле</h1></div>
+    <div><span class="label">Как устроен Bereke store</span><h1 style="margin-top:6px">Соседи покупают вместе, поэтому дешевле</h1></div>
     <div class="steps">
       ${[
         ["Сегодня до 21:00","Вы делаете заказ","Выбираете товары и своего лидера дома. Платить сразу не нужно."],
         ["Когда дом набрал "+fmt(SET.threshold),"Закупаем оптом","Сумма заказов вашего дома должна дойти до порога. Не дошла: заказы ждут следующий сбор."],
         ["Следующий день","Везём лидеру","Одна машина привозит все заказы дома вашему лидеру. Вам придёт код выдачи."],
-        ["Вечером","Забираете у лидера","Называете код, переводите оплату на Kaspi ADAL и забираете пакет."]
+        ["Вечером","Забираете у лидера","Называете код, переводите оплату на Kaspi Bereke store и забираете пакет."]
       ].map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${s[0]}</span><div class="t">${s[1]}</div><div class="muted">${s[2]}</div></div></div>`).join("")}
     </div>
     <h2>Откуда низкая цена</h2>
@@ -550,7 +550,7 @@ function viewLogin(){
     <h1>Вход для лидера ЖК</h1>
     <form class="panel" id="loginForm" novalidate>
       <div class="field"><label for="l-zk">Ваш ЖК</label><select id="l-zk">${ZKS.map(z=>`<option value="${esc(z.id)}" ${z.id===state.zk?"selected":""}>${esc(z.name)} — ${esc(z.leader_name)}</option>`).join("")}</select></div>
-      <div class="field"><label for="l-code">Код доступа</label><input id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="6 цифр от менеджера ADAL"></div>
+      <div class="field"><label for="l-code">Код доступа</label><input id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="6 цифр от менеджера Bereke store"></div>
       <p id="loginErr" class="err" hidden></p>
       <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Проверяем…":"Войти"}</button>
     </form>
@@ -580,7 +580,7 @@ function viewReg(){
     <div class="duties">
       <div class="duty"><b>Звать соседей</b><span class="muted">Отправлять ссылку в чат дома: готовые тексты уже в кабинете.</span></div>
       <div class="duty"><b>Принять машину</b><span class="muted">Мы привозим заказы дома, когда сбор дошёл до ${fmt(SET.threshold)}.</span></div>
-      <div class="duty"><b>Выдать заказы по коду</b><span class="muted">1–2 часа вечером. Соседи платят на Kaspi ADAL, деньги у вас не остаются.</span></div>
+      <div class="duty"><b>Выдать заказы по коду</b><span class="muted">1–2 часа вечером. Соседи платят на Kaspi Bereke store, деньги у вас не остаются.</span></div>
     </div>
     <form class="panel" id="regForm" novalidate>
       <h2>Заявка</h2>
@@ -640,8 +640,8 @@ function leaderLink(z){
 }
 function leaderBody(d){
   const left = Math.max(0, d.threshold - d.pool);
-  if(state.tmpl==="morn") return `Доброе утро, соседи! Сегодня до 21:00 собираем общий заказ ADAL: бытовая химия дешевле магазина. Наберём ${fmt(d.threshold)}, заказы привезут мне, и вы заберёте их у меня.`;
-  return `Соседи, сбор ADAL закрывается сегодня в 21:00. Набрано ${fmt(d.pool)} из ${fmt(d.threshold)}${left?`, осталось ${fmt(left)}.`:". Сбор набран!"} Как наберём, заказы привезут мне, и вы заберёте их у меня. Бытовая химия по оптовым ценам.`;
+  if(state.tmpl==="morn") return `Доброе утро, соседи! Сегодня до 21:00 собираем общий заказ Bereke store: бытовая химия дешевле магазина. Наберём ${fmt(d.threshold)}, заказы привезут мне, и вы заберёте их у меня.`;
+  return `Соседи, сбор Bereke store закрывается сегодня в 21:00. Набрано ${fmt(d.pool)} из ${fmt(d.threshold)}${left?`, осталось ${fmt(left)}.`:". Сбор набран!"} Как наберём, заказы привезут мне, и вы заберёте их у меня. Бытовая химия по оптовым ценам.`;
 }
 const leaderText = d => leaderBody(d) + " Заказать: " + leaderLink(d.zk);
 
@@ -694,7 +694,7 @@ function viewLeader(){
       return `<section class="panel" style="border:2px solid var(--accent)">
         <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><b style="font-size:17px">${esc(o.who)}, кв. ${esc(o.apt)}</b><span class="pill ${STATUS[o.st].c}">${STATUS[o.st].t}</span></div>
         <span class="muted" style="font-size:13px">${itemsText(o.items)}</span>
-        <div class="sum-row"><span>К оплате на Kaspi ADAL</span><b>${fmt(o.total)}</b></div>
+        <div class="sum-row"><span>К оплате на Kaspi Bereke store</span><b>${fmt(o.total)}</b></div>
         ${msg?`<p class="note" style="margin:0">${msg}</p>`:`<button class="btn block" data-give="${o.id}" ${dis}>Оплатил Kaspi · выдать</button>`}
       </section>`; })():""}
     <section class="panel">
