@@ -298,6 +298,15 @@ body.prelaunch .zk,body.prelaunch .deadline,body.prelaunch .demo{display:none!im
 body.in-tg .demo{display:none}
 .codein{font-size:26px!important;letter-spacing:.3em;text-align:center;font-weight:800}
 .ordcard{gap:10px}
+.tip{grid-column:1/-1;display:grid;grid-template-columns:88px 1fr;gap:10px;align-items:end;margin:4px 0}
+.tip .irbi{width:88px;height:auto;display:block;transform-origin:50% 100%;transition:transform .6s cubic-bezier(.2,1.4,.4,1),opacity .35s}
+.tip:not(.in) .irbi{transform:translateY(34px) scale(.8) rotate(-6deg);opacity:0}
+.tip:not(.in) .bub{opacity:0;transform:translateY(8px)}
+.bub{position:relative;background:var(--surface);border-radius:18px 18px 18px 6px;padding:12px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:600;line-height:1.4;transition:opacity .35s .25s,transform .35s .25s}
+.bub b{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--brand)}
+.bub .btn{align-self:flex-start;padding:9px 14px;font-size:13.5px;min-height:0}
+.irbi-big{width:132px;height:auto;display:block;margin:0 auto -6px}
+@media (prefers-reduced-motion:reduce){.tip .irbi,.bub{transition:none!important}}
 .top-r{display:flex;align-items:center;gap:8px;min-width:0}
 @media (max-width:400px){.logo{font-size:17px}.logo small{font-size:12px}.top-r{gap:6px}.lang{min-width:40px;padding:0 8px}.zk{padding:6px 8px 6px 10px}}
 .zk{flex:1 1 auto;min-width:0;max-width:none}
@@ -486,6 +495,11 @@ const KK = {
 "Ваш жилой комплекс":"Сіздің тұрғын үй кешеніңіз","Заказ заберёте у лидера выбранного ЖК.":"Тапсырысты таңдалған ТҮК лидерінен аласыз.","Закрыть":"Жабу","Выбор ЖК":"ТҮК таңдау",
 "Скопировано":"Көшірілді",
 "Поиск по товарам":"Тауарлардан іздеу","Ничего не найдено":"Ештеңе табылмады","Попробуйте другое слово или выберите категорию.":"Басқа сөзді көріңіз немесе санатты таңдаңыз.","Сбросить":"Тазарту",
+"Позвать соседей":"Көршілерді шақыру","Стать лидером":"Лидер болу","Записаться":"Жазылу","Ирби":"Ирби",
+"Привет, я Ирби! Сбор дома набран — скоро привезём заказы лидеру.":"Сәлем, мен Ирбимін! Үйдің жинағы толды — жақында тапсырыстарды лидерге әкелеміз.",
+"Закажи до 21:00, а завтра лидер получит машину. Платить сразу не нужно — переведёшь на Kaspi при получении.":"Тапсырысты 21:00-ге дейін бер, ертең лидер көлікті қабылдайды. Бірден төлеудің қажеті жоқ — алғанда Kaspi-ге аударасың.",
+"Нажми на фото товара — там состав и срок годности.":"Тауардың суретін бас — онда құрамы мен жарамдылық мерзімі бар.",
+"Привет, я Ирби! Мы с соседями покупаем вместе — и платим меньше. Запишись в список, и я напишу, когда запустимся.":"Сәлем, мен Ирбимін! Біз көршілермен бірге сатып аламыз — сондықтан аз төлейміз. Тізімге жазыл, іске қосылғанда мен хабарлаймын.",
 "Состав":"Құрамы","Срок годности":"Жарамдылық мерзімі","Хранение":"Сақтау","О товаре":"Тауар туралы","В магазине":"Дүкенде","Цены откроем при запуске":"Бағаны іске қосылғанда ашамыз","Карточка товара":"Тауар картасы","В корзине":"Себетте","Не ограничен":"Шектелмейді",
 "Рис длиннозёрный шлифованный":"Ұзын дәнді тазартылған күріш","Крупа гречневая ядрица":"Қарақұмық жармасы (ядрица)","Сахар белый кристаллический":"Ақ кристалды қант","Пшеничная мука высшего сорта":"Жоғары сортты бидай ұны","Мука из твёрдых сортов пшеницы, вода":"Қатты бидай ұны, су","Хлопья овсяные":"Сұлы жапырақшалары","Соль пищевая поваренная":"Ас тұзы","Кофе жареный молотый":"Қуырылған ұнтақ кофе","Масло подсолнечное рафинированное":"Тазартылған күнбағыс майы","Чай чёрный байховый, 100 пакетиков":"Қара байховый шай, 100 пакет","Говядина, жир, соль, специи":"Сиыр еті, май, тұз, дәмдеуіштер","Томаты, соль":"Қызанақ, тұз",
 "В сухом прохладном месте, в закрытой таре":"Құрғақ салқын жерде, жабық ыдыста","В сухом прохладном месте":"Құрғақ салқын жерде","В сухом месте, вдали от запахов":"Құрғақ жерде, иістерден алыс","В сухом месте":"Құрғақ жерде","В плотно закрытой упаковке, в сухом месте":"Тығыз жабық қаптамада, құрғақ жерде","В тёмном месте при температуре до 20 °C":"Қараңғы жерде, 20 °C-қа дейінгі температурада","При температуре от 0 до 20 °C":"0-ден 20 °C-қа дейінгі температурада","При температуре от 0 до 25 °C":"0-ден 25 °C-қа дейінгі температурада"
@@ -500,6 +514,9 @@ const KK_RE = [
 [/^Сбор набран: закупаем и везём заказы дома лидеру(?: (.+))?$/,(m,b)=>`Жинақ толды: үйдің тапсырыстарын сатып алып, ${b?b+" ":""}лидеріне жеткіземіз`],
 [/^(.+) — лидер вашего дома$/,"$1 — үйіңіздің лидері"],
 [/^Заказ заберёте у лидера(.*?)\.\s*$/,"Тапсырысты лидерден аласыз$1. "],
+[/^Привет, я Ирби! Дому не хватает (.+) до машины\. Позови соседей — вместе дешевле!$/,"Сәлем, мен Ирбимін! Үйге көлікке дейін $1 жетіспейді. Көршілерді шақыр — бірге арзанырақ!"],
+[/^Ты уже экономишь (.+) в корзине\. Так держать!$/,"Сен себетте $1 үнемдеп отырсың. Осылай жалғастыр!"],
+[/^Хочешь зарабатывать (\d+)% с заказов дома\? Стань лидером ЖК!$/,"Үйдегі тапсырыстардан $1% табыс тапқың келе ме? ТҮК лидері бол!"],
 [/^Добавить в корзину · (.+)$/,"Себетке қосу · $1"],
 [/^Оформить заказ на (.+)$/,"Тапсырыс беру: $1"],
 [/^Заказ №(\d+) принят$/,"№$1 тапсырыс қабылданды"],[/^Заказ №(\d+)$/,"№$1 тапсырыс"],
@@ -594,9 +611,30 @@ function filterList(){
   if(!q) return PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
   return PRODUCTS.filter(p=>norm([p.name,p.name_kk,p.brand,p.variant,p.weight,CATS[p.cat],t(CATS[p.cat])].join(" ")).includes(q));
 }
+function tipList(){
+  const z=zk(), sum=pool(z.id), left=Math.max(0,SET.threshold-sum), c=cartSum(), o=cartOld();
+  const link=leaderLink(z), txt="Покупаем продукты вместе с соседями — дешевле! Заходи:";
+  const share=`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(txt)}`;
+  return [
+    left ? {pose:"wave",text:`Привет, я Ирби! Дому не хватает ${fmt(left)} до машины. Позови соседей — вместе дешевле!`,btn:["Позвать соседей",`data-ext="${esc(share)}"`]}
+         : {pose:"wave",text:"Привет, я Ирби! Сбор дома набран — скоро привезём заказы лидеру."},
+    {pose:"bag",text:"Закажи до 21:00, а завтра лидер получит машину. Платить сразу не нужно — переведёшь на Kaspi при получении."},
+    (o>c && c) ? {pose:"point",text:`Ты уже экономишь ${fmt(o-c)} в корзине. Так держать!`} : {pose:"point",text:"Нажми на фото товара — там состав и срок годности."},
+    {pose:"wave",text:`Хочешь зарабатывать ${Math.round(SET.commission)}% с заказов дома? Стань лидером ЖК!`,btn:["Стать лидером",'data-act="becomeleader"']}
+  ];
+}
+const tipHtml = k => `<div class="tip"><img class="irbi" src="img/irbi-${k.pose}.svg" alt="" width="88" height="96" loading="lazy"><div class="bub"><b>Ирби</b><span>${esc(k.text)}</span>${k.btn?`<button class="btn light" ${k.btn[1]}>${k.btn[0]}</button>`:""}</div></div>`;
+let tipObs=null;
+function observeTips(){
+  const els=document.querySelectorAll(".tip:not(.in)");
+  if(!("IntersectionObserver" in window)){ els.forEach(e=>e.classList.add("in")); return; }
+  if(!tipObs) tipObs=new IntersectionObserver(es=>es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("in"); tipObs.unobserve(en.target); } }),{threshold:.35});
+  els.forEach(e=>tipObs.observe(e));
+}
 function gridHtml(list){
   if(!list.length) return `<div class="nores"><b>Ничего не найдено</b><span class="muted">Попробуйте другое слово или выберите категорию.</span><button class="btn light" data-qclear>Сбросить</button></div>`;
-  return `<div class="grid">${list.map(p=>`<article class="card ${state.cart[p.id]?"in":""}">
+  const tips = state.q.trim() ? [] : tipList();
+  const cards = list.map(p=>`<article class="card ${state.cart[p.id]?"in":""}">
         <div class="photo" style="${tile(p)}" data-open="${p.id}">
           <img src="${imgOf(p)}" alt="${esc(tName(p))}${p.variant?" "+esc(p.variant):""}" loading="lazy" onerror="this.remove()">
           <span class="w">${esc(p.weight)}</span>
@@ -607,7 +645,10 @@ function gridHtml(list){
           <div class="name" data-open="${p.id}">${esc(tName(p))}</div>
           ${p.variant?`<div class="variant">${esc(p.variant)}</div>`:""}
         </div>
-      </article>`).join("")}</div>`;
+      </article>`);
+  const out=[]; let ti=0;
+  cards.forEach((c,i)=>{ out.push(c); if(i>=3 && (i-3)%8===0 && ti<tips.length && i<cards.length-1) out.push(tipHtml(tips[ti++])); });
+  return `<div class="grid">${out.join("")}</div>`;
 }
 
 /* ---------- карточка товара ---------- */
@@ -675,6 +716,7 @@ function viewSoon(){
     </div>
     ${PRODUCTS.length?`<div><h2 style="margin-bottom:8px">Первые товары</h2>
       <div class="strip">${PRODUCTS.slice(0,12).map(p=>`<div class="tz" data-open="${p.id}" role="button" tabindex="0"><div class="ph" style="${tile(p)}"><img src="${imgOf(p)}" alt="${esc(tName(p))}" loading="lazy" onerror="this.remove()"></div><span>${esc(p.brand||tName(p))}</span></div>`).join("")}</div></div>`:""}
+    ${tipHtml({pose:"wave",text:"Привет, я Ирби! Мы с соседями покупаем вместе — и платим меньше. Запишись в список, и я напишу, когда запустимся.",btn:["Записаться",'data-act="towait"']})}
     <div class="panel"><h2>Почему так дешевле</h2>
       <div class="why"><b>1</b><div><div class="t">Покупаем оптом под заказ</div><div class="muted">Соседи заказывают вместе, мы закупаем у поставщиков большой партией.</div></div></div>
       <div class="why"><b>2</b><div><div class="t">Без рекламы и магазина</div><div class="muted">Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.</div></div></div>
@@ -708,6 +750,7 @@ function viewSoon(){
 function viewCart(){
   const ids = Object.keys(state.cart).filter(id=>prod(id));
   if(!ids.length) return `<section class="wrap empty">
+    <img class="irbi-big" src="img/irbi-wave.svg" alt="">
     <h2>Корзина пуста</h2>
     <p class="muted">Добавьте товары из каталога. Когда дом наберёт нужную сумму, мы привезём заказы лидеру, и вы их заберёте.</p>
     <button class="btn" data-go="shop">Перейти в магазин</button></section>`;
@@ -748,8 +791,7 @@ function viewDone(o){
   const z = ZKS.find(x=>x.id===o.zk) || zk();
   return `<section class="section wrap">
     <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:6px">
-      <div style="width:64px;height:64px;border-radius:50%;background:var(--ok-soft);display:flex;align-items:center;justify-content:center">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+      <img class="irbi-big" src="img/irbi-bag.svg" alt="">
       <h1>Заказ №${o.id} принят</h1>
       <p class="muted" style="margin:0">${fmt(o.total)} · забрать у лидера ${esc(z.leader_name||"")}</p>
     </div>
@@ -1002,6 +1044,7 @@ function render(){
   if(showBar) cb.innerHTML=`<span class="cb-n">${c}</span><span class="cb-t">Корзина</span><b>${fmt(cartSum())}</b><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   $("#deadline").hidden = state.view==="leader";
   translateDom(document.body);
+  observeTips();
   if(state.pid) renderProduct();
   tgSync();
 }
@@ -1078,6 +1121,7 @@ document.addEventListener("click",e=>{
   if(d.give){ leaderAction("give", +d.give); return; }
   if(d.pay){ state.reg.pay=d.pay; document.querySelectorAll("[data-pay]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pay===d.pay)); return; }
   if(d.act==="reload"){ loadCatalog(); return; }
+  if(d.act==="towait"){ const f=$("#waitForm"); if(f){ f.scrollIntoView({behavior:"smooth",block:"center"}); const i=$("#w-name"); if(i) setTimeout(()=>i.focus({preventScroll:true}),400); } return; }
   if(d.act==="becomeleader"){ state.leaderMode="reg"; state.regDone=false; go("leader"); return; }
   if(d.act==="tologin"){ state.leaderMode="login"; go("leader"); return; }
   if(d.act==="logout"){ state.leader=null; state.ld=null; state.ldError=null; state.found=null; ss.del("adal-leader"); state.leaderMode="login"; go("leader"); return; }
@@ -1178,7 +1222,7 @@ document.addEventListener("keydown",e=>{
 });
 document.addEventListener("input",e=>{
   const t=e.target;
-  if(t.id==="q"){ state.q=t.value; const g=$("#gridWrap"); if(g){ g.innerHTML=gridHtml(filterList()); translateDom(g); } return; }
+  if(t.id==="q"){ state.q=t.value; const g=$("#gridWrap"); if(g){ g.innerHTML=gridHtml(filterList()); translateDom(g); observeTips(); } return; }
   if(t.id==="calc"){ state.calc=+t.value; $("#calcN").textContent=t.value; $("#calcOut").textContent="≈ "+fmt(calcIncome(+t.value)); return; }
   if(t.dataset.reg){ state.reg[t.dataset.reg]= t.type==="checkbox" ? t.checked : t.value; t.classList.remove("bad"); }
 });
