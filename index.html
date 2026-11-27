@@ -582,6 +582,16 @@ body[data-hero="irbi"] .soon>.himg2{height:148px}
 .langsw button{border:0;background:transparent;color:#4E7A5E;font:inherit;font-weight:800;font-size:12px;letter-spacing:.02em;border-radius:9px;min-width:38px;height:34px;padding:0 8px}
 .langsw button[aria-pressed="true"]{background:var(--brand);color:#fff;box-shadow:0 1px 4px rgba(11,138,62,.35)}
 @media (max-width:400px){.langsw button{min-width:34px;padding:0 6px}}
+
+/* шапка: логотип и язык сверху, ЖК и таймер снизу */
+.sub-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.sub-row .zk{flex:1 1 auto;min-width:0;max-width:none;padding:6px 10px 6px 14px}
+.sub-row .zk .zk-txt{flex:1;min-width:0}
+.sub-row .deadline{margin-top:0;flex:none;flex-direction:column;align-items:flex-start;gap:0;white-space:nowrap;background:#EAF8EF;border-radius:14px;padding:5px 11px;line-height:1.15}
+.sub-row .deadline .dot{display:none}
+.sub-row .deadline span{font-size:11px;font-weight:600;color:#4E7A5E}
+.sub-row .deadline b{margin-left:0;background:transparent;padding:0;font-size:14px;color:var(--brand)}
+body.prelaunch .sub-row{display:none!important}
 </style>
 </head>
 <body>
@@ -590,12 +600,15 @@ body[data-hero="irbi"] .soon>.himg2{height:148px}
   <header class="top wrap">
     <div class="top-row">
       <div class="logo" aria-label="Bereke store"><svg width="32" height="25" viewBox="0 0 46 36" aria-hidden="true"><path class="h1" d="M3 34 V17 L14 7 L25 17 V34 Z"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#FFD43B"/></svg><span>bereke<small>store</small></span></div>
-      <div class="top-r"><button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
+      <div class="langsw" id="langSw" role="group" aria-label="Язык / Тіл"><button type="button" data-setlang="ru" aria-pressed="true">РУС</button><button type="button" data-setlang="kk" aria-pressed="false">ҚАЗ</button></div>
+    </div>
+    <div class="sub-row">
+      <button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
         <span class="zk-txt"><small>Мой дом</small><span id="zkName"></span></span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button><div class="langsw" id="langSw" role="group" aria-label="Язык / Тіл"><button type="button" data-setlang="ru" aria-pressed="true">РУС</button><button type="button" data-setlang="kk" aria-pressed="false">ҚАЗ</button></div></div>
+      </button>
+      <div class="deadline" id="deadline"><span class="dot"></span><span title="Сбор заказов до 21:00">до 21:00</span><b id="cd">--:--:--</b></div>
     </div>
-    <div class="deadline" id="deadline"><span class="dot"></span><span>Сбор заказов до 21:00</span><b id="cd">--:--:--</b></div>
   </header>
 
   <main id="view"></main>
@@ -702,7 +715,7 @@ let LANG = (()=>{ try{ const v=localStorage.getItem("adal-lang"); if(v==="kk"||v
   const tl = (window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user&&Telegram.WebApp.initDataUnsafe.user.language_code)||navigator.language||"";
   return /^kk/i.test(tl) ? "kk" : "ru"; })();
 const KK = {
-"Мой дом":"Менің үйім","Сбор заказов до 21:00":"Қабылдау 21:00-ге дейін","Выбрать свой ЖК":"ТҮК таңдау",
+"Мой дом":"Менің үйім","Сбор заказов до 21:00":"Қабылдау 21:00-ге дейін","до 21:00":"21:00-ге дейін","Выбрать свой ЖК":"ТҮК таңдау",
 "Оплата Kaspi-переводом при получении заказа.":"Тапсырысты алғанда Kaspi аударымымен төлейсіз.",
 "Главная":"Басты бет","Магазин":"Дүкен","Как это работает":"Қалай жұмыс істейді","Корзина":"Себет","Заказы":"Тапсырыстар","Лидер ЖК":"ТҮК лидері","Разделы":"Бөлімдер",
 "Скоро запуск":"Жақында ашылады",
