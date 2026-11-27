@@ -502,7 +502,7 @@ function viewOrders(){
       <div class="top-l"><div><div class="who">${esc(o.customer_name)}${o.phone?` · ${esc(o.phone)}`:""}</div>
         <div class="sub">${o.address?`${esc(o.address)}${o.apt&&o.apt!=="—"?", кв. "+esc(o.apt):""}${o.entrance?", "+esc(o.entrance):""}`:`${o.leader_name?"лидер "+esc(o.leader_name)+", ":""}кв. ${esc(o.apt)}`}</div>
         ${o.comment?`<div class="sub">Комментарий: ${esc(o.comment)}</div>`:""}
-        <div class="sub">№${o.id} · ${dt(o.created_at)}${o.zk_name?` · ${esc(o.zk_name)}`:""}${o.code?` · код ${esc(o.code)}`:""}</div></div>
+        <div class="sub">№${o.id} · ${dt(o.created_at)}${o.zk_name?` · ${esc(o.zk_name)}`:` · <b>доставка до двери${o.delivery_fee?", "+fmt(o.delivery_fee):""}</b>`}${o.code?` · код ${esc(o.code)}`:""}</div></div>
         <select class="st st-${o.status}" data-ostatus="${o.id}" aria-label="Статус заказа ${o.id}">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${o.status===k?"selected":""}>${v}</option>`).join("")}</select></div>
       <div class="items">${Object.entries(o.items||{}).map(([id,q])=>`${esc(pname(id))} ×${q}`).join(", ")}</div>
       <div class="bot"><b>${fmt(o.total)}</b>

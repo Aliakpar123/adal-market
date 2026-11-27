@@ -450,6 +450,14 @@ h1,h2{font-family:var(--font-body);font-weight:800;letter-spacing:-.025em}
 .faq details[open] summary::after{content:"–"}
 .faq details p{margin:0 0 14px;font-size:13.5px;color:var(--muted);line-height:1.5}
 @media (max-width:380px){.two2{grid-template-columns:1fr}.reg-hero>*:not(.himg){max-width:62%}}
+
+/* способ получения */
+.fopts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fopt{border:2px solid var(--line);background:#fff;border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:3px;text-align:left;font:inherit;color:var(--ink);min-width:0}
+.fopt b{font-size:14.5px;font-weight:700}
+.fopt span{font-size:12.5px;color:var(--muted);font-weight:500;line-height:1.3}
+.fopt[aria-pressed="true"]{border-color:var(--brand);background:#EAF8EF}
+.fopt[aria-pressed="true"] span{color:var(--brand);font-weight:600}
 </style>
 </head>
 <body>
@@ -468,7 +476,7 @@ h1,h2{font-family:var(--font-body);font-weight:800;letter-spacing:-.025em}
 
   <main id="view"></main>
   <button class="cartbar" id="cartBar" data-go="cart" hidden></button>
-  <p class="demo wrap">Оплата Kaspi-переводом при получении заказа у лидера.</p>
+  <p class="demo wrap">Оплата Kaspi-переводом при получении заказа.</p>
 </div>
 
 <nav class="nav" aria-label="Разделы">
@@ -506,7 +514,13 @@ const BUYER_STATUS = {
   ready:["Можно забирать","Назовите код лидеру и переведите оплату на Kaspi"],
   done:["Заказ выдан","Спасибо, что покупаете вместе"]
 };
-let ZKS = [], PRODUCTS = [], POOLS = {}, SET = {threshold:20000, kaspi:"", kaspi_name:"", tg:"", commission:5, prelaunch:true, waiting:0};
+const BUYER_STATUS_D = {
+  paid:["Заказ принят","Мы соберём заказ, курьер свяжется с вами"],
+  sent:["Собираем заказ","Скоро передадим курьеру"],
+  ready:["Курьер в пути","Назовите код курьеру и переведите оплату на Kaspi"],
+  done:["Доставлено","Спасибо, что покупаете вместе"]
+};
+let ZKS = [], PRODUCTS = [], POOLS = {}, SET = {threshold:20000, kaspi:"", kaspi_name:"", tg:"", commission:5, prelaunch:true, waiting:0, delivery_fee:0, free_from:0};
 
 /* ===== Telegram Mini App ===== */
 const TG = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) ? Telegram.WebApp : null;
@@ -533,7 +547,7 @@ const ss = {
 let CUST = ss.get("adal-cust") || {};
 
 const state = {
-  view:"shop", cat:"all", q:"", pid:null, hero: ss.get("adal-hero") || "irbi", zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
+  view:"shop", cat:"all", q:"", pid:null, hero: ss.get("adal-hero") || "irbi", fulfil: ss.get("adal-fulfil")==="delivery"?"delivery":"pickup", zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
   loading:true, loadError:null, busy:false,
   orders: ss.get("adal-orders") || [], ostat:{}, oLoading:false, done:null,
   leader: ss.get("adal-leader"), ld:null, ldError:null, ltab:"collect", leaderMode:"login", regDone:false,
@@ -555,6 +569,8 @@ const saveCart = () => ss.set("adal-cart", state.cart);
 const imgOf = (p,id) => esc((p&&p.image_url) || `img/${p&&p.id||id}.jpg`);
 const tile = p => `background:linear-gradient(150deg,${esc(p.color||"#0F4C4A")},${esc(p.color2||p.color||"#0F4C4A")})`;
 const plural = (n,a,b,c) => { const m=n%100, d=n%10; return (m>10&&m<20)?c:(d===1?a:(d>=2&&d<=4?b:c)); };
+const dFee = sum => state.fulfil==="delivery" ? ((SET.free_from>0 && sum>=SET.free_from) ? 0 : (+SET.delivery_fee||0)) : 0;
+const feeLabel = () => SET.delivery_fee>0 ? `${fmt(SET.delivery_fee)}${SET.free_from>0?", бесплатно от "+fmt(SET.free_from):""}` : "бесплатно";
 const itemsText = items => Object.entries(items||{}).map(([id,q])=>`${esc(pName(id))} ×${q}`).join(", ");
 
 /* ===== Язык: русский / қазақша ===== */
@@ -563,7 +579,7 @@ let LANG = (()=>{ try{ const v=localStorage.getItem("adal-lang"); if(v==="kk"||v
   return /^kk/i.test(tl) ? "kk" : "ru"; })();
 const KK = {
 "Мой дом":"Менің үйім","Сбор заказов до 21:00":"Қабылдау 21:00-ге дейін","Выбрать свой ЖК":"ТҮК таңдау",
-"Оплата Kaspi-переводом при получении заказа у лидера.":"Тапсырысты лидерден алғанда Kaspi аударымымен төлейсіз.",
+"Оплата Kaspi-переводом при получении заказа.":"Тапсырысты алғанда Kaspi аударымымен төлейсіз.",
 "Главная":"Басты бет","Магазин":"Дүкен","Как это работает":"Қалай жұмыс істейді","Корзина":"Себет","Заказы":"Тапсырыстар","Лидер ЖК":"ТҮК лидері","Разделы":"Бөлімдер",
 "Скоро запуск":"Жақында ашылады",
 "Продукты и товары для дома до 40% дешевле магазина":"Азық-түлік пен үй тауарлары дүкеннен 40%-ға дейін арзан",
@@ -640,6 +656,12 @@ const KK = {
 "А если сумма дома не набралась?":"Үйдің сомасы жиналмаса ше?","Как и когда платят?":"Қалай және қашан төлейді?","Где хранить заказы?":"Тапсырыстарды қайда сақтау керек?",
 "Только в день привоза и всего на 1–2 часа: в холле, у консьержа, в колясочной или у вас дома. Место вы выбираете в заявке.":"Тек әкелген күні және небәрі 1–2 сағатқа: холлда, консьержде, арбашаларға арналған бөлмеде немесе үйіңізде. Орынды өтінімде өзіңіз таңдайсыз.",
 "Заявка":"Өтінім","Уже лидер? Войти по коду":"Қазір лидерсіз бе? Код арқылы кіру",
+"Как получить":"Қалай алуға болады","Забрать у лидера":"Лидерден алу","Доставка до двери":"Есікке дейін жеткізу","Доставка":"Жеткізу","Куда привезти":"Қайда әкелу керек","Адрес":"Мекенжай","Подъезд, этаж":"Кіреберіс, қабат","Комментарий курьеру":"Курьерге түсініктеме","Необязательно: код домофона, ориентир":"Міндетті емес: домофон коды, бағдар","Улица, дом или ЖК и блок":"Көше, үй немесе ТҮК және блок",
+"Курьер позвонит и привезёт заказ по адресу. Вы получите код, назовёте его курьеру и переведёте оплату на Kaspi.":"Курьер қоңырау шалып, тапсырысты мекенжай бойынша әкеледі. Сіз код аласыз, оны курьерге айтып, Kaspi арқылы төлейсіз.",
+"Как получить:":"Қалай алуға болады:","Код для курьера":"Курьер коды","Назовите код курьеру, когда получите заказ. Код сохранён в разделе «Заказы».":"Тапсырысты алғанда кодты курьерге айтыңыз. Код «Тапсырыстар» бөлімінде сақталған.",
+"доставим по вашему адресу":"мекенжайыңыз бойынша жеткіземіз","Когда получите заказ, переведите":"Тапсырысты алғанда аударыңыз","Принят":"Қабылданды","Собираем":"Жинап жатырмыз","Доставлен":"Жеткізілді",
+"Заказ принят":"Тапсырыс қабылданды","Мы соберём заказ, курьер свяжется с вами":"Тапсырысты жинаймыз, курьер сізбен байланысады","Собираем заказ":"Тапсырысты жинап жатырмыз","Скоро передадим курьеру":"Жақында курьерге береміз","Курьер в пути":"Курьер жолда","Назовите код курьеру и переведите оплату на Kaspi":"Кодты курьерге айтып, Kaspi-ге төлем аударыңыз","Доставлено":"Жеткізілді",
+"бесплатно от":"тегін, бастап","Добавьте ещё":"Тағы қосыңыз",", и доставка будет бесплатной":", сонда жеткізу тегін болады",
 "Состав":"Құрамы","Срок годности":"Жарамдылық мерзімі","Хранение":"Сақтау","О товаре":"Тауар туралы","В магазине":"Дүкенде","Цены откроем при запуске":"Бағаны іске қосылғанда ашамыз","Карточка товара":"Тауар картасы","В корзине":"Себетте","Не ограничен":"Шектелмейді",
 "Рис длиннозёрный шлифованный":"Ұзын дәнді тазартылған күріш","Крупа гречневая ядрица":"Қарақұмық жармасы (ядрица)","Сахар белый кристаллический":"Ақ кристалды қант","Пшеничная мука высшего сорта":"Жоғары сортты бидай ұны","Мука из твёрдых сортов пшеницы, вода":"Қатты бидай ұны, су","Хлопья овсяные":"Сұлы жапырақшалары","Соль пищевая поваренная":"Ас тұзы","Кофе жареный молотый":"Қуырылған ұнтақ кофе","Масло подсолнечное рафинированное":"Тазартылған күнбағыс майы","Чай чёрный байховый, 100 пакетиков":"Қара байховый шай, 100 пакет","Говядина, жир, соль, специи":"Сиыр еті, май, тұз, дәмдеуіштер","Томаты, соль":"Қызанақ, тұз",
 "В сухом прохладном месте, в закрытой таре":"Құрғақ салқын жерде, жабық ыдыста","В сухом прохладном месте":"Құрғақ салқын жерде","В сухом месте, вдали от запахов":"Құрғақ жерде, иістерден алыс","В сухом месте":"Құрғақ жерде","В плотно закрытой упаковке, в сухом месте":"Тығыз жабық қаптамада, құрғақ жерде","В тёмном месте при температуре до 20 °C":"Қараңғы жерде, 20 °C-қа дейінгі температурада","При температуре от 0 до 20 °C":"0-ден 20 °C-қа дейінгі температурада","При температуре от 0 до 25 °C":"0-ден 25 °C-қа дейінгі температурада"
@@ -668,6 +690,10 @@ const KK_RE = [
 [/^Если заказы дома не дошли до (.+), они ждут следующий сбор\. Позовите ещё соседей: ссылка и тексты для чата есть в кабинете\.$/,"Үйдің тапсырыстары $1-ға жетпесе, келесі жинақты күтеді. Тағы көршілерді шақырыңыз: сілтеме мен чатқа арналған мәтіндер кабинетте бар."],
 [/^Раз в неделю переводом\. (\d+)% считаются с выданных заказов дома\. Как оформить вознаграждение \(самозанятость или ИП\), менеджер подскажет по телефону\.$/,"Аптасына бір рет аударыммен. $1% үйдің берілген тапсырыстарынан есептеледі. Сыйақыны қалай рәсімдеуді (өзін-өзі жұмыспен қамтыған немесе ЖК) менеджер телефонмен айтады."],
 [/^Зовите соседей и выдавайте им заказы по коду\. (\d+)% с каждого выданного заказа дома\.$/,"Көршілерді шақырып, оларға тапсырысты код бойынша беріңіз. Үйдегі әр берілген тапсырыстан $1%."],
+[/^(.+), бесплатно от (.+)$/,"$1, $2 бастап тегін"],
+[/^Добавьте ещё (.+), и доставка будет бесплатной$/,"Тағы $1 қосыңыз, сонда жеткізу тегін болады"],
+[/^в том числе доставка (.+)$/,"оның ішінде жеткізу $1"],
+[/^Доставка: (.+)$/,"Жеткізу: $1"],
 [/^Добавить в корзину · (.+)$/,"Себетке қосу · $1"],
 [/^Оформить заказ на (.+)$/,"Тапсырыс беру: $1"],
 [/^Заказ №(\d+) принят$/,"№$1 тапсырыс қабылданды"],[/^Заказ №(\d+)$/,"№$1 тапсырыс"],
@@ -737,16 +763,16 @@ function collectCard(z, sum, title, toWhom){
     <span class="sub">${(()=>{ const who = toWhom || (z.leader_name?"лидеру "+esc(z.leader_name):"лидеру"); return left?`Ещё ${fmt(left)} — и мы привезём заказы дома ${who}`:`Сбор набран: закупаем и везём заказы дома ${who}`; })()}</span>
   </section>`;
 }
-function payBlock(total){
+function payBlock(total, delivery){
   return `<section class="panel">
     <h2>Оплата</h2>
-    <p class="muted" style="margin:0">Когда будете забирать заказ у лидера, переведите ${total?`<b>${fmt(total)}</b> `:""}на Kaspi Bereke store. Наличные не принимаем.</p>
+    <p class="muted" style="margin:0">${delivery?"Когда получите заказ, переведите":"Когда будете забирать заказ у лидера, переведите"} ${total?`<b>${fmt(total)}</b> `:""}на Kaspi Bereke store. Наличные не принимаем.</p>
     ${SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi${SET.kaspi_name?" · "+esc(SET.kaspi_name):""}</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`
       :`<div class="kaspi"><span class="muted">Реквизиты Kaspi появятся здесь</span></div>`}
   </section>`;
 }
-function stageBar(st){
-  const i = STAGE_OF[st] ?? 0, names=["Сбор","В пути","Привезли","Выдан"];
+function stageBar(st, delivery){
+  const i = STAGE_OF[st] ?? 0, names=delivery?["Принят","Собираем","В пути","Доставлен"]:["Сбор","В пути","Привезли","Выдан"];
   return `<div class="progress">${names.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div>
     <div class="stage">${names.map((n,k)=>`<span class="${k===i?"cur":""}">${n}</span>`).join("")}</div>`;
 }
@@ -928,6 +954,7 @@ function viewCart(){
     <p class="muted">Добавьте товары из каталога. Когда дом наберёт нужную сумму, мы привезём заказы лидеру, и вы их заберёте.</p>
     <button class="btn" data-go="shop">Перейти в магазин</button></section>`;
   const sum=cartSum(), old=cartOld(), z=zk(), withMe=pool(z.id)+sum;
+  const dl=state.fulfil==="delivery", fee=dFee(sum), left=(dl && SET.delivery_fee>0 && SET.free_from>0) ? SET.free_from-sum : 0;
   return `<section class="section wrap">
     <h1>Корзина</h1>
     <div class="panel" style="padding-block:4px">
@@ -938,39 +965,58 @@ function viewCart(){
       </div>`}).join("")}
     </div>
     <div class="panel">
+      <h2>Как получить</h2>
+      <div class="fopts" role="group" aria-label="Как получить">
+        <button type="button" class="fopt" data-ful="pickup" aria-pressed="${!dl}"><b>Забрать у лидера</b><span>бесплатно</span></button>
+        <button type="button" class="fopt" data-ful="delivery" aria-pressed="${dl}"><b>Доставка до двери</b><span>${feeLabel()}</span></button>
+      </div>
+    </div>
+    <div class="panel">
       ${old>sum?`<div class="sum-row"><span class="muted">В обычном магазине</span><span class="old" style="font-size:15px">${fmt(old)}</span></div>
       <div class="sum-row"><span>Ваша экономия</span><b style="color:var(--ok)">−${fmt(old-sum)}</b></div>`:""}
-      <div class="sum-row"><span class="muted">Получение у лидера</span><b style="color:var(--ok)">бесплатно</b></div>
-      <div class="sum-row total"><span>Итого</span><span>${fmt(sum)}</span></div>
+      ${dl?`<div class="sum-row"><span class="muted">Доставка</span><b style="color:${fee?"inherit":"var(--ok)"}">${fee?fmt(fee):"бесплатно"}</b></div>`
+          :`<div class="sum-row"><span class="muted">Получение у лидера</span><b style="color:var(--ok)">бесплатно</b></div>`}
+      <div class="sum-row total"><span>Итого</span><span>${fmt(sum+fee)}</span></div>
     </div>
-    ${collectCard(z, withMe, "Сбор дома с вашим заказом")}
+    ${left>0?`<div class="free-hint"><span>Добавьте ещё <b>${fmt(left)}</b>, и доставка будет бесплатной</span><i><em style="width:${Math.min(100,sum/SET.free_from*100)}%"></em></i></div>`:""}
+    ${dl?"":collectCard(z, withMe, "Сбор дома с вашим заказом")}
     <form class="panel" id="checkout" novalidate>
-      <h2>Кто заберёт</h2>
-      <div class="field"><label for="f-zk">Ваш ЖК и лидер</label>
+      <h2>${dl?"Куда привезти":"Кто заберёт"}</h2>
+      ${dl?`<div class="field"><label for="f-addr">Адрес</label><input id="f-addr" autocomplete="street-address" maxlength="160" placeholder="Улица, дом или ЖК и блок" value="${esc(CUST.address||"")}"></div>
+      <div class="two">
+        <div class="field"><label for="f-apt">Квартира</label><input id="f-apt" maxlength="20" placeholder="45" value="${esc(CUST.apt||"")}"></div>
+        <div class="field"><label for="f-ent">Подъезд, этаж</label><input id="f-ent" maxlength="40" placeholder="2 подъезд, 5 этаж" value="${esc(CUST.entrance||"")}"></div>
+      </div>
+      <div class="field"><label for="f-name">Имя</label><input id="f-name" autocomplete="given-name" maxlength="80" placeholder="Алия" value="${esc(CUST.name||"")}"></div>
+      <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __" value="${esc(CUST.phone||"")}"></div>
+      <div class="field"><label for="f-comment">Комментарий курьеру</label><input id="f-comment" maxlength="200" placeholder="Необязательно: код домофона, ориентир"></div>
+      <div class="note"><b>Как получить:</b> курьер позвонит и привезёт заказ по адресу. Вы получите код, назовёте его курьеру и переведёте оплату на Kaspi.</div>`
+      :`<div class="field"><label for="f-zk">Ваш ЖК и лидер</label>
         <select id="f-zk">${ZKS.map(x=>`<option value="${esc(x.id)}" ${x.id===z.id?"selected":""}>${esc(x.name)} — ${esc(x.leader_name)}</option>`).join("")}</select></div>
       <div class="two">
         <div class="field"><label for="f-name">Имя</label><input id="f-name" autocomplete="given-name" maxlength="80" placeholder="Алия" value="${esc(CUST.name||"")}"></div>
         <div class="field"><label for="f-apt">Квартира</label><input id="f-apt" maxlength="20" placeholder="45" value="${esc(CUST.apt||"")}"></div>
       </div>
       <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __" value="${esc(CUST.phone||"")}"></div>
-      <div class="note"><b>Как забрать:</b> когда сбор дома наберётся, мы привезём заказы лидеру. Вы получите код выдачи, назовёте его лидеру и переведёте оплату на Kaspi.</div>
+      <div class="note"><b>Как забрать:</b> когда сбор дома наберётся, мы привезём заказы лидеру. Вы получите код выдачи, назовёте его лидеру и переведёте оплату на Kaspi.</div>`}
       <p id="formErr" class="err" hidden></p>
-      <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Отправляем…":"Оформить заказ на "+fmt(sum)}</button>
+      <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Отправляем…":"Оформить заказ на "+fmt(sum+fee)}</button>
     </form>
   </section>`;
 }
 
 function viewDone(o){
-  const z = ZKS.find(x=>x.id===o.zk) || zk();
+  const z = ZKS.find(x=>x.id===o.zk) || zk(), dl = o.fulfil==="delivery";
   return `<section class="section wrap">
     <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:6px">
       ${heroBig()}
       <h1>Заказ №${o.id} принят</h1>
-      <p class="muted" style="margin:0">${fmt(o.total)} · забрать у лидера ${esc(z.leader_name||"")}</p>
+      <p class="muted" style="margin:0">${fmt(o.total)} · ${dl?"доставим по вашему адресу":"забрать у лидера "+esc(z.leader_name||"")}</p>
+      ${dl&&o.delivery_fee?`<p class="muted" style="margin:0;font-size:13px">в том числе доставка ${fmt(o.delivery_fee)}</p>`:""}
     </div>
-    <div class="codebox"><span style="font-size:13px;font-weight:700;opacity:.85">Код выдачи</span><b>${esc(o.code)}</b><span style="font-size:13px;opacity:.85">Назовите код лидеру, когда будете забирать. Код сохранён в разделе «Заказы».</span></div>
-    ${collectCard(z, +o.pool||pool(z.id))}
-    ${payBlock(o.total)}
+    <div class="codebox"><span style="font-size:13px;font-weight:700;opacity:.85">${dl?"Код для курьера":"Код выдачи"}</span><b>${esc(o.code)}</b><span style="font-size:13px;opacity:.85">${dl?"Назовите код курьеру, когда получите заказ. Код сохранён в разделе «Заказы».":"Назовите код лидеру, когда будете забирать. Код сохранён в разделе «Заказы»."}</span></div>
+    ${dl?"":collectCard(z, +o.pool||pool(z.id))}
+    ${payBlock(o.total, dl)}
     <button class="btn block" data-go="orders">Мои заказы</button>
     <button class="btn ghost block" data-go="shop">Вернуться в магазин</button>
   </section>`;
@@ -984,15 +1030,17 @@ function viewOrders(){
     ${state.orders.map(o=>{
       const d = state.ostat[o.id];
       if(!d) return `<div class="panel"><b>Заказ №${o.id}</b><span class="muted">${state.oLoading?"Загружаем статус…":"Не удалось получить статус"}</span></div>`;
-      const [title, hint] = BUYER_STATUS[d.status] || ["",""];
+      const dl = d.fulfil==="delivery";
+      const [title, hint] = (dl?BUYER_STATUS_D:BUYER_STATUS)[d.status] || ["",""];
       return `<div class="panel ordcard">
         <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><b style="font-size:16px">Заказ №${d.id}</b><b>${fmt(d.total)}</b></div>
-        ${stageBar(d.status)}
+        ${stageBar(d.status, dl)}
         <div><b>${title}</b><div class="muted" style="font-size:13px">${hint}</div></div>
-        ${d.status!=="done"?`<div class="codebox small"><span style="font-size:12px;font-weight:700;opacity:.85">Код выдачи</span><b>${esc(d.code)}</b></div>`:""}
+        ${d.status!=="done"?`<div class="codebox small"><span style="font-size:12px;font-weight:700;opacity:.85">${dl?"Код для курьера":"Код выдачи"}</span><b>${esc(d.code)}</b></div>`:""}
         <div class="muted" style="font-size:13px">${itemsText(d.items)}</div>
-        <div class="muted" style="font-size:13px">Лидер: ${esc(d.leader_name)} · ${esc(d.zk_name)}</div>
-        ${d.status==="paid"?`<div class="free-hint"><span>Сбор дома: <b>${fmt(d.pool)}</b> из ${fmt(d.threshold)}</span><i><em style="width:${Math.min(100,d.threshold?d.pool/d.threshold*100:100)}%"></em></i></div>`:""}
+        ${dl?`<div class="muted" style="font-size:13px">Доставка: ${esc(d.address||"")}${d.apt&&d.apt!=="—"?", кв. "+esc(d.apt):""}${d.entrance?", "+esc(d.entrance):""}${d.delivery_fee?" · "+fmt(d.delivery_fee):""}</div>`
+          :`<div class="muted" style="font-size:13px">Лидер: ${esc(d.leader_name)} · ${esc(d.zk_name)}</div>`}
+        ${!dl&&d.status==="paid"?`<div class="free-hint"><span>Сбор дома: <b>${fmt(d.pool)}</b> из ${fmt(d.threshold)}</span><i><em style="width:${Math.min(100,d.threshold?d.pool/d.threshold*100:100)}%"></em></i></div>`:""}
         ${d.status==="ready"&&SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi Bereke store</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`:""}
       </div>`;}).join("")}
   </section>`;
@@ -1310,6 +1358,7 @@ document.addEventListener("click",e=>{
   const d=t.dataset;
   if(d.pclose!==undefined){ closeProduct(); return; }
   if(d.hero){ setHero(d.hero); return; }
+  if(d.ful){ state.fulfil=d.ful; ss.set("adal-fulfil",d.ful); render(); return; }
   if(d.lang!==undefined){ setLang(LANG==="kk"?"ru":"kk"); return; }
   if(d.qclear!==undefined){ state.q=""; render(); return; }
   if(d.go){ go(d.go); return; }
@@ -1355,22 +1404,34 @@ document.addEventListener("submit",async e=>{
   }
 
   if(id==="checkout"){
-    const v = k => $("#"+k).value.trim();
-    const f = {zk:v("f-zk"), name:v("f-name"), apt:v("f-apt").replace(/^кв\.?\s*/i,""), phone:v("f-phone")};
+    const v = k => { const el=$("#"+k); return el ? el.value.trim() : ""; };
+    const dl = state.fulfil==="delivery";
+    const f = dl ? {name:v("f-name"), phone:v("f-phone"), address:v("f-addr"), apt:v("f-apt").replace(/^кв\.?\s*/i,""), entrance:v("f-ent"), comment:v("f-comment")}
+                 : {zk:v("f-zk"), name:v("f-name"), apt:v("f-apt").replace(/^кв\.?\s*/i,""), phone:v("f-phone")};
     const err=$("#formErr"), miss=[];
     if(!f.name) miss.push("имя");
-    if(!f.apt) miss.push("квартиру");
+    if(dl && f.address.length<5) miss.push("адрес");
+    if(!dl && !f.apt) miss.push("квартиру");
     if(f.phone.replace(/\D/g,"").length<10) miss.push("телефон");
-    if(miss.length){ err.textContent="Укажите "+miss.join(", ")+", чтобы лидер знал, кому отдать заказ."; err.hidden=false; return; }
-    state.zk=f.zk; ss.set("adal-zk",f.zk);
-    const restore = () => { $("#f-name").value=f.name; $("#f-apt").value=f.apt; $("#f-phone").value=f.phone; };
+    if(miss.length){ err.textContent="Укажите "+miss.join(", ")+(dl?", чтобы курьер мог привезти заказ.":", чтобы лидер знал, кому отдать заказ."); err.hidden=false; return; }
+    if(!dl){ state.zk=f.zk; ss.set("adal-zk",f.zk); }
+    const restore = () => { for(const [k,id2] of [["name","f-name"],["apt","f-apt"],["phone","f-phone"],["address","f-addr"],["entrance","f-ent"],["comment","f-comment"]]){ const el=$("#"+id2); if(el&&f[k]!==undefined) el.value=f[k]; } };
     state.busy=true; render(); restore();
     try{
-      const r = await rpc("adal_place_order",{p_zk:f.zk, p_name:f.name, p_apt:f.apt, p_phone:f.phone, p_items:state.cart});
-      CUST={name:f.name, apt:f.apt, phone:f.phone}; ss.set("adal-cust",CUST);
-      state.orders.unshift({id:r.id, code:r.code, zk:f.zk}); state.orders=state.orders.slice(0,20); ss.set("adal-orders",state.orders);
-      POOLS[f.zk]=r.pool;
-      state.done={...r, zk:f.zk};
+      let r;
+      if(dl){
+        r = await rpc("adal_place_delivery",{p:{...f, items:state.cart}});
+        CUST={...CUST, name:f.name, phone:f.phone, address:f.address, apt:f.apt, entrance:f.entrance}; ss.set("adal-cust",CUST);
+        state.orders.unshift({id:r.id, code:r.code, fulfil:"delivery"});
+        state.done={...r, fulfil:"delivery"};
+      }else{
+        r = await rpc("adal_place_order",{p_zk:f.zk, p_name:f.name, p_apt:f.apt, p_phone:f.phone, p_items:state.cart});
+        CUST={...CUST, name:f.name, apt:f.apt, phone:f.phone}; ss.set("adal-cust",CUST);
+        state.orders.unshift({id:r.id, code:r.code, zk:f.zk});
+        POOLS[f.zk]=r.pool;
+        state.done={...r, zk:f.zk};
+      }
+      state.orders=state.orders.slice(0,20); ss.set("adal-orders",state.orders);
       state.cart={}; saveCart(); state.busy=false; go("done");
     }catch(ex){
       state.busy=false; render(); restore();
