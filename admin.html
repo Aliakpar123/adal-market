@@ -550,6 +550,7 @@ function collectSettingsHtml(){
       <div class="field"><label for="cKaspi">Kaspi для оплаты</label><input id="cKaspi" value="${esc(c.kaspi||"")}" placeholder="+7 7__ ___ __ __"><span class="hint">Номер или ссылка. Увидят покупатели.</span></div>
       <div class="field"><label for="cName">Получатель</label><input id="cName" value="${esc(c.kaspi_name||"")}" placeholder="ИП или имя"></div>
     </div>
+    <div class="field"><label for="cTg">Telegram Mini App</label><input id="cTg" value="${esc(c.tg||"")}" placeholder="https://t.me/имя_бота/shop"><span class="hint">Ссылка на ваше мини-приложение. Ссылки лидеров будут открывать его сразу на нужном ЖК. Пусто — ссылки на сайт.</span></div>
     <p class="err" id="cErr" hidden></p>
     <button class="btn" type="submit">Сохранить</button>
   </form>`;
@@ -897,7 +898,7 @@ document.addEventListener("submit", async e => {
     e.preventDefault();
     const v = id => $("#"+id).value.trim().replace(",",".");
     try{
-      await rpc("adal_admin_save_collect",{p_pass:state.pass,p:{threshold:v("cThr").replace(/\s/g,""),commission:v("cRate"),kaspi:$("#cKaspi").value.trim(),kaspi_name:$("#cName").value.trim()}});
+      await rpc("adal_admin_save_collect",{p_pass:state.pass,p:{threshold:v("cThr").replace(/\s/g,""),commission:v("cRate"),kaspi:$("#cKaspi").value.trim(),kaspi_name:$("#cName").value.trim(),tg:$("#cTg").value.trim()}});
       toast("Сохранено: на сайте обновится сразу"); await loadLeaders();
       state.settings = {...(state.settings||{}), leader:+v("cRate")};
     }catch(ex){ const er=$("#cErr"); er.textContent=ex.message; er.hidden=false; }

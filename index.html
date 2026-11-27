@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="ADAL market — бытовая химия по оптовым ценам: соседи покупают вместе, заказ вы забираете у лидера своего дома.">
 <meta name="theme-color" content="#FFFFFF">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <meta name="color-scheme" content="light only">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>ADAL market</title>
@@ -261,6 +262,7 @@ body.has-bar .app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .sec-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .entry2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .entry2:last-child{border-bottom:0}
+body.in-tg .demo{display:none}
 .codein{font-size:26px!important;letter-spacing:.3em;text-align:center;font-weight:800}
 .ordcard{gap:10px}
 
@@ -320,7 +322,24 @@ const BUYER_STATUS = {
   ready:["Можно забирать","Назовите код лидеру и переведите оплату на Kaspi"],
   done:["Заказ выдан","Спасибо, что покупаете вместе"]
 };
-let ZKS = [], PRODUCTS = [], POOLS = {}, SET = {threshold:20000, kaspi:"", kaspi_name:"", commission:5};
+let ZKS = [], PRODUCTS = [], POOLS = {}, SET = {threshold:20000, kaspi:"", kaspi_name:"", tg:"", commission:5};
+
+/* ===== Telegram Mini App ===== */
+const TG = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) ? Telegram.WebApp : null;
+function initTelegram(){
+  if(!TG) return;
+  try{
+    TG.ready(); TG.expand();
+    try{ TG.setHeaderColor("#FFFFFF"); TG.setBackgroundColor("#F4F6F5"); if(TG.setBottomBarColor) TG.setBottomBarColor("#FFFFFF"); }catch(_){}
+    document.body.classList.add("in-tg");
+    TG.BackButton.onClick(()=>{ go("shop"); });
+  }catch(_){}
+}
+function tgSync(){
+  if(!TG) return;
+  try{ if(state.view==="shop") TG.BackButton.hide(); else TG.BackButton.show(); }catch(_){}
+}
+function openExternal(url){ if(TG && /^https:\/\/t\.me\//.test(url) && TG.openTelegramLink) TG.openTelegramLink(url); else if(TG && TG.openLink) TG.openLink(url); else window.open(url,"_blank","noopener"); }
 
 const ss = {
   get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(_){ return null; } },
@@ -614,12 +633,17 @@ function viewRegDone(){
 }
 
 /* ---------- кабинет лидера ---------- */
-function leaderLink(z){ return location.origin + location.pathname + "?zk=" + encodeURIComponent(z.id); }
-function leaderText(d){
-  const link = leaderLink(d.zk), left = Math.max(0, d.threshold - d.pool);
-  if(state.tmpl==="morn") return `Доброе утро, соседи! Сегодня до 21:00 собираем общий заказ ADAL: бытовая химия дешевле магазина. Наберём ${fmt(d.threshold)}, заказы привезут мне, и вы заберёте их у меня. Заказать: ${link}`;
-  return `Соседи, сбор ADAL закрывается сегодня в 21:00. Набрано ${fmt(d.pool)} из ${fmt(d.threshold)}${left?`, осталось ${fmt(left)}.`:". Сбор набран!"} Как наберём, заказы привезут мне, и вы заберёте их у меня. Бытовая химия по оптовым ценам: ${link}`;
+function leaderLink(z){
+  const base=(SET.tg||"").trim();
+  if(base) return base + "?startapp=" + encodeURIComponent(z.id);
+  return location.origin + location.pathname + "?zk=" + encodeURIComponent(z.id);
 }
+function leaderBody(d){
+  const left = Math.max(0, d.threshold - d.pool);
+  if(state.tmpl==="morn") return `Доброе утро, соседи! Сегодня до 21:00 собираем общий заказ ADAL: бытовая химия дешевле магазина. Наберём ${fmt(d.threshold)}, заказы привезут мне, и вы заберёте их у меня.`;
+  return `Соседи, сбор ADAL закрывается сегодня в 21:00. Набрано ${fmt(d.pool)} из ${fmt(d.threshold)}${left?`, осталось ${fmt(left)}.`:". Сбор набран!"} Как наберём, заказы привезут мне, и вы заберёте их у меня. Бытовая химия по оптовым ценам.`;
+}
+const leaderText = d => leaderBody(d) + " Заказать: " + leaderLink(d.zk);
 
 function viewLeader(){
   if(!state.leader) return state.leaderMode==="reg" ? (state.regDone?viewRegDone():viewReg()) : viewLogin();
@@ -648,8 +672,9 @@ function viewLeader(){
         <button class="chip" data-tmpl="eve" aria-pressed="${state.tmpl==="eve"}">Вечер</button>
         <button class="chip" data-tmpl="morn" aria-pressed="${state.tmpl==="morn"}">Утро</button></div>
       <div class="tmpl">${esc(text)}</div>
-      <div class="two"><a class="btn block" style="text-align:center;text-decoration:none" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">В WhatsApp</a>
-        <button class="btn ghost block" data-copy="${esc(text)}">Копировать</button></div>
+      <div class="two"><button class="btn block" data-ext="https://t.me/share/url?url=${encodeURIComponent(leaderLink(z))}&text=${encodeURIComponent(leaderBody(d))}">В Telegram</button>
+        <button class="btn block" data-ext="https://wa.me/?text=${encodeURIComponent(text)}">В WhatsApp</button></div>
+      <button class="btn ghost block" data-copy="${esc(text)}">Копировать текст</button>
     </section>
     <section class="panel">
       <div class="sec-row"><h2>Заказы в сборе</h2><span class="muted">${inPool.length}</span></div>
@@ -707,6 +732,7 @@ function render(){
   cb.hidden=!showBar; document.body.classList.toggle("has-bar",showBar);
   if(showBar) cb.innerHTML=`<span class="cb-n">${c}</span><span class="cb-t">Корзина</span><b>${fmt(cartSum())}</b><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   $("#deadline").hidden = state.view==="leader";
+  tgSync();
 }
 function go(v){
   state.view=v; if(location.hash!=="#"+v && v!=="done") history.replaceState(null,"",location.pathname+location.search+"#"+v);
@@ -772,6 +798,7 @@ document.addEventListener("click",e=>{
   if(d.ltab){ state.ltab=d.ltab; state.found=null; state.foundErr=null; render(); return; }
   if(d.tmpl){ state.tmpl=d.tmpl; render(); return; }
   if(d.copy){ copyText(d.copy, "Скопировано"); return; }
+  if(d.ext){ openExternal(d.ext); return; }
   if(d.give){ leaderAction("give", +d.give); return; }
   if(d.pay){ state.reg.pay=d.pay; document.querySelectorAll("[data-pay]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pay===d.pay)); return; }
   if(d.act==="reload"){ loadCatalog(); return; }
@@ -886,8 +913,11 @@ setInterval(()=>{ if(!document.hidden && (state.view==="shop"||state.view==="car
 
 window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(VIEWS.includes(h) && h!==state.view) go(h); });
 (function boot(){
-  const q=new URLSearchParams(location.search).get("zk");
-  if(q){ state.zk=q; ss.set("adal-zk",q); }
+  initTelegram();
+  const q = new URLSearchParams(location.search).get("zk") || (TG && TG.initDataUnsafe && TG.initDataUnsafe.start_param) || "";
+  if(/^[A-Za-z0-9_-]{1,40}$/.test(q)){ state.zk=q; ss.set("adal-zk",q); }
+  const u = TG && TG.initDataUnsafe && TG.initDataUnsafe.user;
+  if(u && !CUST.name && u.first_name) CUST={...CUST, name:u.first_name};
   const h=location.hash.slice(1); if(VIEWS.includes(h)) state.view=h;
   if(state.leader) state.leaderMode="login";
   loadCatalog().then(()=>{ if(state.view==="leader" && state.leader) loadLeader(); if(state.view==="orders") loadOrders(); });
