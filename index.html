@@ -592,6 +592,11 @@ body[data-hero="irbi"] .soon>.himg2{height:148px}
 .sub-row .deadline span{font-size:11px;font-weight:600;color:#4E7A5E}
 .sub-row .deadline b{margin-left:0;background:transparent;padding:0;font-size:14px;color:var(--brand)}
 body.prelaunch .sub-row{display:none!important}
+
+/* без обрезов: длинные названия переносятся */
+.sub-row .zk .zk-txt span#zkName{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:clip;line-height:1.15;font-size:13px;word-break:break-word}
+.card .name{-webkit-line-clamp:3}
+.line .mini{font-size:10px;line-height:1.1;padding:3px;overflow:hidden;word-break:break-word}
 </style>
 </head>
 <body>
