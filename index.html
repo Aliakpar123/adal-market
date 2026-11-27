@@ -415,6 +415,41 @@ h1,h2{font-family:var(--font-body);font-weight:800;letter-spacing:-.025em}
 .psave{background:#DDF3E6;color:var(--brand)}
 .tz .ph{border-radius:18px}
 .search input{box-shadow:none;background:#EDF2EE}
+
+/* ===== страница для лидеров ===== */
+.reg-hero{position:relative;overflow:hidden;padding:20px 18px 22px;min-height:230px}
+.reg-hero>*:not(.himg){position:relative;z-index:1;max-width:66%}
+.reg-hero h1{font-size:25px;line-height:1.1;font-weight:800}
+.reg-hero .himg{position:absolute;right:-4px;bottom:0;height:176px;width:auto;z-index:0;filter:drop-shadow(0 6px 10px rgba(0,0,0,.22))}
+.reg-hero::before{content:"";position:absolute;right:-50px;top:-60px;width:190px;height:190px;border-radius:50%;background:var(--fresh2);opacity:.55}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.fact{background:#fff;border-radius:20px;padding:12px 8px;text-align:center;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px}
+.fact b{font-size:22px;font-weight:800;color:var(--brand);letter-spacing:-.02em}
+.fact span{font-size:11.5px;font-weight:500;color:var(--muted);line-height:1.25}
+.calcp{gap:12px}
+.crow{display:flex;flex-direction:column;gap:6px}
+.crow label{font-size:14px;font-weight:600}
+.crow input[type=range]{width:100%;accent-color:var(--brand)}
+.calc-res{background:linear-gradient(135deg,var(--fresh),var(--brand));color:#fff;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.calc-big{display:flex;flex-direction:column;gap:2px;font-size:13.5px;opacity:1}
+.calc-big b{font-size:32px;font-weight:800;color:var(--accent);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.calc-sub{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;opacity:.95;flex-wrap:wrap}
+.calc-sub b{font-variant-numeric:tabular-nums}
+.two2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two2 .panel{padding:14px 14px;gap:8px}
+.two2 h2{font-size:16px}
+.tick{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13.5px;line-height:1.35}
+.tick li{padding-left:24px;position:relative}
+.tick li::before{content:"";position:absolute;left:0;top:1px;width:18px;height:18px;border-radius:50%;background:var(--ok-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B8A3E' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/12px no-repeat}
+.tick.no li::before{background:#FFE7E0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E0502F' stroke-width='3.4' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E") center/12px no-repeat}
+.faq{display:flex;flex-direction:column;gap:8px}
+.faq details{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:0 14px}
+.faq summary{list-style:none;cursor:pointer;padding:14px 22px 14px 0;font-weight:700;font-size:14.5px;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:500;color:var(--brand)}
+.faq details[open] summary::after{content:"–"}
+.faq details p{margin:0 0 14px;font-size:13.5px;color:var(--muted);line-height:1.5}
+@media (max-width:380px){.two2{grid-template-columns:1fr}.reg-hero>*:not(.himg){max-width:62%}}
 </style>
 </head>
 <body>
@@ -502,7 +537,7 @@ const state = {
   loading:true, loadError:null, busy:false,
   orders: ss.get("adal-orders") || [], ostat:{}, oLoading:false, done:null,
   leader: ss.get("adal-leader"), ld:null, ldError:null, ltab:"collect", leaderMode:"login", regDone:false,
-  calc:30, tmpl:"eve", found:null, foundErr:null, ref:"", wait: ss.get("adal-wait"),
+  calc:40, calcO:4, calcC:3000, tmpl:"eve", found:null, foundErr:null, ref:"", wait: ss.get("adal-wait"),
   reg:{name:"",phone:"",city:"Алматы",zk:"",addr:"",flats:"200–500",chat:"WhatsApp",members:"",spot:"Холл или консьерж",pay:"Самозанятый",agree:false}
 };
 
@@ -591,6 +626,20 @@ const KK = {
 "Сбор дома набран — скоро привезём заказы лидеру.":"Үйдің жинағы толды — жақында тапсырыстарды лидерге әкелеміз.",
 "Мы с соседями покупаем вместе — и платим меньше. Запишись в список, и я напишу, когда запустимся.":"Біз көршілермен бірге сатып аламыз — сондықтан аз төлейміз. Тізімге жазыл, іске қосылғанда мен хабарлаймын.",
 "Зови соседей и выдавай им заказы — и береке придёт в каждый дом.":"Көршілерді шақыр да, оларға тапсырыс бер — әр үйге береке келеді.",
+"Зарабатывайте на заказах своего дома":"Үйіңіздің тапсырыстарынан табыс табыңыз","Оставить заявку":"Өтінім қалдыру",
+"с каждого выданного заказа":"берілген әр тапсырыстан","в неделю выплата":"аптасына бір рет төлем","на закупку товара":"тауар сатып алуға",
+"Сколько вы заработаете":"Қанша табыс табасыз","Ваш доход в месяц":"Айлық табысыңыз","Это расчёт, а не гарантия":"Бұл есеп, кепілдік емес",
+"Как это работает":"Қалай жұмыс істейді","Сегодня":"Бүгін","Оставляете заявку":"Өтінім қалдырасыз","Менеджер позвонит, расскажет об условиях и проверит ЖК.":"Менеджер қоңырау шалып, шарттарды айтып, ТҮК-ті тексереді.",
+"Сразу после старта":"Іске қосылған соң","Зовёте соседей":"Көршілерді шақырасыз","Отправляете ссылку в чат дома. Готовые тексты и ссылка есть в кабинете.":"Үй чатына сілтеме жібересіз. Дайын мәтіндер мен сілтеме кабинетте бар.",
+"Принимаете машину":"Көлікті қабылдайсыз","Мы привозим заказы дома одной машиной. Пакеты подписаны по квартирам.":"Үйдің тапсырыстарын бір көлікпен әкелеміз. Пакеттер пәтерлер бойынша жазылған.",
+"Вечером в день привоза":"Әкелген күні кешке","Выдаёте по коду":"Код бойынша бересіз",
+"Вы делаете":"Сіз жасайсыз","Вам не нужно":"Сізге қажет емес","Зовёте соседей в чате дома":"Үй чатында көршілерді шақырасыз","Принимаете машину":"Көлікті қабылдайсыз","1–2 часа вечером выдаёте заказы":"Кешке 1–2 сағат тапсырыс бересіз",
+"Покупать товар":"Тауар сатып алу","Возить и собирать заказы":"Тапсырыстарды жинау және тасымалдау","Брать деньги с соседей: они платят на Kaspi Bereke store":"Көршілерден ақша алу: олар Kaspi Bereke store-ға төлейді",
+"Частые вопросы":"Жиі қойылатын сұрақтар","Сколько времени это занимает?":"Бұл қанша уақыт алады?","Звать соседей можно в удобное время. Выдача заказов занимает 1–2 часа вечером в день привоза.":"Көршілерді қолайлы уақытта шақыруға болады. Тапсырыс беру әкелген күні кешке 1–2 сағат алады.",
+"Нужно ли что-то вкладывать?":"Бір нәрсе салу керек пе?","Нет. Товар вы не покупаете, деньги соседей у вас не остаются: они платят на Kaspi Bereke store.":"Жоқ. Тауарды сіз сатып алмайсыз, көршілердің ақшасы сізде қалмайды: олар Kaspi Bereke store-ға төлейді.",
+"А если сумма дома не набралась?":"Үйдің сомасы жиналмаса ше?","Как и когда платят?":"Қалай және қашан төлейді?","Где хранить заказы?":"Тапсырыстарды қайда сақтау керек?",
+"Только в день привоза и всего на 1–2 часа: в холле, у консьержа, в колясочной или у вас дома. Место вы выбираете в заявке.":"Тек әкелген күні және небәрі 1–2 сағатқа: холлда, консьержде, арбашаларға арналған бөлмеде немесе үйіңізде. Орынды өтінімде өзіңіз таңдайсыз.",
+"Заявка":"Өтінім","Уже лидер? Войти по коду":"Қазір лидерсіз бе? Код арқылы кіру",
 "Состав":"Құрамы","Срок годности":"Жарамдылық мерзімі","Хранение":"Сақтау","О товаре":"Тауар туралы","В магазине":"Дүкенде","Цены откроем при запуске":"Бағаны іске қосылғанда ашамыз","Карточка товара":"Тауар картасы","В корзине":"Себетте","Не ограничен":"Шектелмейді",
 "Рис длиннозёрный шлифованный":"Ұзын дәнді тазартылған күріш","Крупа гречневая ядрица":"Қарақұмық жармасы (ядрица)","Сахар белый кристаллический":"Ақ кристалды қант","Пшеничная мука высшего сорта":"Жоғары сортты бидай ұны","Мука из твёрдых сортов пшеницы, вода":"Қатты бидай ұны, су","Хлопья овсяные":"Сұлы жапырақшалары","Соль пищевая поваренная":"Ас тұзы","Кофе жареный молотый":"Қуырылған ұнтақ кофе","Масло подсолнечное рафинированное":"Тазартылған күнбағыс майы","Чай чёрный байховый, 100 пакетиков":"Қара байховый шай, 100 пакет","Говядина, жир, соль, специи":"Сиыр еті, май, тұз, дәмдеуіштер","Томаты, соль":"Қызанақ, тұз",
 "В сухом прохладном месте, в закрытой таре":"Құрғақ салқын жерде, жабық ыдыста","В сухом прохладном месте":"Құрғақ салқын жерде","В сухом месте, вдали от запахов":"Құрғақ жерде, иістерден алыс","В сухом месте":"Құрғақ жерде","В плотно закрытой упаковке, в сухом месте":"Тығыз жабық қаптамада, құрғақ жерде","В тёмном месте при температуре до 20 °C":"Қараңғы жерде, 20 °C-қа дейінгі температурада","При температуре от 0 до 20 °C":"0-ден 20 °C-қа дейінгі температурада","При температуре от 0 до 25 °C":"0-ден 25 °C-қа дейінгі температурада"
@@ -609,6 +658,16 @@ const KK_RE = [
 [/^Ты уже экономишь (.+) в корзине\. Так держать!$/,"Сен себетте $1 үнемдеп отырсың. Осылай жалғастыр!"],
 [/^Хочешь зарабатывать (\d+)% с заказов дома\? Стань лидером ЖК!$/,"Үйдегі тапсырыстардан $1% табыс тапқың келе ме? ТҮК лидері бол!"],
 [/^Хотите зарабатывать\? Станьте лидером своего ЖК: (\d+)% с каждого заказа дома\. Приглашайте соседей, а когда запустимся, выдавайте им заказы\.$/,"Табыс тапқыңыз келе ме? Өз ТҮК-ңіздің лидері болыңыз: үйдегі әр тапсырыстан $1%. Көршілерді шақырыңыз, ал іске қосылғанда оларға тапсырыс беріңіз."],
+[/^Соседей заказывают: (\d+)$/,"Тапсырыс беретін көршілер: $1"],
+[/^Заказов в месяц от каждого: (\d+)$/,"Әрқайсысынан айына тапсырыс: $1"],
+[/^Средний заказ: (.+)$/,"Орташа тапсырыс: $1"],
+[/^в неделю ≈ (.+)$/,"аптасына ≈ $1"],[/^заказов в месяц (\d+)$/,"айына тапсырыс $1"],
+[/^Когда сбор дома дошёл до (.+)$/,"Үйдің жинағы $1 болғанда"],
+[/^Сосед называет код и платит на Kaspi Bereke store\. Вам идёт (\d+)% с выданного заказа\.$/,"Көрші кодты айтып, Kaspi Bereke store-ға төлейді. Сізге берілген тапсырыстан $1% беріледі."],
+[/^Это расчёт, а не гарантия: доход зависит от того, сколько соседей реально заказывают\. (\d+)% считаются с выданных заказов\.$/,"Бұл есеп, кепілдік емес: табыс көршілердің нақты қанша тапсырыс беруіне байланысты. $1% берілген тапсырыстардан есептеледі."],
+[/^Если заказы дома не дошли до (.+), они ждут следующий сбор\. Позовите ещё соседей: ссылка и тексты для чата есть в кабинете\.$/,"Үйдің тапсырыстары $1-ға жетпесе, келесі жинақты күтеді. Тағы көршілерді шақырыңыз: сілтеме мен чатқа арналған мәтіндер кабинетте бар."],
+[/^Раз в неделю переводом\. (\d+)% считаются с выданных заказов дома\. Как оформить вознаграждение \(самозанятость или ИП\), менеджер подскажет по телефону\.$/,"Аптасына бір рет аударыммен. $1% үйдің берілген тапсырыстарынан есептеледі. Сыйақыны қалай рәсімдеуді (өзін-өзі жұмыспен қамтыған немесе ЖК) менеджер телефонмен айтады."],
+[/^Зовите соседей и выдавайте им заказы по коду\. (\d+)% с каждого выданного заказа дома\.$/,"Көршілерді шақырып, оларға тапсырысты код бойынша беріңіз. Үйдегі әр берілген тапсырыстан $1%."],
 [/^Добавить в корзину · (.+)$/,"Себетке қосу · $1"],
 [/^Оформить заказ на (.+)$/,"Тапсырыс беру: $1"],
 [/^Заказ №(\d+) принят$/,"№$1 тапсырыс қабылданды"],[/^Заказ №(\d+)$/,"№$1 тапсырыс"],
@@ -977,32 +1036,58 @@ function viewLogin(){
 }
 
 const CITIES=["Алматы","Астана","Шымкент","Караганда","Другой город"];
-const calcIncome = n => Math.round(n*3000*4*SET.commission/100);
+const calcIncome = (n,o,c) => Math.round(n*(o||4)*(c||3000)*SET.commission/100);
+const calcAll = () => ({inc:calcIncome(state.calc,state.calcO,state.calcC), orders:state.calc*state.calcO});
+function calcOutHtml(){ const {inc,orders}=calcAll(); return `<div class="calc-big"><span>Ваш доход в месяц</span><b id="calcOut">≈ ${fmt(inc)}</b></div>
+    <div class="calc-sub"><span>в неделю <b id="calcWeek">≈ ${fmt(inc/4.33)}</b></span><span>заказов в месяц <b id="calcOrd">${orders}</b></span></div>`; }
 function opts(list,cur){ return list.map(o=>`<option ${o===cur?"selected":""}>${esc(o)}</option>`).join(""); }
 
 function viewReg(){
   const r=state.reg, rate=Math.round(SET.commission);
   return `<section class="section wrap">
     <div class="reg-hero">
-      <span class="label" style="color:inherit;opacity:.8">Для активных соседей</span>
-      <h1>Станьте лидером своего ЖК</h1>
-      <p style="margin:0;opacity:.9">Зовите соседей и выдавайте им заказы по коду. ${rate}% с каждого выданного заказа дома, выплата раз в неделю.</p>
-      <div class="calc">
-        <label for="calc">Сколько соседей будут заказывать: <b id="calcN">${state.calc}</b></label>
-        <input id="calc" type="range" min="10" max="100" step="5" value="${state.calc}">
-        <div class="calc-out"><span>Ваш доход в месяц</span><b id="calcOut">≈ ${fmt(calcIncome(state.calc))}</b></div>
-        <small>Расчёт: заказ на 3 000 ₸ раз в неделю, 4 недели, ${rate}% лидеру.</small>
-      </div>
+      <img class="himg" src="${hero().img}" alt="" width="${hero().w}" height="${hero().h}">
+      <span class="label" style="color:inherit;opacity:.85">Для активных соседей</span>
+      <h1>Зарабатывайте на заказах своего дома</h1>
+      <p style="margin:0;opacity:.92">Зовите соседей и выдавайте им заказы по коду. ${rate}% с каждого выданного заказа дома.</p>
+      <button class="cta" data-act="toform">Оставить заявку</button>
+    </div>
+    <div class="facts">
+      <div class="fact"><b>${rate}%</b><span>с каждого выданного заказа</span></div>
+      <div class="fact"><b>1 раз</b><span>в неделю выплата</span></div>
+      <div class="fact"><b>0 ₸</b><span>на закупку товара</span></div>
+    </div>
+    <div class="panel calcp">
+      <h2>Сколько вы заработаете</h2>
+      <div class="crow"><label for="calc">Соседей заказывают: <b id="calcN">${state.calc}</b></label><input id="calc" type="range" min="10" max="150" step="5" value="${state.calc}"></div>
+      <div class="crow"><label for="calcO">Заказов в месяц от каждого: <b id="calcOn">${state.calcO}</b></label><input id="calcO" type="range" min="1" max="10" step="1" value="${state.calcO}"></div>
+      <div class="crow"><label for="calcC">Средний заказ: <b id="calcCn">${fmt(state.calcC)}</b></label><input id="calcC" type="range" min="1500" max="10000" step="500" value="${state.calcC}"></div>
+      <div class="calc-res" id="calcRes">${calcOutHtml()}</div>
+      <small class="muted">Это расчёт, а не гарантия: доход зависит от того, сколько соседей реально заказывают. ${rate}% считаются с выданных заказов.</small>
+    </div>
+    <h2>Как это работает</h2>
+    <div class="steps">
+      ${[["Сегодня","Оставляете заявку","Менеджер позвонит, расскажет об условиях и проверит ЖК."],
+         ["Сразу после старта","Зовёте соседей","Отправляете ссылку в чат дома. Готовые тексты и ссылка есть в кабинете."],
+         ["Когда сбор дома дошёл до "+fmt(SET.threshold),"Принимаете машину","Мы привозим заказы дома одной машиной. Пакеты подписаны по квартирам."],
+         ["Вечером в день привоза","Выдаёте по коду","Сосед называет код и платит на Kaspi Bereke store. Вам идёт "+rate+"% с выданного заказа."]]
+        .map((x,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${x[0]}</span><div class="t">${x[1]}</div><div class="muted">${x[2]}</div></div></div>`).join("")}
     </div>
     ${tipHtml({pose:"wave",text:`${greet()} Зови соседей и выдавай им заказы — и береке придёт в каждый дом.`})}
-    <h2>Что нужно делать</h2>
-    <div class="duties">
-      <div class="duty"><b>Звать соседей</b><span class="muted">Отправлять ссылку в чат дома: готовые тексты уже в кабинете.</span></div>
-      <div class="duty"><b>Принять машину</b><span class="muted">Мы привозим заказы дома, когда сбор дошёл до ${fmt(SET.threshold)}.</span></div>
-      <div class="duty"><b>Выдать заказы по коду</b><span class="muted">1–2 часа вечером. Соседи платят на Kaspi Bereke store, деньги у вас не остаются.</span></div>
+    <div class="two2">
+      <div class="panel"><h2>Вы делаете</h2><ul class="tick"><li>Зовёте соседей в чате дома</li><li>Принимаете машину</li><li>1–2 часа вечером выдаёте заказы</li></ul></div>
+      <div class="panel"><h2>Вам не нужно</h2><ul class="tick no"><li>Покупать товар</li><li>Возить и собирать заказы</li><li>Брать деньги с соседей: они платят на Kaspi Bereke store</li></ul></div>
+    </div>
+    <h2>Частые вопросы</h2>
+    <div class="faq">
+      <details><summary>Сколько времени это занимает?</summary><p>Звать соседей можно в удобное время. Выдача заказов занимает 1–2 часа вечером в день привоза.</p></details>
+      <details><summary>Нужно ли что-то вкладывать?</summary><p>Нет. Товар вы не покупаете, деньги соседей у вас не остаются: они платят на Kaspi Bereke store.</p></details>
+      <details><summary>А если сумма дома не набралась?</summary><p>Если заказы дома не дошли до ${fmt(SET.threshold)}, они ждут следующий сбор. Позовите ещё соседей: ссылка и тексты для чата есть в кабинете.</p></details>
+      <details><summary>Как и когда платят?</summary><p>Раз в неделю переводом. ${rate}% считаются с выданных заказов дома. Как оформить вознаграждение (самозанятость или ИП), менеджер подскажет по телефону.</p></details>
+      <details><summary>Где хранить заказы?</summary><p>Только в день привоза и всего на 1–2 часа: в холле, у консьержа, в колясочной или у вас дома. Место вы выбираете в заявке.</p></details>
     </div>
     <form class="panel" id="regForm" novalidate>
-      <h2>Заявка</h2>
+      <h2 id="reg-form">Заявка</h2>
       <span class="label">О вас</span>
       <div class="field"><label for="r-name">Имя и фамилия</label><input id="r-name" data-reg="name" maxlength="80" autocomplete="name" value="${esc(r.name)}" placeholder="Например, Айгерим Сапарова"></div>
       <div class="field"><label for="r-phone">Телефон</label><input id="r-phone" data-reg="phone" maxlength="30" type="tel" autocomplete="tel" value="${esc(r.phone)}" placeholder="+7 7__ ___ __ __"></div>
@@ -1238,6 +1323,7 @@ document.addEventListener("click",e=>{
   if(d.give){ leaderAction("give", +d.give); return; }
   if(d.pay){ state.reg.pay=d.pay; document.querySelectorAll("[data-pay]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pay===d.pay)); return; }
   if(d.act==="reload"){ loadCatalog(); return; }
+  if(d.act==="toform"){ const f=$("#reg-form"); if(f) f.scrollIntoView({behavior:"smooth",block:"start"}); return; }
   if(d.act==="towait"){ const f=$("#waitForm"); if(f){ f.scrollIntoView({behavior:"smooth",block:"center"}); const i=$("#w-name"); if(i) setTimeout(()=>i.focus({preventScroll:true}),400); } return; }
   if(d.act==="becomeleader"){ state.leaderMode="reg"; state.regDone=false; go("leader"); return; }
   if(d.act==="tologin"){ state.leaderMode="login"; go("leader"); return; }
@@ -1340,7 +1426,11 @@ document.addEventListener("keydown",e=>{
 document.addEventListener("input",e=>{
   const t=e.target;
   if(t.id==="q"){ state.q=t.value; const g=$("#gridWrap"); if(g){ g.innerHTML=gridHtml(filterList()); translateDom(g); observeTips(); } return; }
-  if(t.id==="calc"){ state.calc=+t.value; $("#calcN").textContent=t.value; $("#calcOut").textContent="≈ "+fmt(calcIncome(+t.value)); return; }
+  if(t.id==="calc"||t.id==="calcO"||t.id==="calcC"){
+    if(t.id==="calc"){ state.calc=+t.value; $("#calcN").textContent=t.value; }
+    if(t.id==="calcO"){ state.calcO=+t.value; $("#calcOn").textContent=t.value; }
+    if(t.id==="calcC"){ state.calcC=+t.value; $("#calcCn").textContent=fmt(+t.value); }
+    $("#calcRes").innerHTML=calcOutHtml(); return; }
   if(t.dataset.reg){ state.reg[t.dataset.reg]= t.type==="checkbox" ? t.checked : t.value; t.classList.remove("bad"); }
 });
 
