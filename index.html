@@ -576,6 +576,12 @@ body[data-hero="irbi"] .soon>.himg2{height:148px}
 .wapanel{gap:12px}
 .wa-head{display:flex;gap:12px;align-items:flex-start}
 .wa-ic{flex:none;width:40px;height:40px;border-radius:50%;background:#25D366;color:#073B1B;display:flex;align-items:center;justify-content:center}
+
+/* переключатель языка */
+.langsw{display:inline-flex;flex:none;background:#EAF8EF;border-radius:12px;padding:3px;gap:2px}
+.langsw button{border:0;background:transparent;color:#4E7A5E;font:inherit;font-weight:800;font-size:12px;letter-spacing:.02em;border-radius:9px;min-width:38px;height:34px;padding:0 8px}
+.langsw button[aria-pressed="true"]{background:var(--brand);color:#fff;box-shadow:0 1px 4px rgba(11,138,62,.35)}
+@media (max-width:400px){.langsw button{min-width:34px;padding:0 6px}}
 </style>
 </head>
 <body>
@@ -587,7 +593,7 @@ body[data-hero="irbi"] .soon>.himg2{height:148px}
       <div class="top-r"><button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
         <span class="zk-txt"><small>Мой дом</small><span id="zkName"></span></span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button><button class="lang" id="langBtn" data-lang>ҚАЗ</button></div>
+      </button><div class="langsw" id="langSw" role="group" aria-label="Язык / Тіл"><button type="button" data-setlang="ru" aria-pressed="true">РУС</button><button type="button" data-setlang="kk" aria-pressed="false">ҚАЗ</button></div></div>
     </div>
     <div class="deadline" id="deadline"><span class="dot"></span><span>Сбор заказов до 21:00</span><b id="cd">--:--:--</b></div>
   </header>
@@ -868,14 +874,14 @@ function translateDom(root){
     if(n.nodeValue!==nv) n.nodeValue=nv;
   }
   root.querySelectorAll("[placeholder],[aria-label],[title]").forEach(el=>{
-    if(el.id==="langBtn") return;
+    if(el.id==="langSw") return;
     for(const a of ["placeholder","aria-label","title"]){
       if(!el.hasAttribute(a)) continue;
       const k="_ru_"+a; if(el[k]===undefined) el[k]=el.getAttribute(a);
       const nv = LANG==="kk" ? t(el[k]) : el[k]; if(el.getAttribute(a)!==nv) el.setAttribute(a,nv);
     }
   });
-  const lb=document.getElementById("langBtn"); if(lb){ lb.textContent = LANG==="kk" ? "РУС" : "ҚАЗ"; lb.setAttribute("aria-label", LANG==="kk"?"Выбрать язык: русский":"Тілді таңдау: қазақша"); }
+  document.querySelectorAll("#langSw [data-setlang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.setlang===LANG)));
   document.documentElement.lang = LANG==="kk" ? "kk" : "ru";
 }
 function setLang(l){ LANG=l; try{ localStorage.setItem("adal-lang",l); }catch(_){} render(); }
