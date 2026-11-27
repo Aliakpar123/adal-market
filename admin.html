@@ -249,7 +249,7 @@ const store = {
 };
 
 const state = { pass: store.get(), products: [], q:"", filter:"all", busy:false, loading:false,
-  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","finance","leaders","plan"].includes(h)?h:"products"; })(),
+  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","finance","leaders","waitlist","plan"].includes(h)?h:"products"; })(),
   orders: [], days: 7, ozk: "all", ost: "all", apps: [], zks: [], confirm: null };
 const DEF_SET = {leader:7, acq:1.5, tax:4, logistics:0, target:15};
 const S = () => ({...DEF_SET, ...(state.settings||{})});
@@ -292,10 +292,10 @@ const dt = s => new Date(s).toLocaleString("ru-RU",{day:"numeric",month:"short",
 function tabsHtml(){
   const n = state.apps.filter(a=>a.status==="new").length;
   return `<div class="tabs" role="tablist">
-    ${[["products","Товары"],["orders","Заказы"],["finance","Финансы"],["leaders","Лидеры"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
+    ${[["products","Товары"],["orders","Заказы"],["finance","Финансы"],["leaders","Лидеры"],["waitlist","Ожидающие"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
   </div>`;
 }
-function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else if(state.tab==="plan") viewPlan(); else if(state.tab==="finance") viewFinance(); else viewList(); }
+function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else if(state.tab==="plan") viewPlan(); else if(state.tab==="finance") viewFinance(); else if(state.tab==="waitlist") viewWaitlist(); else viewList(); }
 const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = n => Math.round(n).toLocaleString("ru-RU").replace(/ |,/g," ") + " ₸";
@@ -550,6 +550,7 @@ function collectSettingsHtml(){
       <div class="field"><label for="cKaspi">Kaspi для оплаты</label><input id="cKaspi" value="${esc(c.kaspi||"")}" placeholder="+7 7__ ___ __ __"><span class="hint">Номер или ссылка. Увидят покупатели.</span></div>
       <div class="field"><label for="cName">Получатель</label><input id="cName" value="${esc(c.kaspi_name||"")}" placeholder="ИП или имя"></div>
     </div>
+    <label class="switch" style="margin-bottom:4px"><input type="checkbox" id="cPre" ${c.prelaunch===false?"":"checked"}><span class="tr"></span>Режим «Скоро запуск»: магазин скрыт, идёт запись в список</label>
     <div class="field"><label for="cTg">Telegram Mini App</label><input id="cTg" value="${esc(c.tg||"")}" placeholder="https://t.me/имя_бота/shop"><span class="hint">Ссылка на ваше мини-приложение. Ссылки лидеров будут открывать его сразу на нужном ЖК. Пусто — ссылки на сайт.</span></div>
     <p class="err" id="cErr" hidden></p>
     <button class="btn" type="submit">Сохранить</button>
@@ -612,7 +613,7 @@ async function loadLeaders(){
   if(state.pass) render();
 }
 function authFail(ex){ if(/пароль|попыток/i.test(ex.message)){ state.pass=null; store.del(); viewLogin(ex.message); return true; } return false; }
-function setTab(t){ state.tab=t; history.replaceState(null,"","#"+t); state.confirm=null; render(); if(t==="orders") loadOrders(); if(t==="leaders") loadLeaders(); if(t==="plan") loadPlanData(); if(t==="finance") loadFinance(); }
+function setTab(t){ state.tab=t; history.replaceState(null,"","#"+t); state.confirm=null; render(); if(t==="orders") loadOrders(); if(t==="leaders") loadLeaders(); if(t==="plan") loadPlanData(); if(t==="finance") loadFinance(); if(t==="waitlist") loadWaitlist(); }
 
 
 /* ===================== План: сколько продать, чтобы заработать N ===================== */
@@ -842,6 +843,47 @@ function openFinance(kind){
   });
 }
 
+
+/* ===================== Список ожидания ===================== */
+async function loadWaitlist(){
+  try{ const d = await rpc("adal_admin_waitlist", {p_pass:state.pass}); state.wl = d; }
+  catch(ex){ if(!authFail(ex)) toast(ex.message); }
+  if(state.pass && state.tab==="waitlist") viewWaitlist();
+}
+function viewWaitlist(){
+  $("#topActions").hidden = false;
+  const d = state.wl, q = (state.wq||"").trim().toLowerCase();
+  if(!d){ $("#view").innerHTML = tabsHtml() + `<div class="empty">Загружаем…</div>`; return; }
+  const list = d.list.filter(w => !q || [w.name,w.phone,w.place,w.ref_name].join(" ").toLowerCase().includes(q));
+  const byRef = {}; d.list.forEach(w => { const k = w.ref_name || "Напрямую"; byRef[k] = (byRef[k]||0)+1; });
+  const top = Object.entries(byRef).sort((a,b)=>b[1]-a[1]);
+  const day = new Date(Date.now()-864e5), today = d.list.filter(w=>new Date(w.created_at)>day).length;
+  $("#view").innerHTML = tabsHtml() + `
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+      <div><h1>Список ожидания</h1><p class="muted" style="margin:4px 0 0">Люди, которые записались до запуска. Позже им можно написать о старте.</p></div>
+      <div class="acts"><button class="btn light" data-act="csv">Скачать CSV</button></div>
+    </div>
+    <div class="summary">
+      <div class="stat"><b>${d.total}</b><span>всего в списке</span></div>
+      <div class="stat"><b>${today}</b><span>за сутки</span></div>
+      <div class="stat"><b>${top.filter(([k])=>k!=="Напрямую").length}</b><span>лидеров привели людей</span></div>
+    </div>
+    ${top.length?`<section class="panel"><h2>Откуда пришли</h2><div class="catbar">${top.slice(0,8).map(([k,v])=>`<div class="c"><span>${esc(k)}</span><b>${v}</b><i><em style="width:${v/top[0][1]*100}%"></em></i></div>`).join("")}</div></section>`:""}
+    <div class="toolbar"><label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="wq" placeholder="Найти по имени, телефону, ЖК" value="${esc(state.wq||"")}" aria-label="Поиск"></label></div>
+    <div class="list">${list.length?list.map(w=>`<div class="ocard">
+      <div class="top-l"><div><div class="who">${esc(w.name)} · ${esc(w.phone)}</div>
+        <div class="sub">${esc(w.place||"ЖК не указан")} · ${dt(w.created_at)}</div>
+        <div class="sub">${w.ref_name?`Привёл лидер: ${esc(w.ref_name)}`:"Пришёл напрямую"}${w.tg_username?` · @${esc(w.tg_username)}`:""}</div></div>
+        <div>${state.confirm===("wl"+w.id)?`<button class="btn danger" data-wldel="${w.id}" style="padding:6px 10px">Удалить</button>`:`<button class="ghost" data-askwldel="${w.id}" style="font-size:12px">Удалить</button>`}</div></div>
+    </div>`).join(""):`<div class="empty">${q?"Ничего не найдено":"Пока никто не записался. Запустите рекламу, и записи появятся здесь."}</div>`}</div>`;
+}
+function downloadCsv(){
+  const rows = [["Имя","Телефон","ЖК или адрес","Привёл лидер","Telegram","Дата"]].concat((state.wl?.list||[]).map(w=>[w.name,w.phone,w.place||"",w.ref_name||"",w.tg_username?"@"+w.tg_username:"",new Date(w.created_at).toLocaleString("ru-RU")]));
+  const csv = "﻿" + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download = "waitlist.csv";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
 /* сжатие фото в браузере: максимум 1000 px по длинной стороне, JPEG */
 function shrink(file){
   return new Promise((resolve, reject) => {
@@ -898,7 +940,7 @@ document.addEventListener("submit", async e => {
     e.preventDefault();
     const v = id => $("#"+id).value.trim().replace(",",".");
     try{
-      await rpc("adal_admin_save_collect",{p_pass:state.pass,p:{threshold:v("cThr").replace(/\s/g,""),commission:v("cRate"),kaspi:$("#cKaspi").value.trim(),kaspi_name:$("#cName").value.trim(),tg:$("#cTg").value.trim()}});
+      await rpc("adal_admin_save_collect",{p_pass:state.pass,p:{threshold:v("cThr").replace(/\s/g,""),commission:v("cRate"),kaspi:$("#cKaspi").value.trim(),kaspi_name:$("#cName").value.trim(),tg:$("#cTg").value.trim(),prelaunch:$("#cPre").checked}});
       toast("Сохранено: на сайте обновится сразу"); await loadLeaders();
       state.settings = {...(state.settings||{}), leader:+v("cRate")};
     }catch(ex){ const er=$("#cErr"); er.textContent=ex.message; er.hidden=false; }
@@ -936,6 +978,9 @@ document.addEventListener("click", async e => {
   }
   if(b.dataset.act==="new"){ openEditor(null); return; }
   if(b.dataset.act==="calcset"){ openCalcSettings(); return; }
+  if(b.dataset.act==="csv"){ downloadCsv(); return; }
+  if(b.dataset.askwldel){ state.confirm="wl"+b.dataset.askwldel; viewWaitlist(); return; }
+  if(b.dataset.wldel){ try{ await rpc("adal_admin_waitlist_delete",{p_pass:state.pass,p_id:+b.dataset.wldel}); state.confirm=null; toast("Запись удалена"); await loadWaitlist(); }catch(ex){ toast(ex.message); } return; }
   if(b.dataset.askship){ state.confirm="ship"+b.dataset.askship; viewLeaders(); return; }
   if(b.dataset.ship){ b.disabled=true; try{ const r=await rpc("adal_admin_ship",{p_pass:state.pass,p_zk:b.dataset.ship,p_force:!!b.dataset.force}); state.confirm=null; toast(`Отправлено в закупку: ${r.count} заказов`); await loadLeaders(); }catch(ex){ toast(ex.message); b.disabled=false; } return; }
   if(b.dataset.payout){ const id=b.dataset.payout; if(state.confirm!=="pay"+id){ state.confirm="pay"+id; viewLeaders(); return; }
@@ -980,6 +1025,7 @@ document.addEventListener("change", async e => {
   }
 });
 document.addEventListener("input", e => {
+  if(e.target.id==="wq"){ state.wq=e.target.value; const pos=e.target.selectionStart; viewWaitlist(); const q=$("#wq"); q.focus(); q.setSelectionRange(pos,pos); return; }
   const t = e.target, P = state.tab==="plan" ? plan() : null;
   if(P && t.dataset.costname!==undefined){ P.costs[+t.dataset.costname][0]=t.value; planChanged(); return; }
   if(P && t.dataset.costsum!==undefined){ P.costs[+t.dataset.costsum][1]=+t.value.replace(/\D/g,"")||0; planChanged(); return; }
@@ -1089,7 +1135,7 @@ function openPassword(){
   });
 }
 
-if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); if(state.tab==='finance') loadFinance(); } }); } else { viewLogin(); }
+if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); if(state.tab==='finance') loadFinance(); if(state.tab==='waitlist') loadWaitlist(); } }); } else { viewLogin(); }
 </script>
 </body>
 </html>

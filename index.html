@@ -146,7 +146,7 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
 
 /* bottom nav */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-.nav-in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.nav-in{max-width:480px;margin:0 auto;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)}
 .nav button{border:0;background:transparent;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--muted);position:relative}
 .nav button[aria-current="page"]{color:var(--brand)}
 .nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -262,6 +262,24 @@ body.has-bar .app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .sec-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .entry2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .entry2:last-child{border-bottom:0}
+
+body.prelaunch .zk,body.prelaunch .deadline,body.prelaunch .demo{display:none!important}
+.soon{position:relative;overflow:hidden;background:var(--brand);color:var(--brand-ink);border-radius:24px;padding:22px 18px 24px;display:flex;flex-direction:column;gap:10px}
+.soon h1{font-size:27px;line-height:1.12;color:inherit;max-width:13ch}
+.soon p{margin:0;font-size:15px;opacity:.9;max-width:28ch}
+.soon-tag{align-self:flex-start;background:var(--accent);color:#2A1A03;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.soon-art{position:absolute;right:-8px;bottom:-10px;width:112px;height:auto;opacity:.9}
+.strip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 6px;margin:0 -2px}
+.tz{flex:none;width:96px;display:flex;flex-direction:column;gap:6px;text-align:center;font-size:12px;font-weight:700}
+.tz .ph{position:relative;width:96px;height:116px;border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.tz .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#F3F5F4}
+.why{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start}
+.why b{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--warn);display:flex;align-items:center;justify-content:center;font-weight:800}
+.why .t{font-weight:800}
+.joined{align-items:center;text-align:center}
+.joined .okc{width:56px;height:56px;border-radius:50%;background:var(--ok-soft);display:flex;align-items:center;justify-content:center}
+.leadpromo{background:var(--accent-soft);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.leadpromo b{font-size:17px}
 body.in-tg .demo{display:none}
 .codein{font-size:26px!important;letter-spacing:.3em;text-align:center;font-weight:800}
 .ordcard{gap:10px}
@@ -290,9 +308,10 @@ body.in-tg .demo{display:none}
 
 <nav class="nav" aria-label="Разделы">
   <div class="nav-in">
-    <button data-go="shop"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M3 9h18v11H3zM9 13h6"/></svg>Магазин</button>
-    <button data-go="cart"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>Корзина<span class="badge" id="cartBadge" hidden>0</span></button>
-    <button data-go="orders"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/></svg>Заказы</button>
+    <button data-go="shop"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M3 9h18v11H3zM9 13h6"/></svg><span class="lbl">Магазин</span></button>
+    <button data-go="how" data-pre><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5h.01"/></svg>Как это работает</button>
+    <button data-go="cart" data-live><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>Корзина<span class="badge" id="cartBadge" hidden>0</span></button>
+    <button data-go="orders" data-live><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/></svg>Заказы</button>
     <button data-go="leader"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Лидер ЖК</button>
   </div>
 </nav>
@@ -322,7 +341,7 @@ const BUYER_STATUS = {
   ready:["Можно забирать","Назовите код лидеру и переведите оплату на Kaspi"],
   done:["Заказ выдан","Спасибо, что покупаете вместе"]
 };
-let ZKS = [], PRODUCTS = [], POOLS = {}, SET = {threshold:20000, kaspi:"", kaspi_name:"", tg:"", commission:5};
+let ZKS = [], PRODUCTS = [], POOLS = {}, SET = {threshold:20000, kaspi:"", kaspi_name:"", tg:"", commission:5, prelaunch:true, waiting:0};
 
 /* ===== Telegram Mini App ===== */
 const TG = (window.Telegram && Telegram.WebApp && Telegram.WebApp.initData) ? Telegram.WebApp : null;
@@ -353,7 +372,7 @@ const state = {
   loading:true, loadError:null, busy:false,
   orders: ss.get("adal-orders") || [], ostat:{}, oLoading:false, done:null,
   leader: ss.get("adal-leader"), ld:null, ldError:null, ltab:"collect", leaderMode:"login", regDone:false,
-  calc:30, tmpl:"eve", found:null, foundErr:null,
+  calc:30, tmpl:"eve", found:null, foundErr:null, ref:"", wait: ss.get("adal-wait"),
   reg:{name:"",phone:"",city:"Алматы",zk:"",addr:"",flats:"200–500",chat:"WhatsApp",members:"",spot:"Холл или консьерж",pay:"Самозанятый",agree:false}
 };
 
@@ -415,7 +434,8 @@ function cardCtl(id){
 
 function viewShop(){
   if(state.loading) return `<section class="section wrap"><div class="grid">${Array.from({length:4},()=>`<div class="card skel"><div class="photo"></div><div class="body"><div class="sk"></div><div class="sk short"></div></div></div>`).join("")}</div></section>`;
-  if(state.loadError) return `<section class="wrap empty"><h2>Не удалось загрузить каталог</h2><p class="muted">${esc(state.loadError)}. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-act="reload">Обновить</button></section>`;
+  if(state.loadError && !SET.prelaunch) return `<section class="wrap empty"><h2>Не удалось загрузить каталог</h2><p class="muted">${esc(state.loadError)}. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-act="reload">Обновить</button></section>`;
+  if(SET.prelaunch) return viewSoon();
   const cats = Object.keys(CATS).filter(k=>PRODUCTS.some(p=>p.cat===k));
   const list = PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
   const z = zk();
@@ -441,6 +461,50 @@ function viewShop(){
         </div>
       </article>`).join("")}
     </div>
+  </section>`;
+}
+
+
+/* ---------- скоро запуск ---------- */
+function waitShareLink(){ return (SET.tg ? SET.tg : location.origin + location.pathname) + (SET.tg ? "" : ""); }
+function viewSoon(){
+  const n=+SET.waiting||0, joined=state.wait;
+  const share=waitShareLink(), shareText="Скоро запускается Bereke store: бытовая химия до 40% дешевле магазина. Они не тратят деньги на рекламу, а возвращают их покупателям. Запишитесь в список ожидания:";
+  return `<section class="section wrap">
+    <div class="soon">
+      <span class="soon-tag">Скоро запуск</span>
+      <h1>Бытовая химия до&nbsp;40% дешевле магазина</h1>
+      <p>Мы не тратим деньги на рекламу — мы возвращаем их вам в цене.</p>
+      <svg class="soon-art" viewBox="0 0 46 36" aria-hidden="true"><path d="M3 34 V17 L14 7 L25 17 V34 Z" fill="rgba(255,255,255,.22)"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg>
+    </div>
+    ${PRODUCTS.length?`<div><h2 style="margin-bottom:8px">Первые товары</h2>
+      <div class="strip">${PRODUCTS.slice(0,10).map(p=>`<div class="tz"><div class="ph" style="${tile(p)}"><img src="${imgOf(p)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()"></div><span>${esc(p.brand||p.name)}</span></div>`).join("")}</div></div>`:""}
+    <div class="panel"><h2>Почему так дешевле</h2>
+      <div class="why"><b>1</b><div><div class="t">Покупаем оптом под заказ</div><div class="muted">Соседи заказывают вместе, мы закупаем у поставщиков большой партией.</div></div></div>
+      <div class="why"><b>2</b><div><div class="t">Без рекламы и магазина</div><div class="muted">Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.</div></div></div>
+      <div class="why"><b>3</b><div><div class="t">Заказ забираете у соседа</div><div class="muted">Лидер вашего дома принимает машину и выдаёт пакеты. Курьер к каждой двери не нужен.</div></div></div>
+    </div>
+    ${joined?`<div class="panel joined">
+        <div class="okc"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+        <h2>${esc(joined.name||"Вы")}, вы в списке!</h2>
+        <p class="muted" style="margin:0">Мы напишем, когда запустимся. Чем больше соседей запишется, тем быстрее начнём в вашем доме.</p>
+        <div class="two"><button class="btn block" data-ext="https://t.me/share/url?url=${encodeURIComponent(share)}&text=${encodeURIComponent(shareText)}">В Telegram</button>
+          <button class="btn block" data-ext="https://wa.me/?text=${encodeURIComponent(shareText+" "+share)}">В WhatsApp</button></div>
+        <button class="btn ghost block" data-copy="${esc(shareText+" "+share)}">Копировать приглашение</button>
+      </div>`
+    :`<form class="panel" id="waitForm" novalidate>
+        <h2>Записаться в список ожидания</h2>
+        <p class="muted" style="margin:0">Узнаете о запуске первыми и получите доступ к ценам до 40% ниже магазина.</p>
+        <div class="field"><label for="w-name">Имя</label><input id="w-name" autocomplete="given-name" maxlength="80" placeholder="Алия" value="${esc(CUST.name||"")}"></div>
+        <div class="field"><label for="w-phone">Телефон</label><input id="w-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __" value="${esc(CUST.phone||"")}"></div>
+        <div class="field"><label for="w-place">ЖК или адрес</label><input id="w-place" maxlength="120" placeholder="Например, ЖК Алатау Сити" value="${esc(state.ref?(ZKS.find(z=>z.id===state.ref)||{}).name||"":"")}"></div>
+        <p id="waitErr" class="err" hidden></p>
+        <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Записываем…":"Записаться"}</button>
+        <span class="muted" style="font-size:12px">${n>=10?`Уже в списке: ${n} ${plural(n,"сосед","соседа","соседей")}. `:"Станьте одним из первых. "}Нажимая кнопку, вы соглашаетесь на обработку персональных данных.</span>
+      </form>`}
+    <div class="leadpromo"><b>Хотите зарабатывать?</b>
+      <span>Станьте лидером своего ЖК: ${Math.round(SET.commission)}% с каждого заказа дома. Приглашайте соседей, а когда запустимся, выдавайте им заказы.</span>
+      <button class="btn accent block" data-act="becomeleader">Стать лидером ЖК</button></div>
   </section>`;
 }
 
@@ -639,11 +703,15 @@ function leaderLink(z){
   return location.origin + location.pathname + "?zk=" + encodeURIComponent(z.id);
 }
 function leaderBody(d){
+  if(SET.prelaunch){
+    if(state.tmpl==="morn") return `Соседи, скоро запускается Bereke store: бытовая химия до 40% дешевле магазина. Они не тратят деньги на рекламу, а возвращают их покупателям. Я буду лидером нашего дома: заказы привезут мне, и вы заберёте их у меня. Запишитесь в список ожидания.`;
+    return `Соседи, хотите платить за порошок, мыло и средства для посуды до 40% меньше? Скоро запускается Bereke store, и я буду выдавать заказы в нашем доме. Запишитесь в список ожидания, чтобы получить доступ первыми.`;
+  }
   const left = Math.max(0, d.threshold - d.pool);
   if(state.tmpl==="morn") return `Доброе утро, соседи! Сегодня до 21:00 собираем общий заказ Bereke store: бытовая химия дешевле магазина. Наберём ${fmt(d.threshold)}, заказы привезут мне, и вы заберёте их у меня.`;
   return `Соседи, сбор Bereke store закрывается сегодня в 21:00. Набрано ${fmt(d.pool)} из ${fmt(d.threshold)}${left?`, осталось ${fmt(left)}.`:". Сбор набран!"} Как наберём, заказы привезут мне, и вы заберёте их у меня. Бытовая химия по оптовым ценам.`;
 }
-const leaderText = d => leaderBody(d) + " Заказать: " + leaderLink(d.zk);
+const leaderText = d => leaderBody(d) + (SET.prelaunch ? " Записаться: " : " Заказать: ") + leaderLink(d.zk);
 
 function viewLeader(){
   if(!state.leader) return state.leaderMode==="reg" ? (state.regDone?viewRegDone():viewReg()) : viewLogin();
@@ -664,13 +732,15 @@ function viewLeader(){
   let body = "";
   if(state.ltab==="collect"){
     const text = leaderText(d);
-    body = collectCard({}, d.pool, "Сбор сегодня", "вам") + `
+    body = (SET.prelaunch
+      ? `<section class="collect"><b style="font-size:16px">Скоро запуск</b><div><span class="big">${d.waiting||0}</span> <span style="opacity:.85">${plural(d.waiting||0,"сосед записался","соседа записались","соседей записались")} по вашей ссылке</span></div><span class="sub">Когда запустимся, они станут вашими первыми покупателями. Чем больше людей в списке, тем быстрее начнём в вашем доме.</span></section>`
+      : collectCard({}, d.pool, "Сбор сегодня", "вам")) + `
     <section class="panel">
       <h2>Позвать соседей</h2>
       <div class="linkrow"><span>${esc(leaderLink(z))}</span><button class="btn light" data-copy="${esc(leaderLink(z))}">Копировать</button></div>
       <div class="chips" role="group" aria-label="Готовые тексты">
-        <button class="chip" data-tmpl="eve" aria-pressed="${state.tmpl==="eve"}">Вечер</button>
-        <button class="chip" data-tmpl="morn" aria-pressed="${state.tmpl==="morn"}">Утро</button></div>
+        <button class="chip" data-tmpl="eve" aria-pressed="${state.tmpl==="eve"}">${SET.prelaunch?"Про цены":"Вечер"}</button>
+        <button class="chip" data-tmpl="morn" aria-pressed="${state.tmpl==="morn"}">${SET.prelaunch?"Про лидера":"Утро"}</button></div>
       <div class="tmpl">${esc(text)}</div>
       <div class="two"><button class="btn block" data-ext="https://t.me/share/url?url=${encodeURIComponent(leaderLink(z))}&text=${encodeURIComponent(leaderBody(d))}">В Telegram</button>
         <button class="btn block" data-ext="https://wa.me/?text=${encodeURIComponent(text)}">В WhatsApp</button></div>
@@ -721,14 +791,17 @@ function viewLeader(){
 const VIEWS=["shop","cart","orders","how","leader"];
 function render(){
   $("#zkName").textContent = zk().name;
+  document.body.classList.toggle("prelaunch", !!SET.prelaunch);
+  if(SET.prelaunch && ["cart","orders","done"].includes(state.view)) state.view="shop";
   let html;
   if(state.view==="done"&&state.done) html=viewDone(state.done);
   else html=({shop:viewShop,cart:viewCart,orders:viewOrders,how:viewHow,leader:viewLeader}[state.view]||viewShop)();
   $("#view").innerHTML=html;
   const nav=state.view==="done"?"orders":state.view;
-  document.querySelectorAll(".nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===nav?"page":"false"));
+  document.querySelectorAll(".nav button").forEach(b=>{ b.setAttribute("aria-current",b.dataset.go===nav?"page":"false"); if(b.dataset.pre!==undefined) b.hidden=!SET.prelaunch; if(b.dataset.live!==undefined) b.hidden=!!SET.prelaunch; });
+  const lbl=document.querySelector('.nav [data-go="shop"] .lbl'); if(lbl) lbl.textContent = SET.prelaunch?"Главная":"Магазин";
   const c=cartCount(); const bd=$("#cartBadge"); bd.hidden=!c; bd.textContent=c;
-  const cb=$("#cartBar"), showBar=c>0 && state.view==="shop";
+  const cb=$("#cartBar"), showBar=c>0 && state.view==="shop" && !SET.prelaunch;
   cb.hidden=!showBar; document.body.classList.toggle("has-bar",showBar);
   if(showBar) cb.innerHTML=`<span class="cb-n">${c}</span><span class="cb-t">Корзина</span><b>${fmt(cartSum())}</b><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   $("#deadline").hidden = state.view==="leader";
@@ -813,8 +886,23 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{ if(e.target.id==="f-zk"){ state.zk=e.target.value; ss.set("adal-zk",state.zk); render(); } });
 
 document.addEventListener("submit",async e=>{
-  const id=e.target.id; if(!["checkout","regForm","loginForm","findForm"].includes(id)) return;
+  const id=e.target.id; if(!["checkout","regForm","loginForm","findForm","waitForm"].includes(id)) return;
   e.preventDefault(); if(state.busy) return;
+
+  if(id==="waitForm"){
+    const name=$("#w-name").value.trim(), phone=$("#w-phone").value.trim(), place=$("#w-place").value.trim(), err=$("#waitErr"), miss=[];
+    if(name.length<2) miss.push("имя");
+    if(phone.replace(/\D/g,"").length<10) miss.push("телефон");
+    if(miss.length){ err.textContent="Укажите "+miss.join(" и ")+", чтобы мы могли сообщить о запуске."; err.hidden=false; return; }
+    const u = TG && TG.initDataUnsafe && TG.initDataUnsafe.user;
+    state.busy=true; render(); $("#w-name").value=name; $("#w-phone").value=phone; $("#w-place").value=place;
+    try{
+      const r = await rpc("adal_waitlist_join",{p:{name, phone, place, ref:state.ref, tg_id:u&&u.id, tg_username:u&&u.username}});
+      CUST={...CUST, name, phone}; ss.set("adal-cust",CUST); state.wait={name}; ss.set("adal-wait",state.wait); SET.waiting=r.total;
+      state.busy=false; render(); window.scrollTo(0,0);
+    }catch(ex){ state.busy=false; render(); $("#w-name").value=name; $("#w-phone").value=phone; $("#w-place").value=place; const er=$("#waitErr"); er.textContent="Не получилось записать: "+ex.message; er.hidden=false; }
+    return;
+  }
 
   if(id==="checkout"){
     const v = k => $("#"+k).value.trim();
@@ -915,7 +1003,8 @@ window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(VI
 (function boot(){
   initTelegram();
   const q = new URLSearchParams(location.search).get("zk") || (TG && TG.initDataUnsafe && TG.initDataUnsafe.start_param) || "";
-  if(/^[A-Za-z0-9_-]{1,40}$/.test(q)){ state.zk=q; ss.set("adal-zk",q); }
+  if(/^[A-Za-z0-9_-]{1,40}$/.test(q)){ state.zk=q; state.ref=q; ss.set("adal-zk",q); ss.set("adal-ref",q); }
+  else state.ref = ss.get("adal-ref") || "";
   const u = TG && TG.initDataUnsafe && TG.initDataUnsafe.user;
   if(u && !CUST.name && u.first_name) CUST={...CUST, name:u.first_name};
   const h=location.hash.slice(1); if(VIEWS.includes(h)) state.view=h;
