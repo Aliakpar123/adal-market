@@ -614,6 +614,17 @@ body.prelaunch .sub-row{display:none!important}
 }
 .linkrow span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.3}
 @media (max-width:340px){.reg-hero h1{font-size:19px}.fact span{font-size:10.5px;line-height:1.2}.fact{padding:10px 6px}}
+
+/* поставщикам */
+.sup-hero{min-height:200px}
+.wrapchips{flex-wrap:wrap;overflow:visible}
+.bizp{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+.bizp .btn{flex:none}
+@media (max-width:400px){.bizp{flex-direction:column;align-items:stretch}.bizp .btn{align-self:flex-start}}
+.field textarea{border:1.5px solid var(--line);background:var(--bg);border-radius:12px;padding:12px;font:inherit;color:var(--ink);width:100%;resize:vertical;border-color:transparent}
+.field textarea:focus{border-color:var(--brand);outline:none}
+body[data-hero="irbi"] .sup-hero .himg{height:108px;right:6px;bottom:6px}
+body[data-hero="irbi"] .sup-hero>*:not(.himg){max-width:70%}
 </style>
 </head>
 <body>
@@ -706,7 +717,7 @@ const ss = {
 let CUST = ss.get("adal-cust") || {};
 
 const state = {
-  view:"shop", cat:"all", q:"", pid:null, hero: ss.get("adal-hero") || "irbi", src: ss.get("adal-src") || "", fulfil: ss.get("adal-fulfil")==="delivery"?"delivery":"pickup", zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
+  view:"shop", cat:"all", q:"", pid:null, hero: ss.get("adal-hero") || "irbi", sup:{company:"",bin:"",contact:"",phone:"",email:"",city:"Алматы",cats:[],assortment:"",min_order:"",delivery:"Своя доставка до нашего склада",vat:"С НДС",link:"",comment:"",agree:false,busy:false,err:"",done:false}, src: ss.get("adal-src") || "", fulfil: ss.get("adal-fulfil")==="delivery"?"delivery":"pickup", zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
   loading:true, loadError:null, busy:false,
   orders: ss.get("adal-orders") || [], ostat: ss.get("adal-ostat") || {}, oLoading:false, done:null, ptab:"", rst:{phone:"",id:"",code:"",err:"",busy:false}, clr:false,
   leader: ss.get("adal-leader"), ld:null, ldError:null, ltab:"collect", leaderMode:"login", regDone:false,
@@ -835,6 +846,14 @@ const KK = {
 "Группа WhatsApp Bereke store":"Bereke store WhatsApp тобы","Новости, акции и ответы на вопросы.":"Жаңалықтар, акциялар және сұрақтарға жауаптар.","Вопросы по заказу":"Тапсырыс бойынша сұрақтар","Задайте их в группе WhatsApp Bereke store.":"Оларды Bereke store WhatsApp тобында қойыңыз.","Остались вопросы?":"Сұрақтар қалды ма?",
 "Чат лидеров ЖК в WhatsApp":"ТҮК лидерлерінің WhatsApp чаты","Задайте вопросы действующим лидерам и узнайте, как проходит выдача.":"Қазіргі лидерлерге сұрақ қойып, тапсырыс беру қалай өтетінін біліңіз.","Вступить в чат лидеров":"Лидерлер чатына қосылу","Вступите в чат лидеров":"Лидерлер чатына қосылыңыз","Пока менеджер звонит, познакомьтесь с другими лидерами и задайте вопросы.":"Менеджер қоңырау шалғанша, басқа лидерлермен танысып, сұрақ қойыңыз.",
 "Чат лидеров в WhatsApp":"Лидерлердің WhatsApp чаты","Вопросы по входу, выдаче и выплатам.":"Кіру, тапсырыс беру және төлемдер бойынша сұрақтар.","Чат лидеров ЖК":"ТҮК лидерлер чаты","Вопросы по сбору, выдаче и выплатам. Отвечают менеджеры и другие лидеры.":"Жинақ, тапсырыс беру және төлемдер бойынша сұрақтар. Менеджерлер мен басқа лидерлер жауап береді.",
+"Для бизнеса":"Бизнес үшін","Поставщикам и производителям":"Жеткізушілер мен өндірушілерге","Мы закупаем товары оптом под заказы жителей ЖК. Оставьте заявку, и менеджер свяжется с вами.":"Біз ТҮК тұрғындарының тапсырыстарына көтерме тауар сатып аламыз. Өтінім қалдырыңыз, менеджер сізбен байланысады.",
+"Что мы ищем":"Біз нені іздейміз","Продукты и товары для дома":"Азық-түлік және үй тауарлары","Оптовые цены от партии":"Партиядан бастап көтерме бағалар","Доставка до нашего склада или самовывоз":"Қоймамызға жеткізу немесе өзі алып кету","Что понадобится":"Не қажет болады","Прайс с оптовыми ценами":"Көтерме бағалы прайс","Сертификаты и сроки годности":"Сертификаттар мен жарамдылық мерзімдері","Контактное лицо для заказов":"Тапсырыстар үшін байланыс тұлғасы",
+"Как мы работаем":"Біз қалай жұмыс істейміз","Оставляете заявку":"Өтінім қалдырасыз","Коротко опишите компанию и товары.":"Компания мен тауарларды қысқаша сипаттаңыз.","1–3 дня":"1–3 күн","Знакомимся":"Танысамыз","Менеджер свяжется, запросит прайс и документы.":"Менеджер байланысып, прайс пен құжаттарды сұрайды.","Дальше":"Одан әрі","Пробная партия":"Сынақ партиясы","Первая небольшая поставка, чтобы проверить качество и сроки.":"Сапа мен мерзімді тексеру үшін алғашқы шағын жеткізу.",
+"Заявка поставщика":"Жеткізуші өтінімі","О компании":"Компания туралы","Название компании":"Компания атауы","Например, ТОО «Алатау Фуд»":"Мысалы, «Алатау Фуд» ЖШС","БИН или ИИН (необязательно)":"БСН немесе ЖСН (міндетті емес)","12 цифр":"12 сан","Город":"Қала","НДС":"ҚҚС","С НДС":"ҚҚС-пен","Без НДС":"ҚҚС-сыз","Уточню позже":"Кейін нақтылаймын",
+"Контакт":"Байланыс","Контактное лицо":"Байланыс тұлғасы","Имя и должность":"Аты-жөні және лауазымы","Email (необязательно)":"Email (міндетті емес)","Что поставляете":"Не жеткізесіз","Категории товаров":"Тауар санаттары","Ассортимент":"Ассортимент","Например: крупы, мука, масло; фасовка 1–25 кг":"Мысалы: жарма, ұн, май; қаптамасы 1–25 кг","Минимальная партия":"Ең аз партия","Например, от 200 000 ₸":"Мысалы, 200 000 ₸-дан","Доставка":"Жеткізу","Своя доставка до нашего склада":"Қоймамызға өз жеткізуіңіз","Самовывоз с вашего склада":"Қоймаңыздан өзі алып кету","Обсудим":"Талқылаймыз",
+"Сайт, прайс или Instagram (необязательно)":"Сайт, прайс немесе Instagram (міндетті емес)","Ссылка":"Сілтеме","Комментарий (необязательно)":"Түсініктеме (міндетті емес)","Что ещё важно знать":"Тағы нені білу маңызды","Согласен на обработку персональных данных и контакт по заявке":"Дербес деректерді өңдеуге және өтінім бойынша байланысуға келісемін","Отправить заявку":"Өтінімді жіберу","Заявка принята":"Өтінім қабылданды","Что дальше":"Одан әрі не болады",
+"Менеджер позвонит":"Менеджер қоңырау шалады","Уточнит ассортимент, объёмы и условия.":"Ассортимент, көлем және шарттарды нақтылайды.","Пришлёте прайс":"Прайс жібересіз","Лучше с ценами для оптовых партий и сроками годности.":"Көтерме партияға бағалары мен жарамдылық мерзімдері бар болғаны жөн.","Договоримся о первой поставке и формате работы.":"Алғашқы жеткізу және жұмыс форматы туралы келісеміз.","После звонка":"Қоңыраудан кейін","Назад":"Артқа","На главную":"Басты бетке",
+"Вы производитель или поставщик?":"Сіз өндірушісіз бе немесе жеткізушісіз бе?","Мы закупаем оптом под заказы жителей ЖК. Оставьте заявку.":"Біз ТҮК тұрғындарының тапсырыстарына көтерме сатып аламыз. Өтінім қалдырыңыз.","Для поставщиков":"Жеткізушілерге","Поставщикам и бизнесу":"Жеткізушілер мен бизнеске","Я поставщик или производитель":"Мен жеткізушімін немесе өндірушімін",
 "Состав":"Құрамы","Срок годности":"Жарамдылық мерзімі","Хранение":"Сақтау","О товаре":"Тауар туралы","В магазине":"Дүкенде","Цены откроем при запуске":"Бағаны іске қосылғанда ашамыз","Карточка товара":"Тауар картасы","В корзине":"Себетте","Не ограничен":"Шектелмейді",
 "Рис длиннозёрный шлифованный":"Ұзын дәнді тазартылған күріш","Крупа гречневая ядрица":"Қарақұмық жармасы (ядрица)","Сахар белый кристаллический":"Ақ кристалды қант","Пшеничная мука высшего сорта":"Жоғары сортты бидай ұны","Мука из твёрдых сортов пшеницы, вода":"Қатты бидай ұны, су","Хлопья овсяные":"Сұлы жапырақшалары","Соль пищевая поваренная":"Ас тұзы","Кофе жареный молотый":"Қуырылған ұнтақ кофе","Масло подсолнечное рафинированное":"Тазартылған күнбағыс майы","Чай чёрный байховый, 100 пакетиков":"Қара байховый шай, 100 пакет","Говядина, жир, соль, специи":"Сиыр еті, май, тұз, дәмдеуіштер","Томаты, соль":"Қызанақ, тұз",
 "В сухом прохладном месте, в закрытой таре":"Құрғақ салқын жерде, жабық ыдыста","В сухом прохладном месте":"Құрғақ салқын жерде","В сухом месте, вдали от запахов":"Құрғақ жерде, иістерден алыс","В сухом месте":"Құрғақ жерде","В плотно закрытой упаковке, в сухом месте":"Тығыз жабық қаптамада, құрғақ жерде","В тёмном месте при температуре до 20 °C":"Қараңғы жерде, 20 °C-қа дейінгі температурада","При температуре от 0 до 20 °C":"0-ден 20 °C-қа дейінгі температурада","При температуре от 0 до 25 °C":"0-ден 25 °C-қа дейінгі температурада"
@@ -871,6 +890,8 @@ const KK_RE = [
 [/^(Активные|История) · (\d+)$/,(m,a,n)=>(a==="Активные"?"Белсенді":"Тарих")+" · "+n],
 [/^(\d+) из (\d+)$/,"$1 / $2"],
 [/^Осталось ещё (\d+)\. Позовите соседей, так мы запустимся быстрее\.$/,"Тағы $1 қалды. Көршілерді шақырыңыз, сонда біз тезірек іске қосамыз."],
+[/^(.+), спасибо! Менеджер свяжется с вами по телефону (.+)\.$/,"$1, рахмет! Менеджер сізбен $2 телефоны бойынша байланысады."],
+[/^Укажите: (.+)\.$/,"Көрсетіңіз: $1."],
 [/^Добавить в корзину · (.+)$/,"Себетке қосу · $1"],
 [/^Оформить заказ на (.+)$/,"Тапсырыс беру: $1"],
 [/^Заказ №(\d+) принят$/,"№$1 тапсырыс қабылданды"],[/^Заказ №(\d+)$/,"№$1 тапсырыс"],
@@ -1165,6 +1186,7 @@ function viewSoon(){
       <div class="why"><b>2</b><div><div class="t">Без рекламы и магазина</div><div class="muted">Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.</div></div></div>
       <div class="why"><b>3</b><div><div class="t">Заказ забираете у соседа</div><div class="muted">Лидер вашего дома принимает машину и выдаёт пакеты. Курьер к каждой двери не нужен.</div></div></div>
     </div>
+    <div class="panel bizp"><div><b>Вы производитель или поставщик?</b><div class="muted" style="font-size:13px">Мы закупаем оптом под заказы жителей ЖК. Оставьте заявку.</div></div><button class="btn light" data-go="supply">Для поставщиков</button></div>
     ${tipHtml({pose:"cheer",text:`Хотите зарабатывать? Станьте лидером своего ЖК: ${Math.round(SET.commission)}% с каждого заказа дома. Приглашайте соседей, а когда запустимся, выдавайте им заказы.`,btn:["Стать лидером ЖК",'data-act="becomeleader"']})}
   </section>`;
 }
@@ -1247,6 +1269,65 @@ function viewDone(o){
   </section>`;
 }
 
+/* ---------- поставщикам ---------- */
+const SUP_CITIES=["Алматы","Астана","Шымкент","Караганда","Другой город"];
+function viewSupply(){
+  const u=state.sup, h=hero();
+  if(u.done) return `<section class="section wrap">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding-top:16px">${heroBig("cheer")}
+      <h1>Заявка принята</h1>
+      <p class="muted" style="margin:0">${esc((u.contact||"").split(" ")[0])}, спасибо! Менеджер свяжется с вами по телефону ${esc(u.phone)}.</p></div>
+    <div class="panel"><h2>Что дальше</h2><div class="steps">
+      ${[["1–3 дня","Менеджер позвонит","Уточнит ассортимент, объёмы и условия."],["После звонка","Пришлёте прайс","Лучше с ценами для оптовых партий и сроками годности."],["Дальше","Пробная партия","Договоримся о первой поставке и формате работы."]].map((x,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${x[0]}</span><div class="t">${x[1]}</div><div class="muted">${x[2]}</div></div></div>`).join("")}
+    </div></div>
+    ${waBox("all","Остались вопросы?","Напишите в группу WhatsApp Bereke store.")}
+    <button class="btn ghost block" data-go="shop">На главную</button></section>`;
+  return `<section class="section wrap">
+    <div class="reg-hero sup-hero">
+      ${heroMedia("point","himg an-breath",h.w,h.h)}
+      <span class="label" style="color:inherit;opacity:.85">Для бизнеса</span>
+      <h1>Поставщикам и производителям</h1>
+      <p style="margin:0;opacity:.92">Мы закупаем товары оптом под заказы жителей ЖК. Оставьте заявку, и менеджер свяжется с вами.</p>
+      <button class="cta" data-act="tosupform">Оставить заявку</button>
+    </div>
+    <div class="two2">
+      <div class="panel"><h2>Что мы ищем</h2><ul class="tick"><li>Продукты и товары для дома</li><li>Оптовые цены от партии</li><li>Доставка до нашего склада или самовывоз</li></ul></div>
+      <div class="panel"><h2>Что понадобится</h2><ul class="tick"><li>Прайс с оптовыми ценами</li><li>Сертификаты и сроки годности</li><li>Контактное лицо для заказов</li></ul></div>
+    </div>
+    <h2>Как мы работаем</h2>
+    <div class="steps">
+      ${[["Сегодня","Оставляете заявку","Коротко опишите компанию и товары."],["1–3 дня","Знакомимся","Менеджер свяжется, запросит прайс и документы."],["Дальше","Пробная партия","Первая небольшая поставка, чтобы проверить качество и сроки."]].map((x,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${x[0]}</span><div class="t">${x[1]}</div><div class="muted">${x[2]}</div></div></div>`).join("")}
+    </div>
+    <form class="panel" id="supplyForm" novalidate>
+      <h2 id="sup-form">Заявка поставщика</h2>
+      <span class="label">О компании</span>
+      <div class="field"><label for="s-company">Название компании</label><input id="s-company" data-sup="company" maxlength="120" autocomplete="organization" value="${esc(u.company)}" placeholder="Например, ТОО «Алатау Фуд»"></div>
+      <div class="field"><label for="s-bin">БИН или ИИН (необязательно)</label><input id="s-bin" data-sup="bin" inputmode="numeric" maxlength="12" value="${esc(u.bin)}" placeholder="12 цифр"></div>
+      <div class="two">
+        <div class="field"><label for="s-city">Город</label><select id="s-city" data-sup="city">${opts(SUP_CITIES,u.city)}</select></div>
+        <div class="field"><label for="s-vat">НДС</label><select id="s-vat" data-sup="vat">${opts(["С НДС","Без НДС","Уточню позже"],u.vat)}</select></div>
+      </div>
+      <span class="label" style="margin-top:6px">Контакт</span>
+      <div class="field"><label for="s-contact">Контактное лицо</label><input id="s-contact" data-sup="contact" maxlength="80" autocomplete="name" value="${esc(u.contact)}" placeholder="Имя и должность"></div>
+      <div class="field"><label for="s-phone">Телефон (лучше с WhatsApp)</label><input id="s-phone" data-sup="phone" type="tel" maxlength="30" autocomplete="tel" value="${esc(u.phone)}" placeholder="+7 7__ ___ __ __"></div>
+      <div class="field"><label for="s-email">Email (необязательно)</label><input id="s-email" data-sup="email" type="email" maxlength="120" autocomplete="email" value="${esc(u.email)}" placeholder="name@company.kz"></div>
+      <span class="label" style="margin-top:6px">Что поставляете</span>
+      <div class="chips wrapchips" role="group" aria-label="Категории товаров">${Object.keys(CATS).map(k=>`<button type="button" class="chip" data-scat="${k}" aria-pressed="${u.cats.includes(k)}">${CATS[k]}</button>`).join("")}</div>
+      <div class="field"><label for="s-assort">Ассортимент</label><textarea id="s-assort" data-sup="assortment" rows="3" maxlength="1000" placeholder="Например: крупы, мука, масло; фасовка 1–25 кг">${esc(u.assortment)}</textarea></div>
+      <div class="two">
+        <div class="field"><label for="s-min">Минимальная партия</label><input id="s-min" data-sup="min_order" maxlength="120" value="${esc(u.min_order)}" placeholder="Например, от 200 000 ₸"></div>
+        <div class="field"><label for="s-delivery">Доставка</label><select id="s-delivery" data-sup="delivery">${opts(["Своя доставка до нашего склада","Самовывоз с вашего склада","Обсудим"],u.delivery)}</select></div>
+      </div>
+      <div class="field"><label for="s-link">Сайт, прайс или Instagram (необязательно)</label><input id="s-link" data-sup="link" maxlength="300" value="${esc(u.link)}" placeholder="Ссылка"></div>
+      <div class="field"><label for="s-comment">Комментарий (необязательно)</label><input id="s-comment" data-sup="comment" maxlength="500" value="${esc(u.comment)}" placeholder="Что ещё важно знать"></div>
+      <label class="check" for="s-agree"><input id="s-agree" type="checkbox" data-sup="agree" ${u.agree?"checked":""}><span>Согласен на обработку персональных данных и контакт по заявке</span></label>
+      <p id="supErr" class="err" ${u.err?"":"hidden"}>${esc(u.err)}</p>
+      <button class="btn accent block" type="submit" ${u.busy?"disabled":""}>${u.busy?"Отправляем…":"Отправить заявку"}</button>
+    </form>
+    <button class="btn ghost block" data-go="shop">Назад</button>
+  </section>`;
+}
+
 /* ---------- профиль и история заказов ---------- */
 const PK_NAMES=["Сбор","В пути","Привезли","Выдан"], DL_NAMES=["Принят","Собираем","В пути","Доставлен"];
 const MONTHS = {
@@ -1315,6 +1396,7 @@ function viewProfile(){
       <div class="setrow"><span>Язык</span><div class="seg2 inl" role="group" aria-label="Язык"><button data-setlang="ru" aria-pressed="${LANG==="ru"}">РУС</button><button data-setlang="kk" aria-pressed="${LANG==="kk"}">ҚАЗ</button></div></div>
       <div class="setrow col"><span>Помощник</span><div class="hgrid">${heroPick()}</div></div>
       <button class="rowlink" data-go="leader"><span>Кабинет лидера ЖК</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="rowlink" data-go="supply"><span>Поставщикам и бизнесу</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
       <button class="rowlink" data-go="how"><span>Как это работает</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <p class="muted" style="font-size:12px;text-align:center;margin:0">Заказы и данные хранятся на этом устройстве. На другом устройстве их можно восстановить по телефону.</p>
@@ -1356,6 +1438,7 @@ function viewHow(){
     <h2>Ваш помощник</h2>
     <div class="hgrid">${heroPick()}</div>
     ${waBox("all","Остались вопросы?","Задайте их в группе WhatsApp Bereke store.")}
+    <button class="btn ghost block" data-go="supply">Я поставщик или производитель</button>
     <button class="btn accent block" data-act="becomeleader">Стать лидером своего ЖК</button>
     <button class="btn ghost block" data-go="shop">Перейти к покупкам</button>
   </section>`;
@@ -1571,7 +1654,7 @@ function viewLeader(){
 }
 
 /* ---------- отрисовка и данные ---------- */
-const VIEWS=["shop","cart","profile","orders","how","leader"];
+const VIEWS=["shop","cart","profile","orders","how","leader","supply"];
 function render(){
   document.body.dataset.hero=state.hero;
   $("#zkName").textContent = zk().name;
@@ -1580,7 +1663,7 @@ function render(){
   if(SET.prelaunch && ["cart","profile","done"].includes(state.view)) state.view="shop";
   let html;
   if(state.view==="done"&&state.done) html=viewDone(state.done);
-  else html=({shop:viewShop,cart:viewCart,profile:viewProfile,how:viewHow,leader:viewLeader}[state.view]||viewShop)();
+  else html=({shop:viewShop,cart:viewCart,profile:viewProfile,supply:viewSupply,how:viewHow,leader:viewLeader}[state.view]||viewShop)();
   $("#view").innerHTML=html;
   const nav=state.view==="done"?"profile":state.view;
   document.querySelectorAll(".nav button").forEach(b=>{ b.setAttribute("aria-current",b.dataset.go===nav?"page":"false"); if(b.dataset.pre!==undefined) b.hidden=!SET.prelaunch; if(b.dataset.live!==undefined) b.hidden=!!SET.prelaunch; });
@@ -1688,6 +1771,8 @@ document.addEventListener("click",e=>{
   if(d.pay){ state.reg.pay=d.pay; document.querySelectorAll("[data-pay]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pay===d.pay)); return; }
   if(d.act==="reload"){ loadCatalog(); return; }
   if(d.act==="toform"){ const f=$("#reg-form"); if(f) f.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  if(d.scat){ const c=state.sup.cats, i=c.indexOf(d.scat); if(i>=0) c.splice(i,1); else c.push(d.scat); t.setAttribute("aria-pressed",String(i<0)); return; }
+  if(d.act==="tosupform"){ const f=$("#sup-form"); if(f) f.scrollIntoView({behavior:"smooth",block:"start"}); return; }
   if(d.act==="wajoinl"){ const w=waUrl("leaders"); if(w) openExternal(w); return; }
   if(d.act==="wajoin"){
     const w=(SET.wa||"").trim(); if(!w) return;
@@ -1705,8 +1790,22 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{ if(e.target.id==="f-zk"){ state.zk=e.target.value; ss.set("adal-zk",state.zk); render(); } });
 
 document.addEventListener("submit",async e=>{
-  const id=e.target.id; if(!["checkout","regForm","loginForm","findForm","waitForm","restoreForm","profileForm"].includes(id)) return;
+  const id=e.target.id; if(!["checkout","regForm","loginForm","findForm","waitForm","restoreForm","profileForm","supplyForm"].includes(id)) return;
   e.preventDefault(); if(state.busy) return;
+
+  if(id==="supplyForm"){
+    const u=state.sup; u.err="";
+    const miss=[]; if(u.company.trim().length<2) miss.push("название компании"); if(u.contact.trim().length<2) miss.push("контактное лицо");
+    if(u.phone.replace(/\D/g,"").length<10) miss.push("телефон"); if(u.assortment.trim().length<5) miss.push("ассортимент");
+    if(miss.length){ u.err="Укажите: "+miss.join(", ")+"."; render(); $("#supErr")&&$("#supErr").scrollIntoView({block:"center"}); return; }
+    if(!u.agree){ u.err="Подтвердите согласие на обработку данных."; render(); $("#supErr")&&$("#supErr").scrollIntoView({block:"center"}); return; }
+    u.busy=true; render();
+    try{
+      await rpc("adal_submit_supplier",{p:{company:u.company,bin:u.bin,contact:u.contact,phone:u.phone,email:u.email,city:u.city,categories:u.cats,assortment:u.assortment,min_order:u.min_order,delivery:u.delivery,vat:u.vat,link:u.link,comment:u.comment,src:state.src}});
+      u.busy=false; u.done=true; render(); window.scrollTo(0,0);
+    }catch(ex){ u.busy=false; u.err=ex.message; render(); $("#supErr")&&$("#supErr").scrollIntoView({block:"center"}); }
+    return;
+  }
 
   if(id==="profileForm"){
     const g=k=>document.getElementById(k).value.trim();
@@ -1835,6 +1934,7 @@ document.addEventListener("input",e=>{
     if(t.id==="calcO"){ state.calcO=+t.value; $("#calcOn").textContent=t.value; }
     if(t.id==="calcC"){ state.calcC=+t.value; $("#calcCn").textContent=fmt(+t.value); }
     $("#calcRes").innerHTML=calcOutHtml(); return; }
+  if(t.dataset.sup){ state.sup[t.dataset.sup]= t.type==="checkbox" ? t.checked : t.value; return; }
   if(t.dataset.reg){ state.reg[t.dataset.reg]= t.type==="checkbox" ? t.checked : t.value; t.classList.remove("bad"); }
 });
 

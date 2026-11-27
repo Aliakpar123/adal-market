@@ -256,7 +256,7 @@ const store = {
 };
 
 const state = { pass: store.get(), products: [], q:"", filter:"all", busy:false, loading:false,
-  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","finance","leaders","waitlist","plan"].includes(h)?h:"products"; })(),
+  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","finance","leaders","waitlist","suppliers","plan"].includes(h)?h:"products"; })(),
   orders: [], days: 7, ozk: "all", ost: "all", apps: [], zks: [], confirm: null };
 const DEF_SET = {leader:7, acq:1.5, tax:4, logistics:0, target:15};
 const S = () => ({...DEF_SET, ...(state.settings||{})});
@@ -299,10 +299,10 @@ const dt = s => new Date(s).toLocaleString("ru-RU",{day:"numeric",month:"short",
 function tabsHtml(){
   const n = state.apps.filter(a=>a.status==="new").length;
   return `<div class="tabs" role="tablist">
-    ${[["products","Товары"],["orders","Заказы"],["finance","Финансы"],["leaders","Лидеры"],["waitlist","Ожидающие"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
+    ${[["products","Товары"],["orders","Заказы"],["finance","Финансы"],["leaders","Лидеры"],["waitlist","Ожидающие"],["suppliers","Поставщики"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
   </div>`;
 }
-function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else if(state.tab==="plan") viewPlan(); else if(state.tab==="finance") viewFinance(); else if(state.tab==="waitlist") viewWaitlist(); else viewList(); }
+function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else if(state.tab==="plan") viewPlan(); else if(state.tab==="finance") viewFinance(); else if(state.tab==="waitlist") viewWaitlist(); else if(state.tab==="suppliers") viewSuppliers(); else viewList(); }
 const $ = s => document.querySelector(s);
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = n => Math.round(n).toLocaleString("ru-RU").replace(/ |,/g," ") + " ₸";
@@ -631,7 +631,7 @@ async function loadLeaders(){
   if(state.pass) render();
 }
 function authFail(ex){ if(/пароль|попыток/i.test(ex.message)){ state.pass=null; store.del(); viewLogin(ex.message); return true; } return false; }
-function setTab(t){ state.tab=t; history.replaceState(null,"","#"+t); state.confirm=null; render(); if(t==="orders") loadOrders(); if(t==="leaders") loadLeaders(); if(t==="plan") loadPlanData(); if(t==="finance") loadFinance(); if(t==="waitlist") loadWaitlist(); }
+function setTab(t){ state.tab=t; history.replaceState(null,"","#"+t); state.confirm=null; render(); if(t==="orders") loadOrders(); if(t==="leaders") loadLeaders(); if(t==="plan") loadPlanData(); if(t==="finance") loadFinance(); if(t==="waitlist") loadWaitlist(); if(t==="suppliers") loadSuppliers(); }
 
 
 /* ===================== План: сколько продать, чтобы заработать N ===================== */
@@ -896,6 +896,50 @@ function viewWaitlist(){
         <div>${state.confirm===("wl"+w.id)?`<button class="btn danger" data-wldel="${w.id}" style="padding:6px 10px">Удалить</button>`:`<button class="ghost" data-askwldel="${w.id}" style="font-size:12px">Удалить</button>`}</div></div>
     </div>`).join(""):`<div class="empty">${q?"Ничего не найдено":"Пока никто не записался. Запустите рекламу, и записи появятся здесь."}</div>`}</div>`;
 }
+const SUP_ST = {new:"Новая", contacted:"Связались", approved:"Одобрена", rejected:"Отклонена"};
+async function loadSuppliers(){
+  try{ const d = await rpc("adal_admin_suppliers", {p_pass:state.pass}); state.sups = d.list || []; }
+  catch(ex){ if(!authFail(ex)) toast(ex.message); }
+  if(state.pass && state.tab==="suppliers") viewSuppliers();
+}
+function viewSuppliers(){
+  $("#topActions").hidden = false;
+  const all = state.sups; const q = (state.sq||"").trim().toLowerCase(), f = state.sf||"all";
+  if(!all){ $("#view").innerHTML = tabsHtml() + `<div class="empty">Загружаем…</div>`; return; }
+  const list = all.filter(w => (f==="all"||w.status===f) && (!q || [w.company,w.contact,w.phone,w.city,w.assortment,(w.categories||[]).join(" ")].join(" ").toLowerCase().includes(q)));
+  const nNew = all.filter(w=>w.status==="new").length;
+  $("#view").innerHTML = tabsHtml() + `
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+      <div><h1>Поставщики</h1><p class="muted" style="margin:4px 0 0">Заявки компаний, которые хотят поставлять товары. Статус и заметку можно менять в карточке.</p></div>
+      <div class="acts"><button class="btn light" data-act="supcsv">Скачать CSV</button></div>
+    </div>
+    <div class="summary">
+      <div class="stat"><b>${all.length}</b><span>всего заявок</span></div>
+      <div class="stat"><b>${nNew}</b><span>новых</span></div>
+      <div class="stat"><b>${all.filter(w=>w.status==="approved").length}</b><span>одобрено</span></div>
+    </div>
+    <div class="filters"><div class="chips" role="group" aria-label="Статус">${[["all","Все"],...Object.entries(SUP_ST)].map(([k,v])=>`<button class="chip" data-supf="${k}" aria-pressed="${f===k}">${v}</button>`).join("")}</div></div>
+    <div class="toolbar"><label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="sq" placeholder="Найти по компании, контакту, товару" value="${esc(state.sq||"")}" aria-label="Поиск"></label></div>
+    <div class="list">${list.length?list.map(w=>`<div class="ocard">
+      <div class="top-l"><div><div class="who">${esc(w.company)}</div>
+        <div class="sub">${esc(w.contact)} · ${esc(w.phone)}${w.email?" · "+esc(w.email):""}</div>
+        <div class="sub">${esc(w.city||"город не указан")}${w.bin?" · БИН/ИИН "+esc(w.bin):""}${w.vat?" · "+esc(w.vat):""} · ${dt(w.created_at)}${w.src?" · реклама: "+esc(w.src):""}</div></div>
+        <select class="st" data-supst="${w.id}" aria-label="Статус заявки ${w.id}">${Object.entries(SUP_ST).map(([k,v])=>`<option value="${k}" ${w.status===k?"selected":""}>${v}</option>`).join("")}</select></div>
+      ${(w.categories||[]).length?`<div class="sub">${(w.categories||[]).map(k=>`<span class="tag">${esc(CATS[k]||k)}</span>`).join(" ")}</div>`:""}
+      <div class="items">${esc(w.assortment||"")}</div>
+      ${w.min_order||w.delivery?`<div class="sub">${w.min_order?"Мин. партия: "+esc(w.min_order):""}${w.min_order&&w.delivery?" · ":""}${w.delivery?esc(w.delivery):""}</div>`:""}
+      ${w.link?`<div class="sub"><a href="${esc(/^https?:\/\//i.test(w.link)?w.link:"https://"+w.link)}" target="_blank" rel="noopener noreferrer">${esc(w.link)}</a></div>`:""}
+      ${w.comment?`<div class="sub">Комментарий: ${esc(w.comment)}</div>`:""}
+      <div class="field" style="margin-top:4px"><label for="sn${w.id}" class="hint">Заметка менеджера</label><input id="sn${w.id}" data-supnote="${w.id}" maxlength="500" value="${esc(w.admin_note||"")}" placeholder="Например: звонили, ждём прайс"></div>
+      <div style="display:flex;justify-content:flex-end">${state.confirm===("sp"+w.id)?`<button class="btn danger" data-supdel="${w.id}" style="padding:6px 10px">Удалить</button>`:`<button class="ghost" data-asksupdel="${w.id}" style="font-size:12px">Удалить</button>`}</div>
+    </div>`).join(""):`<div class="empty">${q||f!=="all"?"Ничего не найдено":"Пока заявок нет. Ссылка для поставщиков: страница «Поставщикам и бизнесу» в магазине."}</div>`}</div>`;
+}
+function downloadSupCsv(){
+  const rows = [["Компания","Контакт","Телефон","Email","Город","БИН/ИИН","НДС","Категории","Ассортимент","Мин. партия","Доставка","Ссылка","Комментарий","Статус","Заметка","Реклама","Дата"]].concat((state.sups||[]).map(w=>[w.company,w.contact,w.phone,w.email||"",w.city||"",w.bin||"",w.vat||"",(w.categories||[]).map(k=>CATS[k]||k).join(", "),w.assortment||"",w.min_order||"",w.delivery||"",w.link||"",w.comment||"",SUP_ST[w.status]||w.status,w.admin_note||"",w.src||"",new Date(w.created_at).toLocaleString("ru-RU")]));
+  const csv = "\ufeff" + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download = "suppliers.csv";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
 function downloadCsv(){
   const rows = [["Имя","Телефон","ЖК или адрес","Привёл лидер","Реклама","Telegram","WhatsApp","Дата"]].concat((state.wl?.list||[]).map(w=>[w.name,w.phone,w.place||"",w.ref_name||"",w.src||"",w.tg_username?"@"+w.tg_username:"",w.wa_click_at?"нажал":"",new Date(w.created_at).toLocaleString("ru-RU")]));
   const csv = "﻿" + rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\r\n");
@@ -998,6 +1042,10 @@ document.addEventListener("click", async e => {
   if(b.dataset.act==="new"){ openEditor(null); return; }
   if(b.dataset.act==="calcset"){ openCalcSettings(); return; }
   if(b.dataset.act==="csv"){ downloadCsv(); return; }
+  if(b.dataset.supf){ state.sf=b.dataset.supf; viewSuppliers(); return; }
+  if(b.dataset.act==="supcsv"){ downloadSupCsv(); return; }
+  if(b.dataset.asksupdel){ state.confirm="sp"+b.dataset.asksupdel; viewSuppliers(); return; }
+  if(b.dataset.supdel){ try{ await rpc("adal_admin_supplier_delete",{p_pass:state.pass,p_id:+b.dataset.supdel}); state.confirm=null; toast("Заявка удалена"); await loadSuppliers(); }catch(ex){ toast(ex.message); } return; }
   if(b.dataset.askwldel){ state.confirm="wl"+b.dataset.askwldel; viewWaitlist(); return; }
   if(b.dataset.wldel){ try{ await rpc("adal_admin_waitlist_delete",{p_pass:state.pass,p_id:+b.dataset.wldel}); state.confirm=null; toast("Запись удалена"); await loadWaitlist(); }catch(ex){ toast(ex.message); } return; }
   if(b.dataset.askship){ state.confirm="ship"+b.dataset.askship; viewLeaders(); return; }
@@ -1026,6 +1074,18 @@ document.addEventListener("change", async e => {
   const t = e.target;
   
   if(t.id==="oSt"){ state.ost=t.value; render(); return; }
+  if(t.dataset.supst){
+    const id=+t.dataset.supst, w=state.sups.find(x=>x.id===id), prev=w.status;
+    try{ await rpc("adal_admin_supplier_update",{p_pass:state.pass,p_id:id,p_status:t.value}); w.status=t.value; toast(`${w.company}: ${SUP_ST[t.value]}`); viewSuppliers(); }
+    catch(ex){ toast(ex.message); t.value=prev; }
+    return;
+  }
+  if(t.dataset.supnote!==undefined){
+    const id=+t.dataset.supnote, w=state.sups.find(x=>x.id===id);
+    try{ await rpc("adal_admin_supplier_update",{p_pass:state.pass,p_id:id,p_status:w.status,p_note:t.value}); w.admin_note=t.value; toast("Заметка сохранена"); }
+    catch(ex){ toast(ex.message); }
+    return;
+  }
   if(t.dataset.ostatus){
     const id=+t.dataset.ostatus, o=state.orders.find(x=>x.id===id), prev=o.status;
     try{ await rpc("adal_admin_order_status",{p_pass:state.pass,p_id:id,p_status:t.value}); o.status=t.value; toast(`Заказ №${id}: ${STATUS[t.value]}`); render(); }
@@ -1044,6 +1104,7 @@ document.addEventListener("change", async e => {
   }
 });
 document.addEventListener("input", e => {
+  if(e.target.id==="sq"){ state.sq=e.target.value; const pos=e.target.selectionStart; viewSuppliers(); const q=$("#sq"); q.focus(); q.setSelectionRange(pos,pos); return; }
   if(e.target.id==="wq"){ state.wq=e.target.value; const pos=e.target.selectionStart; viewWaitlist(); const q=$("#wq"); q.focus(); q.setSelectionRange(pos,pos); return; }
   const t = e.target, P = state.tab==="plan" ? plan() : null;
   if(P && t.dataset.costname!==undefined){ P.costs[+t.dataset.costname][0]=t.value; planChanged(); return; }
@@ -1154,7 +1215,7 @@ function openPassword(){
   });
 }
 
-if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); if(state.tab==='finance') loadFinance(); if(state.tab==='waitlist') loadWaitlist(); } }); } else { viewLogin(); }
+if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); if(state.tab==='finance') loadFinance(); if(state.tab==='waitlist') loadWaitlist(); if(state.tab==='suppliers') loadSuppliers(); } }); } else { viewLogin(); }
 </script>
 </body>
 </html>
