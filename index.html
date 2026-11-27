@@ -268,7 +268,14 @@ body.prelaunch .zk,body.prelaunch .deadline,body.prelaunch .demo{display:none!im
 .soon h1{font-size:25px;line-height:1.14;color:inherit;max-width:16ch}
 .soon p{margin:0;font-size:15px;opacity:.9;max-width:28ch}
 .soon-tag{align-self:flex-start;background:var(--accent);color:#2A1A03;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
-.soon-art{position:absolute;right:-8px;bottom:-10px;width:112px;height:auto;opacity:.9}
+.soon{background:radial-gradient(120% 90% at 100% 0%,#1B6A66 0%,var(--brand) 55%,#0B3836 100%);padding-bottom:128px}
+.soon-art{display:none}
+.packs{position:absolute;left:0;right:0;bottom:-26px;height:140px;display:flex;justify-content:center;align-items:flex-end;pointer-events:none}
+.packs img{width:104px;height:130px;object-fit:cover;border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.28);border:3px solid rgba(255,255,255,.9);background:#F3F5F4}
+.packs img:nth-child(1){transform:rotate(-9deg) translateX(18px)}
+.packs img:nth-child(2){transform:translateY(-12px);z-index:2;width:112px;height:140px}
+.packs img:nth-child(3){transform:rotate(9deg) translateX(-18px)}
+.tz span{color:var(--ink)}
 .strip{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 6px;margin:0 -2px}
 .tz{flex:none;width:96px;display:flex;flex-direction:column;gap:6px;text-align:center;font-size:12px;font-weight:700}
 .tz .ph{position:relative;width:96px;height:116px;border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
@@ -475,10 +482,10 @@ function viewSoon(){
       <span class="soon-tag">Скоро запуск</span>
       <h1>Продукты и товары для дома до&nbsp;40% дешевле магазина</h1>
       <p>Мы не тратим деньги на рекламу — мы возвращаем их вам в цене.</p>
-      <svg class="soon-art" viewBox="0 0 46 36" aria-hidden="true"><path d="M3 34 V17 L14 7 L25 17 V34 Z" fill="rgba(255,255,255,.22)"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg>
+      <div class="packs" aria-hidden="true"><img src="img/111.jpg" alt=""><img src="img/119.jpg" alt=""><img src="img/118.jpg" alt=""></div>
     </div>
     ${PRODUCTS.length?`<div><h2 style="margin-bottom:8px">Первые товары</h2>
-      <div class="strip">${PRODUCTS.slice(0,10).map(p=>`<div class="tz"><div class="ph" style="${tile(p)}"><img src="${imgOf(p)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()"></div><span>${esc(p.brand||p.name)}</span></div>`).join("")}</div></div>`:""}
+      <div class="strip">${PRODUCTS.slice(0,12).map(p=>`<div class="tz"><div class="ph" style="${tile(p)}"><img src="${imgOf(p)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()"></div><span>${esc(p.brand||p.name)}</span></div>`).join("")}</div></div>`:""}
     <div class="panel"><h2>Почему так дешевле</h2>
       <div class="why"><b>1</b><div><div class="t">Покупаем оптом под заказ</div><div class="muted">Соседи заказывают вместе, мы закупаем у поставщиков большой партией.</div></div></div>
       <div class="why"><b>2</b><div><div class="t">Без рекламы и магазина</div><div class="muted">Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.</div></div></div>
