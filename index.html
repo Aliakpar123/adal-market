@@ -307,6 +307,11 @@ body.in-tg .demo{display:none}
 .bub .btn{align-self:flex-start;padding:9px 14px;font-size:13.5px;min-height:0}
 .tip .irbi.flip{scale:-1 1}
 .tip.mk{grid-template-columns:84px 1fr}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hpick{border:2px solid var(--line);background:var(--surface);border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font:inherit;color:var(--ink);min-width:0}
+.hpick img{display:block;height:128px;width:auto;object-fit:contain}
+.hpick b{font-size:15px}.hpick span{font-size:12px;color:var(--muted);font-weight:600;line-height:1.3}
+.hpick[aria-pressed="true"]{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 6%,var(--surface))}
 .tip.mk .irbi{width:84px;height:auto}
 .irbi-big{width:132px;height:auto;display:block;margin:0 auto -6px}
 @media (prefers-reduced-motion:reduce){.tip .irbi,.bub{transition:none!important}}
@@ -419,7 +424,7 @@ const ss = {
 let CUST = ss.get("adal-cust") || {};
 
 const state = {
-  view:"shop", cat:"all", q:"", pid:null, zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
+  view:"shop", cat:"all", q:"", pid:null, hero: ss.get("adal-hero") || "irbi", zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
   loading:true, loadError:null, busy:false,
   orders: ss.get("adal-orders") || [], ostat:{}, oLoading:false, done:null,
   leader: ss.get("adal-leader"), ld:null, ldError:null, ltab:"collect", leaderMode:"login", regDone:false,
@@ -505,6 +510,13 @@ const KK = {
 "Привет, я Ирби! Мы с соседями покупаем вместе — и платим меньше. Запишись в список, и я напишу, когда запустимся.":"Сәлем, мен Ирбимін! Біз көршілермен бірге сатып аламыз — сондықтан аз төлейміз. Тізімге жазыл, іске қосылғанда мен хабарлаймын.",
 "Мақта қыз":"Мақта қыз",
 "Привет, я Мақта қыз! Зови соседей и выдавай им заказы — и береке придёт в каждый дом.":"Сәлем, мен Мақта қызбын! Көршілерді шақыр да, оларға тапсырыс бер — әр үйге береке келеді.",
+"Выберите героя-помощника":"Көмекші кейіпкерді таңдаңыз","Он будет подсказывать вам в магазине. Потом можно сменить.":"Ол дүкенде сізге кеңес береді. Кейін ауыстыруға болады.",
+"Ваш помощник":"Сіздің көмекшіңіз","Теперь с вами":"Енді сізбен бірге","Выбор героя":"Кейіпкер таңдау",
+"Барсёнок. Подскажет про сбор дома и цены.":"Барыс бөбегі. Үйдің жинағы мен баға туралы айтып береді.",
+"Героиня казахской сказки и её кот. Подскажет про лидеров.":"Қазақ ертегісінің кейіпкері және оның мысығы. Лидерлер туралы айтып береді.",
+"Сбор дома набран — скоро привезём заказы лидеру.":"Үйдің жинағы толды — жақында тапсырыстарды лидерге әкелеміз.",
+"Мы с соседями покупаем вместе — и платим меньше. Запишись в список, и я напишу, когда запустимся.":"Біз көршілермен бірге сатып аламыз — сондықтан аз төлейміз. Тізімге жазыл, іске қосылғанда мен хабарлаймын.",
+"Зови соседей и выдавай им заказы — и береке придёт в каждый дом.":"Көршілерді шақыр да, оларға тапсырыс бер — әр үйге береке келеді.",
 "Состав":"Құрамы","Срок годности":"Жарамдылық мерзімі","Хранение":"Сақтау","О товаре":"Тауар туралы","В магазине":"Дүкенде","Цены откроем при запуске":"Бағаны іске қосылғанда ашамыз","Карточка товара":"Тауар картасы","В корзине":"Себетте","Не ограничен":"Шектелмейді",
 "Рис длиннозёрный шлифованный":"Ұзын дәнді тазартылған күріш","Крупа гречневая ядрица":"Қарақұмық жармасы (ядрица)","Сахар белый кристаллический":"Ақ кристалды қант","Пшеничная мука высшего сорта":"Жоғары сортты бидай ұны","Мука из твёрдых сортов пшеницы, вода":"Қатты бидай ұны, су","Хлопья овсяные":"Сұлы жапырақшалары","Соль пищевая поваренная":"Ас тұзы","Кофе жареный молотый":"Қуырылған ұнтақ кофе","Масло подсолнечное рафинированное":"Тазартылған күнбағыс майы","Чай чёрный байховый, 100 пакетиков":"Қара байховый шай, 100 пакет","Говядина, жир, соль, специи":"Сиыр еті, май, тұз, дәмдеуіштер","Томаты, соль":"Қызанақ, тұз",
 "В сухом прохладном месте, в закрытой таре":"Құрғақ салқын жерде, жабық ыдыста","В сухом прохладном месте":"Құрғақ салқын жерде","В сухом месте, вдали от запахов":"Құрғақ жерде, иістерден алыс","В сухом месте":"Құрғақ жерде","В плотно закрытой упаковке, в сухом месте":"Тығыз жабық қаптамада, құрғақ жерде","В тёмном месте при температуре до 20 °C":"Қараңғы жерде, 20 °C-қа дейінгі температурада","При температуре от 0 до 20 °C":"0-ден 20 °C-қа дейінгі температурада","При температуре от 0 до 25 °C":"0-ден 25 °C-қа дейінгі температурада"
@@ -519,7 +531,7 @@ const KK_RE = [
 [/^Сбор набран: закупаем и везём заказы дома лидеру(?: (.+))?$/,(m,b)=>`Жинақ толды: үйдің тапсырыстарын сатып алып, ${b?b+" ":""}лидеріне жеткіземіз`],
 [/^(.+) — лидер вашего дома$/,"$1 — үйіңіздің лидері"],
 [/^Заказ заберёте у лидера(.*?)\.\s*$/,"Тапсырысты лидерден аласыз$1. "],
-[/^Привет, я Ирби! Дому не хватает (.+) до машины\. Позови соседей — вместе дешевле!$/,"Сәлем, мен Ирбимін! Үйге көлікке дейін $1 жетіспейді. Көршілерді шақыр — бірге арзанырақ!"],
+[/^Дому не хватает (.+) до машины\. Позови соседей — вместе дешевле!$/,"Үйге көлікке дейін $1 жетіспейді. Көршілерді шақыр — бірге арзанырақ!"],
 [/^Ты уже экономишь (.+) в корзине\. Так держать!$/,"Сен себетте $1 үнемдеп отырсың. Осылай жалғастыр!"],
 [/^Хочешь зарабатывать (\d+)% с заказов дома\? Стань лидером ЖК!$/,"Үйдегі тапсырыстардан $1% табыс тапқың келе ме? ТҮК лидері бол!"],
 [/^Хотите зарабатывать\? Станьте лидером своего ЖК: (\d+)% с каждого заказа дома\. Приглашайте соседей, а когда запустимся, выдавайте им заказы\.$/,"Табыс тапқыңыз келе ме? Өз ТҮК-ңіздің лидері болыңыз: үйдегі әр тапсырыстан $1%. Көршілерді шақырыңыз, ал іске қосылғанда оларға тапсырыс беріңіз."],
@@ -541,6 +553,8 @@ const KK_RE = [
 function t(s){
   if(LANG!=="kk"||!s) return s;
   const k=String(s).replace(/ /g," ").trim();
+  const gm=k.match(/^Привет, я (Ирби|Мақта қыз)! (.+)$/);
+  if(gm) return `Сәлем, мен ${gm[1]==="Ирби"?"Ирбимін":"Мақта қызбын"}! `+t(gm[2]);
   if(KK[k]) return KK[k];
   for(const [re,r] of KK_RE){ if(re.test(k)) return k.replace(re,r); }
   return s;
@@ -617,22 +631,39 @@ function filterList(){
   if(!q) return PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
   return PRODUCTS.filter(p=>norm([p.name,p.name_kk,p.brand,p.variant,p.weight,CATS[p.cat],t(CATS[p.cat])].join(" ")).includes(q));
 }
+const HEROES = {
+  irbi:  {name:"Ирби", img:"img/irbi.webp", w:96, h:96, big:132, desc:"Барсёнок. Подскажет про сбор дома и цены."},
+  makta: {name:"Мақта қыз", img:"img/makta.webp", w:84, h:157, big:96, desc:"Героиня казахской сказки и её кот. Подскажет про лидеров."}
+};
+const hero = () => HEROES[state.hero] || HEROES.irbi;
+const greet = () => `Привет, я ${hero().name}!`;
+function heroBig(extra){ const h=hero(); const bh=Math.round(h.big*h.h/h.w); return `<img class="irbi-big" src="${h.img}" alt="${esc(h.name)}" width="${h.big}" height="${bh}" ${extra||""}>`; }
+function heroPick(){ return Object.entries(HEROES).map(([k,h])=>`<button class="hpick" data-hero="${k}" aria-pressed="${!!ss.get("adal-hero")&&state.hero===k}"><img src="${h.img}" alt="" width="${Math.round(h.w*.8)}" height="${Math.round(h.h*.8)}"><b>${h.name}</b><span>${h.desc}</span></button>`).join(""); }
+function setHero(k){ if(!HEROES[k]) return; state.hero=k; ss.set("adal-hero",k); render(); }
+function openHeroPicker(){
+  if(document.getElementById("hbg")) return;
+  const bg=document.createElement("div"); bg.id="hbg"; bg.className="sheet-bg";
+  bg.innerHTML=`<div class="sheet" role="dialog" aria-label="Выбор героя"><h2>Выберите героя-помощника</h2>
+    <p class="muted" style="margin:0">Он будет подсказывать вам в магазине. Потом можно сменить.</p>
+    <div class="hgrid">${heroPick()}</div></div>`;
+  bg.addEventListener("click",ev=>{ const b=ev.target.closest("[data-hero]"); if(!b) return; setHero(b.dataset.hero); bg.remove(); toast(t("Теперь с вами")+" "+hero().name); ev.stopPropagation(); });
+  document.body.appendChild(bg); translateDom(bg);
+}
 function tipList(){
   const z=zk(), sum=pool(z.id), left=Math.max(0,SET.threshold-sum), c=cartSum(), o=cartOld();
   const link=leaderLink(z), txt="Покупаем продукты вместе с соседями — дешевле! Заходи:";
   const share=`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(txt)}`;
   return [
-    left ? {pose:"wave",text:`Привет, я Ирби! Дому не хватает ${fmt(left)} до машины. Позови соседей — вместе дешевле!`,btn:["Позвать соседей",`data-ext="${esc(share)}"`]}
-         : {pose:"wave",text:"Привет, я Ирби! Сбор дома набран — скоро привезём заказы лидеру."},
-    {who:"makta",text:`Хочешь зарабатывать ${Math.round(SET.commission)}% с заказов дома? Стань лидером ЖК!`,btn:["Стать лидером",'data-act="becomeleader"']},
+    left ? {pose:"wave",text:`${greet()} Дому не хватает ${fmt(left)} до машины. Позови соседей — вместе дешевле!`,btn:["Позвать соседей",`data-ext="${esc(share)}"`]}
+         : {pose:"wave",text:`${greet()} Сбор дома набран — скоро привезём заказы лидеру.`},
+    {pose:"wave",text:`Хочешь зарабатывать ${Math.round(SET.commission)}% с заказов дома? Стань лидером ЖК!`,btn:["Стать лидером",'data-act="becomeleader"']},
     {pose:"bag",text:"Закажи до 21:00, а завтра лидер получит машину. Платить сразу не нужно — переведёшь на Kaspi при получении."},
     (o>c && c) ? {pose:"point",text:`Ты уже экономишь ${fmt(o-c)} в корзине. Так держать!`} : {pose:"point",text:"Нажми на фото товара — там состав и срок годности."},
   ];
 }
-const tipHtml = k => { const mk=k.who==="makta";
-  const img = mk ? `<img class="irbi" src="img/makta.webp" alt="" width="84" height="157" loading="lazy">`
-                 : `<img class="irbi${k.pose==="point"?" flip":""}" src="img/irbi.webp" alt="" width="96" height="96" loading="lazy">`;
-  return `<div class="tip${mk?" mk":""}">${img}<div class="bub"><b>${mk?"Мақта қыз":"Ирби"}</b><span>${esc(k.text)}</span>${k.btn?`<button class="btn light" ${k.btn[1]}>${k.btn[0]}</button>`:""}</div></div>`; };
+const tipHtml = k => { const h=hero(), mk=state.hero==="makta";
+  const img = `<img class="irbi${(!mk&&k.pose==="point")?" flip":""}" src="${h.img}" alt="" width="${h.w}" height="${h.h}" loading="lazy">`;
+  return `<div class="tip${mk?" mk":""}">${img}<div class="bub"><b>${h.name}</b><span>${esc(k.text)}</span>${k.btn?`<button class="btn light" ${k.btn[1]}>${k.btn[0]}</button>`:""}</div></div>`; };
 let tipObs=null;
 function observeTips(){
   const els=document.querySelectorAll(".tip:not(.in)");
@@ -725,7 +756,7 @@ function viewSoon(){
     </div>
     ${PRODUCTS.length?`<div><h2 style="margin-bottom:8px">Первые товары</h2>
       <div class="strip">${PRODUCTS.slice(0,12).map(p=>`<div class="tz" data-open="${p.id}" role="button" tabindex="0"><div class="ph" style="${tile(p)}"><img src="${imgOf(p)}" alt="${esc(tName(p))}" loading="lazy" onerror="this.remove()"></div><span>${esc(p.brand||tName(p))}</span></div>`).join("")}</div></div>`:""}
-    ${tipHtml({pose:"wave",text:"Привет, я Ирби! Мы с соседями покупаем вместе — и платим меньше. Запишись в список, и я напишу, когда запустимся.",btn:["Записаться",'data-act="towait"']})}
+    ${tipHtml({pose:"wave",text:`${greet()} Мы с соседями покупаем вместе — и платим меньше. Запишись в список, и я напишу, когда запустимся.`,btn:["Записаться",'data-act="towait"']})}
     <div class="panel"><h2>Почему так дешевле</h2>
       <div class="why"><b>1</b><div><div class="t">Покупаем оптом под заказ</div><div class="muted">Соседи заказывают вместе, мы закупаем у поставщиков большой партией.</div></div></div>
       <div class="why"><b>2</b><div><div class="t">Без рекламы и магазина</div><div class="muted">Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.</div></div></div>
@@ -749,7 +780,7 @@ function viewSoon(){
         <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Записываем…":"Записаться"}</button>
         <span class="muted" style="font-size:12px">${n>=10?`Уже в списке: ${n} ${plural(n,"сосед","соседа","соседей")}. `:"Станьте одним из первых. "}Нажимая кнопку, вы соглашаетесь на обработку персональных данных.</span>
       </form>`}
-    ${tipHtml({who:"makta",text:`Хотите зарабатывать? Станьте лидером своего ЖК: ${Math.round(SET.commission)}% с каждого заказа дома. Приглашайте соседей, а когда запустимся, выдавайте им заказы.`,btn:["Стать лидером ЖК",'data-act="becomeleader"']})}
+    ${tipHtml({pose:"wave",text:`Хотите зарабатывать? Станьте лидером своего ЖК: ${Math.round(SET.commission)}% с каждого заказа дома. Приглашайте соседей, а когда запустимся, выдавайте им заказы.`,btn:["Стать лидером ЖК",'data-act="becomeleader"']})}
   </section>`;
 }
 
@@ -757,7 +788,7 @@ function viewSoon(){
 function viewCart(){
   const ids = Object.keys(state.cart).filter(id=>prod(id));
   if(!ids.length) return `<section class="wrap empty">
-    <img class="irbi-big" src="img/irbi.webp" width="132" height="132" alt="">
+    ${heroBig()}
     <h2>Корзина пуста</h2>
     <p class="muted">Добавьте товары из каталога. Когда дом наберёт нужную сумму, мы привезём заказы лидеру, и вы их заберёте.</p>
     <button class="btn" data-go="shop">Перейти в магазин</button></section>`;
@@ -798,7 +829,7 @@ function viewDone(o){
   const z = ZKS.find(x=>x.id===o.zk) || zk();
   return `<section class="section wrap">
     <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:6px">
-      <img class="irbi-big" src="img/irbi.webp" width="132" height="132" alt="">
+      ${heroBig()}
       <h1>Заказ №${o.id} принят</h1>
       <p class="muted" style="margin:0">${fmt(o.total)} · забрать у лидера ${esc(z.leader_name||"")}</p>
     </div>
@@ -848,6 +879,8 @@ function viewHow(){
     <div class="panel"><span class="muted">Мы закупаем только под уже собранные заказы. Нет торгового зала, кассиров и остатков на полках, а доставка идёт одной машиной на весь дом.</span></div>
     <h2>Кто такой лидер</h2>
     <div class="panel"><span class="muted">Сосед, который зовёт других покупателей и выдаёт заказы по коду. За это он получает ${Math.round(SET.commission)}% с каждого выданного заказа дома.</span></div>
+    <h2>Ваш помощник</h2>
+    <div class="hgrid">${heroPick()}</div>
     <button class="btn accent block" data-act="becomeleader">Стать лидером своего ЖК</button>
     <button class="btn ghost block" data-go="shop">Перейти к покупкам</button>
   </section>`;
@@ -885,7 +918,7 @@ function viewReg(){
         <small>Расчёт: заказ на 3 000 ₸ раз в неделю, 4 недели, ${rate}% лидеру.</small>
       </div>
     </div>
-    ${tipHtml({who:"makta",text:"Привет, я Мақта қыз! Зови соседей и выдавай им заказы — и береке придёт в каждый дом."})}
+    ${tipHtml({pose:"wave",text:`${greet()} Зови соседей и выдавай им заказы — и береке придёт в каждый дом.`})}
     <h2>Что нужно делать</h2>
     <div class="duties">
       <div class="duty"><b>Звать соседей</b><span class="muted">Отправлять ссылку в чат дома: готовые тексты уже в кабинете.</span></div>
@@ -924,7 +957,7 @@ function viewRegDone(){
   const r=state.reg;
   return `<section class="section wrap">
     <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding-top:16px">
-      <img src="img/makta.webp" alt="Мақта қыз" width="96" height="179" style="display:block">
+      ${heroBig()}
       <h1>Заявка отправлена</h1>
       <p class="muted" style="margin:0">${esc(r.name.split(" ")[0])}, спасибо! ${esc(r.zk)}, ${esc(r.city)}.</p>
     </div>
@@ -1115,6 +1148,7 @@ document.addEventListener("click",e=>{
   if(!t){ const o=e.target.closest("[data-open]"); if(o) openProduct(+o.dataset.open); return; }
   const d=t.dataset;
   if(d.pclose!==undefined){ closeProduct(); return; }
+  if(d.hero){ setHero(d.hero); return; }
   if(d.lang!==undefined){ setLang(LANG==="kk"?"ru":"kk"); return; }
   if(d.qclear!==undefined){ state.q=""; render(); return; }
   if(d.go){ go(d.go); return; }
@@ -1268,7 +1302,7 @@ window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(VI
   if(u && !CUST.name && u.first_name) CUST={...CUST, name:u.first_name};
   const h=location.hash.slice(1); if(VIEWS.includes(h)) state.view=h;
   if(state.leader) state.leaderMode="login";
-  loadCatalog().then(()=>{ if(state.view==="leader" && state.leader) loadLeader(); if(state.view==="orders") loadOrders(); });
+  loadCatalog().then(()=>{ if(!ss.get("adal-hero")) openHeroPicker(); if(state.view==="leader" && state.leader) loadLeader(); if(state.view==="orders") loadOrders(); });
 })();
 </script>
 
