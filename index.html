@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Bereke store — бытовая химия по оптовым ценам: соседи покупают вместе, заказ вы забираете у лидера своего дома.">
+<meta name="description" content="Bereke store — продукты и товары для дома по оптовым ценам: соседи покупают вместе, заказ вы забираете у лидера своего дома.">
 <meta name="theme-color" content="#FFFFFF">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <meta name="color-scheme" content="light only">
@@ -265,7 +265,7 @@ body.has-bar .app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 
 body.prelaunch .zk,body.prelaunch .deadline,body.prelaunch .demo{display:none!important}
 .soon{position:relative;overflow:hidden;background:var(--brand);color:var(--brand-ink);border-radius:24px;padding:22px 18px 24px;display:flex;flex-direction:column;gap:10px}
-.soon h1{font-size:27px;line-height:1.12;color:inherit;max-width:13ch}
+.soon h1{font-size:25px;line-height:1.14;color:inherit;max-width:16ch}
 .soon p{margin:0;font-size:15px;opacity:.9;max-width:28ch}
 .soon-tag{align-self:flex-start;background:var(--accent);color:#2A1A03;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
 .soon-art{position:absolute;right:-8px;bottom:-10px;width:112px;height:auto;opacity:.9}
@@ -332,7 +332,7 @@ async function api(path, body){
 }
 const rpc = (fn, args) => api("rpc/" + fn, args);
 
-const CATS = {clean:"Чистящие средства", soap:"Мыло", dish:"Для посуды", wash:"Для стирки"};
+const CATS = {groc:"Бакалея", dairy:"Молочные", meat:"Мясо и колбасы", veg:"Овощи и фрукты", bev:"Чай, кофе, напитки", snack:"Снеки и сладости", baby:"Детские товары", hyg:"Гигиена", pet:"Для животных", clean:"Чистящие средства", soap:"Мыло", dish:"Для посуды", wash:"Для стирки"};
 const STAGE_OF = {paid:0, sent:1, ready:2, done:3};
 const STATUS = {paid:{t:"Новый", c:"p-paid"}, sent:{t:"В пути", c:"p-sent"}, ready:{t:"Привезли", c:"p-ready"}, done:{t:"Выдан", c:"p-done"}};
 const BUYER_STATUS = {
@@ -469,11 +469,11 @@ function viewShop(){
 function waitShareLink(){ return (SET.tg ? SET.tg : location.origin + location.pathname) + (SET.tg ? "" : ""); }
 function viewSoon(){
   const n=+SET.waiting||0, joined=state.wait;
-  const share=waitShareLink(), shareText="Скоро запускается Bereke store: бытовая химия до 40% дешевле магазина. Они не тратят деньги на рекламу, а возвращают их покупателям. Запишитесь в список ожидания:";
+  const share=waitShareLink(), shareText="Скоро запускается Bereke store: продукты и товары для дома до 40% дешевле магазина. Они не тратят деньги на рекламу, а возвращают их покупателям. Запишитесь в список ожидания:";
   return `<section class="section wrap">
     <div class="soon">
       <span class="soon-tag">Скоро запуск</span>
-      <h1>Бытовая химия до&nbsp;40% дешевле магазина</h1>
+      <h1>Продукты и товары для дома до&nbsp;40% дешевле магазина</h1>
       <p>Мы не тратим деньги на рекламу — мы возвращаем их вам в цене.</p>
       <svg class="soon-art" viewBox="0 0 46 36" aria-hidden="true"><path d="M3 34 V17 L14 7 L25 17 V34 Z" fill="rgba(255,255,255,.22)"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg>
     </div>
@@ -704,12 +704,12 @@ function leaderLink(z){
 }
 function leaderBody(d){
   if(SET.prelaunch){
-    if(state.tmpl==="morn") return `Соседи, скоро запускается Bereke store: бытовая химия до 40% дешевле магазина. Они не тратят деньги на рекламу, а возвращают их покупателям. Я буду лидером нашего дома: заказы привезут мне, и вы заберёте их у меня. Запишитесь в список ожидания.`;
-    return `Соседи, хотите платить за порошок, мыло и средства для посуды до 40% меньше? Скоро запускается Bereke store, и я буду выдавать заказы в нашем доме. Запишитесь в список ожидания, чтобы получить доступ первыми.`;
+    if(state.tmpl==="morn") return `Соседи, скоро запускается Bereke store: продукты и товары для дома до 40% дешевле магазина. Они не тратят деньги на рекламу, а возвращают их покупателям. Я буду лидером нашего дома: заказы привезут мне, и вы заберёте их у меня. Запишитесь в список ожидания.`;
+    return `Соседи, хотите платить за продукты, порошок, мыло и другие товары для дома до 40% меньше? Скоро запускается Bereke store, и я буду выдавать заказы в нашем доме. Запишитесь в список ожидания, чтобы получить доступ первыми.`;
   }
   const left = Math.max(0, d.threshold - d.pool);
-  if(state.tmpl==="morn") return `Доброе утро, соседи! Сегодня до 21:00 собираем общий заказ Bereke store: бытовая химия дешевле магазина. Наберём ${fmt(d.threshold)}, заказы привезут мне, и вы заберёте их у меня.`;
-  return `Соседи, сбор Bereke store закрывается сегодня в 21:00. Набрано ${fmt(d.pool)} из ${fmt(d.threshold)}${left?`, осталось ${fmt(left)}.`:". Сбор набран!"} Как наберём, заказы привезут мне, и вы заберёте их у меня. Бытовая химия по оптовым ценам.`;
+  if(state.tmpl==="morn") return `Доброе утро, соседи! Сегодня до 21:00 собираем общий заказ Bereke store: продукты и товары для дома дешевле магазина. Наберём ${fmt(d.threshold)}, заказы привезут мне, и вы заберёте их у меня.`;
+  return `Соседи, сбор Bereke store закрывается сегодня в 21:00. Набрано ${fmt(d.pool)} из ${fmt(d.threshold)}${left?`, осталось ${fmt(left)}.`:". Сбор набран!"} Как наберём, заказы привезут мне, и вы заберёте их у меня. Продукты и товары для дома по оптовым ценам.`;
 }
 const leaderText = d => leaderBody(d) + (SET.prelaunch ? " Записаться: " : " Заказать: ") + leaderLink(d.zk);
 

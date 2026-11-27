@@ -233,7 +233,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 const SB_URL = "https://fakhibznbnfycafgvfiw.supabase.co";
 const SB_KEY = "sb_publishable_CtZFCSLjUTde5NRtGizYyQ_nSJ7LQU2";
 const UPLOAD_URL = SB_URL + "/functions/v1/adal-admin-upload";
-const CATS = {clean:"Чистящие средства", soap:"Мыло", dish:"Для посуды", wash:"Для стирки"};
+const CATS = {groc:"Бакалея", dairy:"Молочные", meat:"Мясо и колбасы", veg:"Овощи и фрукты", bev:"Чай, кофе, напитки", snack:"Снеки и сладости", baby:"Детские товары", hyg:"Гигиена", pet:"Для животных", clean:"Чистящие средства", soap:"Мыло", dish:"Для посуды", wash:"Для стирки"};
 
 async function rpc(fn, args){
   const res = await fetch(SB_URL + "/rest/v1/rpc/" + fn, {method:"POST", headers:{"apikey":SB_KEY,"Content-Type":"application/json"}, body:JSON.stringify(args)});
