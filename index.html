@@ -495,6 +495,13 @@ h1,h2{font-family:var(--font-body);font-weight:800;letter-spacing:-.025em}
 .nextstep .sn{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#3C2F00;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;font-size:14px}
 .joined .btn.block{width:100%}
 .wahint{display:flex;gap:8px;align-items:center;font-size:12.5px;font-weight:500;color:#2D5A3E;background:#EAF8EF;border-radius:12px;padding:8px 10px}
+
+/* герой в баннере главной */
+.soon{padding-bottom:150px}
+.packs{justify-content:flex-start;padding-left:6px;height:150px}
+.packs img:nth-child(1){transform:rotate(-8deg) translateX(6px);width:96px;height:120px}
+.packs img:nth-child(2){transform:translateY(-6px) translateX(-6px);z-index:2;width:104px;height:130px}
+.soon>.himg2{position:absolute;right:8px;bottom:-2px;height:156px;width:auto;z-index:3;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25));pointer-events:none}
 </style>
 </head>
 <body>
@@ -966,7 +973,8 @@ function viewSoon(){
       <h1>Продукты и товары для дома до&nbsp;40% дешевле магазина</h1>
       <p>Мы не тратим деньги на рекламу — мы возвращаем их вам в цене.</p>
       <button class="cta" data-act="towait">Записаться в список</button>
-      <div class="packs" aria-hidden="true"><img src="img/111.jpg" alt=""><img src="img/119.jpg" alt=""><img src="img/118.jpg" alt=""></div>
+      <div class="packs" aria-hidden="true"><img src="img/111.jpg" alt=""><img src="img/119.jpg" alt=""></div>
+      <img class="himg2" src="${hero().img}" alt="${esc(hero().name)}" width="${hero().w}" height="${hero().h}">
     </div>
     <div class="panel launchp">
       <div class="lp-top"><b>Запустимся, когда нас станет ${goal}</b><span>${n} из ${goal}</span></div>
