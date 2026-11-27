@@ -458,6 +458,30 @@ h1,h2{font-family:var(--font-body);font-weight:800;letter-spacing:-.025em}
 .fopt span{font-size:12.5px;color:var(--muted);font-weight:500;line-height:1.3}
 .fopt[aria-pressed="true"]{border-color:var(--brand);background:#EAF8EF}
 .fopt[aria-pressed="true"] span{color:var(--brand);font-weight:600}
+
+/* профиль */
+.prof-head{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;background:#fff;border-radius:24px;padding:14px;box-shadow:var(--shadow)}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--accent);color:#3C2F00;font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center}
+.pinfo2{display:flex;flex-direction:column;min-width:0;gap:1px}
+.pinfo2 b{font-size:17px;font-weight:800}
+.pinfo2 span{font-size:12.5px;line-height:1.3;overflow:hidden;text-overflow:ellipsis}
+.pstats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#EDF2EE;border-radius:999px;padding:4px}
+.seg2 button{border:0;background:transparent;border-radius:999px;padding:10px 8px;font-weight:700;font-size:13.5px;color:var(--muted)}
+.seg2 button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(16,35,26,.12)}
+.seg2.inl{display:inline-grid;min-width:150px}
+.ocard2{gap:10px}
+.oc-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.oc-r{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.restore summary{list-style:none;cursor:pointer;font-weight:700;font-size:14.5px;position:relative;padding-right:22px}
+.restore summary::-webkit-details-marker{display:none}
+.restore summary::after{content:"+";position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:500;color:var(--brand)}
+.restore[open] summary::after{content:"–"}
+.restore form{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.setrow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:600;font-size:14.5px}
+.setrow.col{flex-direction:column;align-items:stretch}
+.rowlink{display:flex;justify-content:space-between;align-items:center;border:0;background:transparent;border-top:1px solid var(--line);padding:14px 0 4px;font:inherit;font-weight:600;font-size:14.5px;color:var(--ink);text-align:left}
+.btn.danger{background:#E0502F;color:#fff}
 </style>
 </head>
 <body>
@@ -484,8 +508,8 @@ h1,h2{font-family:var(--font-body);font-weight:800;letter-spacing:-.025em}
     <button data-go="shop"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M3 9h18v11H3zM9 13h6"/></svg><span class="lbl">Магазин</span></button>
     <button data-go="how" data-pre><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5h.01"/></svg>Как это работает</button>
     <button data-go="cart" data-live><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>Корзина<span class="badge" id="cartBadge" hidden>0</span></button>
-    <button data-go="orders" data-live><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/></svg>Заказы</button>
-    <button data-go="leader"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Лидер ЖК</button>
+    <button data-go="profile" data-live><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Профиль</button>
+    <button data-go="leader"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Лидер ЖК</button>
   </div>
 </nav>
 
@@ -549,7 +573,7 @@ let CUST = ss.get("adal-cust") || {};
 const state = {
   view:"shop", cat:"all", q:"", pid:null, hero: ss.get("adal-hero") || "irbi", fulfil: ss.get("adal-fulfil")==="delivery"?"delivery":"pickup", zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
   loading:true, loadError:null, busy:false,
-  orders: ss.get("adal-orders") || [], ostat:{}, oLoading:false, done:null,
+  orders: ss.get("adal-orders") || [], ostat: ss.get("adal-ostat") || {}, oLoading:false, done:null, ptab:"", rst:{phone:"",id:"",code:"",err:"",busy:false}, clr:false,
   leader: ss.get("adal-leader"), ld:null, ldError:null, ltab:"collect", leaderMode:"login", regDone:false,
   calc:40, calcO:4, calcC:3000, tmpl:"eve", found:null, foundErr:null, ref:"", wait: ss.get("adal-wait"),
   reg:{name:"",phone:"",city:"Алматы",zk:"",addr:"",flats:"200–500",chat:"WhatsApp",members:"",spot:"Холл или консьерж",pay:"Самозанятый",agree:false}
@@ -662,6 +686,14 @@ const KK = {
 "доставим по вашему адресу":"мекенжайыңыз бойынша жеткіземіз","Когда получите заказ, переведите":"Тапсырысты алғанда аударыңыз","Принят":"Қабылданды","Собираем":"Жинап жатырмыз","Доставлен":"Жеткізілді",
 "Заказ принят":"Тапсырыс қабылданды","Мы соберём заказ, курьер свяжется с вами":"Тапсырысты жинаймыз, курьер сізбен байланысады","Собираем заказ":"Тапсырысты жинап жатырмыз","Скоро передадим курьеру":"Жақында курьерге береміз","Курьер в пути":"Курьер жолда","Назовите код курьеру и переведите оплату на Kaspi":"Кодты курьерге айтып, Kaspi-ге төлем аударыңыз","Доставлено":"Жеткізілді",
 "бесплатно от":"тегін, бастап","Добавьте ещё":"Тағы қосыңыз",", и доставка будет бесплатной":", сонда жеткізу тегін болады",
+"Профиль":"Профиль","Гость":"Қонақ","Изменить":"Өзгерту","Добавьте телефон, чтобы заказы находились на другом устройстве":"Тапсырыстар басқа құрылғыда табылуы үшін телефон қосыңыз","заказов":"тапсырыс","сэкономили":"үнемдедіңіз","Мои заказы":"Менің тапсырыстарым",
+"Активные":"Белсенді","История":"Тарих","Активных заказов нет":"Белсенді тапсырыстар жоқ","Здесь появятся выданные заказы":"Мұнда берілген тапсырыстар көрсетіледі","Выберите товары в каталоге, и заказ появится здесь с кодом и статусом.":"Каталогтан тауар таңдаңыз, тапсырыс осында коды мен мәртебесімен пайда болады.","Когда заказ выдадут или доставят, он останется в истории.":"Тапсырыс берілгенде немесе жеткізілгенде, ол тарихта қалады.",
+"Повторить заказ":"Тапсырысты қайталау","Товары добавлены в корзину":"Тауарлар себетке қосылды","Эти товары сейчас недоступны":"Бұл тауарлар қазір қолжетімсіз","Загружаем статус…":"Мәртебе жүктелуде…",
+"Не видите свои заказы?":"Тапсырыстарыңызды көрмейсіз бе?","Если вы заказывали с другого устройства, введите телефон и номер с кодом любого своего заказа. Мы найдём все заказы с этим телефоном.":"Егер басқа құрылғыдан тапсырыс берсеңіз, телефонды және кез келген тапсырысыңыздың нөмірі мен кодын енгізіңіз. Осы телефонмен барлық тапсырысты табамыз.",
+"Телефон из заказа":"Тапсырыстағы телефон","Номер заказа":"Тапсырыс нөмірі","Код":"Код","Найти мои заказы":"Тапсырыстарымды табу","Ищем…":"Іздеп жатырмыз…","Заполните телефон, номер заказа и 4-значный код.":"Телефонды, тапсырыс нөмірін және 4 таңбалы кодты толтырыңыз.",
+"Настройки":"Баптаулар","Язык":"Тіл","Помощник":"Көмекші","Кабинет лидера ЖК":"ТҮК лидерінің кабинеті","Заказы и данные хранятся на этом устройстве. На другом устройстве их можно восстановить по телефону.":"Тапсырыстар мен деректер осы құрылғыда сақталады. Басқа құрылғыда оларды телефон арқылы қалпына келтіруге болады.",
+"Удалить данные на этом устройстве":"Осы құрылғыдағы деректерді жою","Удалить данные на этом устройстве?":"Осы құрылғыдағы деректерді жою керек пе?","Исчезнут сохранённые заказы, корзина и контакты. Сами заказы в магазине останутся, их можно восстановить по телефону.":"Сақталған тапсырыстар, себет және байланыстар жойылады. Тапсырыстардың өзі дүкенде қалады, оларды телефон арқылы қалпына келтіруге болады.","Да, удалить":"Иә, жою","Отмена":"Бас тарту",
+"Мои данные":"Менің деректерім","Подставим их при оформлении заказа.":"Тапсырыс рәсімдеу кезінде автоматты түрде қоямыз.","Адрес для доставки":"Жеткізу мекенжайы","Сохранить":"Сақтау","Данные сохранены":"Деректер сақталды","Все ваши заказы уже здесь":"Барлық тапсырысыңыз осында","Заказ":"Тапсырыс",
 "Состав":"Құрамы","Срок годности":"Жарамдылық мерзімі","Хранение":"Сақтау","О товаре":"Тауар туралы","В магазине":"Дүкенде","Цены откроем при запуске":"Бағаны іске қосылғанда ашамыз","Карточка товара":"Тауар картасы","В корзине":"Себетте","Не ограничен":"Шектелмейді",
 "Рис длиннозёрный шлифованный":"Ұзын дәнді тазартылған күріш","Крупа гречневая ядрица":"Қарақұмық жармасы (ядрица)","Сахар белый кристаллический":"Ақ кристалды қант","Пшеничная мука высшего сорта":"Жоғары сортты бидай ұны","Мука из твёрдых сортов пшеницы, вода":"Қатты бидай ұны, су","Хлопья овсяные":"Сұлы жапырақшалары","Соль пищевая поваренная":"Ас тұзы","Кофе жареный молотый":"Қуырылған ұнтақ кофе","Масло подсолнечное рафинированное":"Тазартылған күнбағыс майы","Чай чёрный байховый, 100 пакетиков":"Қара байховый шай, 100 пакет","Говядина, жир, соль, специи":"Сиыр еті, май, тұз, дәмдеуіштер","Томаты, соль":"Қызанақ, тұз",
 "В сухом прохладном месте, в закрытой таре":"Құрғақ салқын жерде, жабық ыдыста","В сухом прохладном месте":"Құрғақ салқын жерде","В сухом месте, вдали от запахов":"Құрғақ жерде, иістерден алыс","В сухом месте":"Құрғақ жерде","В плотно закрытой упаковке, в сухом месте":"Тығыз жабық қаптамада, құрғақ жерде","В тёмном месте при температуре до 20 °C":"Қараңғы жерде, 20 °C-қа дейінгі температурада","При температуре от 0 до 20 °C":"0-ден 20 °C-қа дейінгі температурада","При температуре от 0 до 25 °C":"0-ден 25 °C-қа дейінгі температурада"
@@ -694,6 +726,8 @@ const KK_RE = [
 [/^Добавьте ещё (.+), и доставка будет бесплатной$/,"Тағы $1 қосыңыз, сонда жеткізу тегін болады"],
 [/^в том числе доставка (.+)$/,"оның ішінде жеткізу $1"],
 [/^Доставка: (.+)$/,"Жеткізу: $1"],
+[/^Нашли заказов: (\d+)$/,"Табылған тапсырыс: $1"],
+[/^(Активные|История) · (\d+)$/,(m,a,n)=>(a==="Активные"?"Белсенді":"Тарих")+" · "+n],
 [/^Добавить в корзину · (.+)$/,"Себетке қосу · $1"],
 [/^Оформить заказ на (.+)$/,"Тапсырыс беру: $1"],
 [/^Заказ №(\d+) принят$/,"№$1 тапсырыс қабылданды"],[/^Заказ №(\d+)$/,"№$1 тапсырыс"],
@@ -1017,33 +1051,98 @@ function viewDone(o){
     <div class="codebox"><span style="font-size:13px;font-weight:700;opacity:.85">${dl?"Код для курьера":"Код выдачи"}</span><b>${esc(o.code)}</b><span style="font-size:13px;opacity:.85">${dl?"Назовите код курьеру, когда получите заказ. Код сохранён в разделе «Заказы».":"Назовите код лидеру, когда будете забирать. Код сохранён в разделе «Заказы»."}</span></div>
     ${dl?"":collectCard(z, +o.pool||pool(z.id))}
     ${payBlock(o.total, dl)}
-    <button class="btn block" data-go="orders">Мои заказы</button>
+    <button class="btn block" data-go="profile">Мои заказы</button>
     <button class="btn ghost block" data-go="shop">Вернуться в магазин</button>
   </section>`;
 }
 
-/* ---------- мои заказы ---------- */
-function viewOrders(){
-  if(!state.orders.length) return `<section class="wrap empty"><h2>Заказов пока нет</h2><p class="muted">Здесь появятся ваши заказы, коды выдачи и статусы.</p><button class="btn" data-go="shop">Перейти в магазин</button></section>`;
+/* ---------- профиль и история заказов ---------- */
+const PK_NAMES=["Сбор","В пути","Привезли","Выдан"], DL_NAMES=["Принят","Собираем","В пути","Доставлен"];
+const MONTHS = {
+  ru:["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"],
+  kk:["қаңтар","ақпан","наурыз","сәуір","мамыр","маусым","шілде","тамыз","қыркүйек","қазан","қараша","желтоқсан"]
+};
+const fmtDate = iso => { if(!iso) return ""; const d=new Date(iso), p=n=>String(n).padStart(2,"0");
+  return `${d.getDate()} ${MONTHS[LANG==="kk"?"kk":"ru"][d.getMonth()]}, ${p(d.getHours())}:${p(d.getMinutes())}`; };
+function orderCard(o){
+  const d=state.ostat[o.id];
+  if(!d) return `<div class="panel ocard2"><div class="oc-top"><b>Заказ №${o.id}</b></div><span class="muted" style="font-size:13px">${state.oLoading?"Загружаем статус…":"Не удалось получить статус"}</span></div>`;
+  const dl=d.fulfil==="delivery", active=d.status!=="done", si=STAGE_OF[d.status]??0;
+  const [title,hint]=(dl?BUYER_STATUS_D:BUYER_STATUS)[d.status]||["",""];
+  return `<article class="panel ocard2">
+    <div class="oc-top"><div><b style="font-size:16px">Заказ №${d.id}</b><div class="muted" style="font-size:12.5px">${fmtDate(d.created_at)} · ${dl?"Доставка":"У лидера"}</div></div>
+      <div class="oc-r"><b>${fmt(d.total)}</b><span class="pill ${(STATUS[d.status]||{}).c||""}">${(dl?DL_NAMES:PK_NAMES)[si]}</span></div></div>
+    ${active?`${stageBar(d.status, dl)}
+      <div><b>${title}</b><div class="muted" style="font-size:13px">${hint}</div></div>
+      <div class="codebox small"><span style="font-size:12px;font-weight:700;opacity:.85">${dl?"Код для курьера":"Код выдачи"}</span><b>${esc(d.code)}</b></div>
+      ${!dl&&d.status==="paid"?`<div class="free-hint"><span>Сбор дома: <b>${fmt(d.pool)}</b> из ${fmt(d.threshold)}</span><i><em style="width:${Math.min(100,d.threshold?d.pool/d.threshold*100:100)}%"></em></i></div>`:""}
+      ${d.status==="ready"&&SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi Bereke store</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`:""}`:""}
+    <div class="muted" style="font-size:13px">${itemsText(d.items)}</div>
+    <div class="muted" style="font-size:13px">${dl?`Доставка: ${esc(d.address||"")}${d.apt&&d.apt!=="—"?", кв. "+esc(d.apt):""}${d.entrance?", "+esc(d.entrance):""}${d.delivery_fee?" · "+fmt(d.delivery_fee):""}`:`Лидер: ${esc(d.leader_name)} · ${esc(d.zk_name)}`}</div>
+    <button class="btn light" data-repeat="${d.id}">Повторить заказ</button>
+  </article>`;
+}
+function viewProfile(){
+  const list=state.orders.slice().sort((x,y)=>y.id-x.id);
+  const known=list.filter(o=>state.ostat[o.id]);
+  const isAct = o => !state.ostat[o.id] || state.ostat[o.id].status!=="done";
+  const act=list.filter(isAct), hist=list.filter(o=>!isAct(o));
+  const tab = state.ptab || (act.length||!hist.length ? "act" : "hist");
+  const shown = tab==="act" ? act : hist;
+  const saved = known.reduce((s,o)=>{ const d=state.ostat[o.id]; return s + (d.status==="done" && d.old_total>d.total ? d.old_total-d.total : 0); },0);
+  const nm=(CUST.name||"").trim();
   return `<section class="section wrap">
-    <h1>Мои заказы</h1>
-    ${state.orders.map(o=>{
-      const d = state.ostat[o.id];
-      if(!d) return `<div class="panel"><b>Заказ №${o.id}</b><span class="muted">${state.oLoading?"Загружаем статус…":"Не удалось получить статус"}</span></div>`;
-      const dl = d.fulfil==="delivery";
-      const [title, hint] = (dl?BUYER_STATUS_D:BUYER_STATUS)[d.status] || ["",""];
-      return `<div class="panel ordcard">
-        <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><b style="font-size:16px">Заказ №${d.id}</b><b>${fmt(d.total)}</b></div>
-        ${stageBar(d.status, dl)}
-        <div><b>${title}</b><div class="muted" style="font-size:13px">${hint}</div></div>
-        ${d.status!=="done"?`<div class="codebox small"><span style="font-size:12px;font-weight:700;opacity:.85">${dl?"Код для курьера":"Код выдачи"}</span><b>${esc(d.code)}</b></div>`:""}
-        <div class="muted" style="font-size:13px">${itemsText(d.items)}</div>
-        ${dl?`<div class="muted" style="font-size:13px">Доставка: ${esc(d.address||"")}${d.apt&&d.apt!=="—"?", кв. "+esc(d.apt):""}${d.entrance?", "+esc(d.entrance):""}${d.delivery_fee?" · "+fmt(d.delivery_fee):""}</div>`
-          :`<div class="muted" style="font-size:13px">Лидер: ${esc(d.leader_name)} · ${esc(d.zk_name)}</div>`}
-        ${!dl&&d.status==="paid"?`<div class="free-hint"><span>Сбор дома: <b>${fmt(d.pool)}</b> из ${fmt(d.threshold)}</span><i><em style="width:${Math.min(100,d.threshold?d.pool/d.threshold*100:100)}%"></em></i></div>`:""}
-        ${d.status==="ready"&&SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi Bereke store</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`:""}
-      </div>`;}).join("")}
+    <div class="prof-head">
+      <div class="avatar" aria-hidden="true">${esc((nm||"?").slice(0,1).toUpperCase())}</div>
+      <div class="pinfo2"><b>${nm?esc(nm):"Гость"}</b><span class="muted">${CUST.phone?esc(CUST.phone):"Добавьте телефон, чтобы заказы находились на другом устройстве"}</span>${ZKS.length?`<span class="muted">${esc(zk().name)}</span>`:""}</div>
+      <button class="btn light" data-act="editprofile">Изменить</button>
+    </div>
+    <div class="pstats">
+      <div class="fact"><b>${list.length}</b><span>заказов</span></div>
+      <div class="fact"><b>${fmt(saved)}</b><span>сэкономили</span></div>
+    </div>
+    <h2>Мои заказы</h2>
+    <div class="seg2" role="group" aria-label="Заказы">
+      <button data-ptab="act" aria-pressed="${tab==="act"}">Активные${act.length?` · ${act.length}`:""}</button>
+      <button data-ptab="hist" aria-pressed="${tab==="hist"}">История${hist.length?` · ${hist.length}`:""}</button>
+    </div>
+    ${shown.length?shown.map(orderCard).join(""):`<div class="empty" style="padding-block:20px">${heroBig()}<b>${tab==="act"?"Активных заказов нет":"Здесь появятся выданные заказы"}</b><span class="muted">${tab==="act"?"Выберите товары в каталоге, и заказ появится здесь с кодом и статусом.":"Когда заказ выдадут или доставят, он останется в истории."}</span><button class="btn" data-go="shop">Перейти в магазин</button></div>`}
+    <details class="panel restore" ${state.rst.err?"open":""}>
+      <summary>Не видите свои заказы?</summary>
+      <form id="restoreForm" novalidate>
+        <p class="muted" style="margin:0;font-size:13px">Если вы заказывали с другого устройства, введите телефон и номер с кодом любого своего заказа. Мы найдём все заказы с этим телефоном.</p>
+        <div class="field"><label for="rs-phone">Телефон из заказа</label><input id="rs-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __" value="${esc(state.rst.phone||CUST.phone||"")}"></div>
+        <div class="two"><div class="field"><label for="rs-id">Номер заказа</label><input id="rs-id" inputmode="numeric" maxlength="10" placeholder="77" value="${esc(state.rst.id)}"></div>
+          <div class="field"><label for="rs-code">Код</label><input id="rs-code" inputmode="numeric" maxlength="4" placeholder="4821" value="${esc(state.rst.code)}"></div></div>
+        <p id="rsErr" class="err" ${state.rst.err?"":"hidden"}>${esc(state.rst.err)}</p>
+        <button class="btn block" type="submit" ${state.rst.busy?"disabled":""}>${state.rst.busy?"Ищем…":"Найти мои заказы"}</button>
+      </form>
+    </details>
+    <div class="panel">
+      <h2>Настройки</h2>
+      <div class="setrow"><span>Язык</span><div class="seg2 inl" role="group" aria-label="Язык"><button data-setlang="ru" aria-pressed="${LANG==="ru"}">РУС</button><button data-setlang="kk" aria-pressed="${LANG==="kk"}">ҚАЗ</button></div></div>
+      <div class="setrow col"><span>Помощник</span><div class="hgrid">${heroPick()}</div></div>
+      <button class="rowlink" data-go="leader"><span>Кабинет лидера ЖК</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button class="rowlink" data-go="how"><span>Как это работает</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <p class="muted" style="font-size:12px;text-align:center;margin:0">Заказы и данные хранятся на этом устройстве. На другом устройстве их можно восстановить по телефону.</p>
+    ${state.clr?`<div class="panel"><b>Удалить данные на этом устройстве?</b><span class="muted" style="font-size:13px">Исчезнут сохранённые заказы, корзина и контакты. Сами заказы в магазине останутся, их можно восстановить по телефону.</span><div class="two"><button class="btn danger" data-act="clearall">Да, удалить</button><button class="btn ghost" data-act="clearno">Отмена</button></div></div>`
+      :`<button class="btn ghost block" data-act="clearask">Удалить данные на этом устройстве</button>`}
   </section>`;
+}
+function openProfileEdit(){
+  if(document.getElementById("pfbg")) return;
+  const bg=document.createElement("div"); bg.id="pfbg"; bg.className="sheet-bg";
+  bg.innerHTML=`<form class="sheet" id="profileForm" role="dialog" aria-label="Мои данные" novalidate><h2>Мои данные</h2>
+    <p class="muted" style="margin:0;font-size:13px">Подставим их при оформлении заказа.</p>
+    <div class="field"><label for="pf-name">Имя</label><input id="pf-name" autocomplete="given-name" maxlength="80" value="${esc(CUST.name||"")}"></div>
+    <div class="field"><label for="pf-phone">Телефон</label><input id="pf-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __" value="${esc(CUST.phone||"")}"></div>
+    <div class="field"><label for="pf-addr">Адрес для доставки</label><input id="pf-addr" autocomplete="street-address" maxlength="160" placeholder="Улица, дом или ЖК и блок" value="${esc(CUST.address||"")}"></div>
+    <div class="two"><div class="field"><label for="pf-apt">Квартира</label><input id="pf-apt" maxlength="20" value="${esc(CUST.apt||"")}"></div>
+      <div class="field"><label for="pf-ent">Подъезд, этаж</label><input id="pf-ent" maxlength="40" value="${esc(CUST.entrance||"")}"></div></div>
+    <button class="btn block" type="submit">Сохранить</button><button class="btn ghost block" type="button" data-close>Закрыть</button></form>`;
+  bg.addEventListener("click",ev=>{ if(ev.target===bg||ev.target.closest("[data-close]")) bg.remove(); });
+  document.body.appendChild(bg); translateDom(bg); bg.querySelector("#pf-name").focus();
 }
 
 /* ---------- как это работает ---------- */
@@ -1275,16 +1374,17 @@ function viewLeader(){
 }
 
 /* ---------- отрисовка и данные ---------- */
-const VIEWS=["shop","cart","orders","how","leader"];
+const VIEWS=["shop","cart","profile","orders","how","leader"];
 function render(){
   $("#zkName").textContent = zk().name;
   document.body.classList.toggle("prelaunch", !!SET.prelaunch);
-  if(SET.prelaunch && ["cart","orders","done"].includes(state.view)) state.view="shop";
+  if(state.view==="orders") state.view="profile";
+  if(SET.prelaunch && ["cart","profile","done"].includes(state.view)) state.view="shop";
   let html;
   if(state.view==="done"&&state.done) html=viewDone(state.done);
-  else html=({shop:viewShop,cart:viewCart,orders:viewOrders,how:viewHow,leader:viewLeader}[state.view]||viewShop)();
+  else html=({shop:viewShop,cart:viewCart,profile:viewProfile,how:viewHow,leader:viewLeader}[state.view]||viewShop)();
   $("#view").innerHTML=html;
-  const nav=state.view==="done"?"orders":state.view;
+  const nav=state.view==="done"?"profile":state.view;
   document.querySelectorAll(".nav button").forEach(b=>{ b.setAttribute("aria-current",b.dataset.go===nav?"page":"false"); if(b.dataset.pre!==undefined) b.hidden=!SET.prelaunch; if(b.dataset.live!==undefined) b.hidden=!!SET.prelaunch; });
   const lbl=document.querySelector('.nav [data-go="shop"] .lbl'); if(lbl) lbl.textContent = SET.prelaunch?"Главная":"Магазин";
   const c=cartCount(); const bd=$("#cartBadge"); bd.hidden=!c; bd.textContent=c;
@@ -1298,9 +1398,10 @@ function render(){
   tgSync();
 }
 function go(v){
+  if(v==="orders") v="profile";
   state.view=v; if(location.hash!=="#"+v && v!=="done") history.replaceState(null,"",location.pathname+location.search+"#"+v);
   if(v==="leader" && state.leader && !state.ld) loadLeader();
-  if(v==="orders") loadOrders();
+  if(v==="profile") loadOrders();
   if(v==="shop"||v==="cart") loadPools();
   render(); window.scrollTo(0,0);
 }
@@ -1325,9 +1426,13 @@ async function loadCatalog(){
 }
 async function loadOrders(){
   if(!state.orders.length) return;
-  state.oLoading=true; render();
-  await Promise.all(state.orders.map(async o=>{ try{ const d=await rpc("adal_order_status",{p_id:o.id,p_code:o.code}); if(d) state.ostat[o.id]=d; }catch(_){} }));
-  state.oLoading=false; if(state.view==="orders") render();
+  state.oLoading=true; if(state.view==="profile") render();
+  try{
+    const arr = await rpc("adal_orders_status",{p:state.orders.map(o=>({id:o.id,code:o.code}))});
+    (arr||[]).forEach(d=>{ state.ostat[d.id]=d; });
+    ss.set("adal-ostat",state.ostat);
+  }catch(_){}
+  state.oLoading=false; if(state.view==="profile") render();
 }
 async function loadLeader(){
   if(!state.leader) return;
@@ -1358,6 +1463,18 @@ document.addEventListener("click",e=>{
   const d=t.dataset;
   if(d.pclose!==undefined){ closeProduct(); return; }
   if(d.hero){ setHero(d.hero); return; }
+  if(d.ptab){ state.ptab=d.ptab; render(); return; }
+  if(d.setlang){ setLang(d.setlang); return; }
+  if(d.repeat){
+    const od=state.ostat[d.repeat]; let n=0;
+    if(od&&od.items) Object.entries(od.items).forEach(([pid,q])=>{ if(prod(pid)){ state.cart[pid]=Math.min(50,(state.cart[pid]||0)+(+q)); n++; } });
+    if(!n){ toast("Эти товары сейчас недоступны"); return; }
+    saveCart(); state.fulfil = od.fulfil==="delivery" ? "delivery" : "pickup"; ss.set("adal-fulfil",state.fulfil);
+    toast("Товары добавлены в корзину"); go("cart"); return; }
+  if(d.act==="editprofile"){ openProfileEdit(); return; }
+  if(d.act==="clearask"){ state.clr=true; render(); return; }
+  if(d.act==="clearno"){ state.clr=false; render(); return; }
+  if(d.act==="clearall"){ try{ Object.keys(localStorage).filter(k=>k.startsWith("adal-")&&k!=="adal-lang").forEach(k=>localStorage.removeItem(k)); }catch(_){} location.href=location.pathname+location.search+"#shop"; location.reload(); return; }
   if(d.ful){ state.fulfil=d.ful; ss.set("adal-fulfil",d.ful); render(); return; }
   if(d.lang!==undefined){ setLang(LANG==="kk"?"ru":"kk"); return; }
   if(d.qclear!==undefined){ state.q=""; render(); return; }
@@ -1385,8 +1502,31 @@ document.addEventListener("click",e=>{
 document.addEventListener("change",e=>{ if(e.target.id==="f-zk"){ state.zk=e.target.value; ss.set("adal-zk",state.zk); render(); } });
 
 document.addEventListener("submit",async e=>{
-  const id=e.target.id; if(!["checkout","regForm","loginForm","findForm","waitForm"].includes(id)) return;
+  const id=e.target.id; if(!["checkout","regForm","loginForm","findForm","waitForm","restoreForm","profileForm"].includes(id)) return;
   e.preventDefault(); if(state.busy) return;
+
+  if(id==="profileForm"){
+    const g=k=>document.getElementById(k).value.trim();
+    CUST={...CUST, name:g("pf-name"), phone:g("pf-phone"), address:g("pf-addr"), apt:g("pf-apt").replace(/^кв\.?\s*/i,""), entrance:g("pf-ent")};
+    ss.set("adal-cust",CUST); document.getElementById("pfbg").remove(); toast("Данные сохранены"); render(); return;
+  }
+  if(id==="restoreForm"){
+    const g=k=>document.getElementById(k).value.trim();
+    state.rst={...state.rst, phone:g("rs-phone"), id:g("rs-id").replace(/\D/g,""), code:g("rs-code").replace(/\D/g,""), err:"", busy:false};
+    if(state.rst.phone.replace(/\D/g,"").length<10 || !state.rst.id || state.rst.code.length<4){ state.rst.err="Заполните телефон, номер заказа и 4-значный код."; render(); return; }
+    state.rst.busy=true; render();
+    try{
+      const r = await rpc("adal_orders_by_phone",{p_phone:state.rst.phone, p_id:+state.rst.id, p_code:state.rst.code});
+      if(r && r.error){ state.rst.busy=false; state.rst.err=r.error; render(); return; }
+      const have=new Set(state.orders.map(o=>o.id)); let added=0;
+      (r.orders||[]).forEach(o=>{ if(!have.has(o.id)){ state.orders.push({id:o.id, code:o.code, fulfil:o.fulfil, zk:o.zk}); added++; } });
+      state.orders.sort((x,y)=>y.id-x.id); state.orders=state.orders.slice(0,100); ss.set("adal-orders",state.orders);
+      if(!CUST.phone){ CUST={...CUST, phone:state.rst.phone}; ss.set("adal-cust",CUST); }
+      state.rst={phone:"",id:"",code:"",err:"",busy:false};
+      toast(added?`Нашли заказов: ${added}`:"Все ваши заказы уже здесь"); await loadOrders();
+    }catch(ex){ state.rst.busy=false; state.rst.err="Не получилось: "+ex.message; render(); }
+    return;
+  }
 
   if(id==="waitForm"){
     const name=$("#w-name").value.trim(), phone=$("#w-phone").value.trim(), place=$("#w-place").value.trim(), err=$("#waitErr"), miss=[];
@@ -1431,7 +1571,7 @@ document.addEventListener("submit",async e=>{
         POOLS[f.zk]=r.pool;
         state.done={...r, zk:f.zk};
       }
-      state.orders=state.orders.slice(0,20); ss.set("adal-orders",state.orders);
+      state.orders=state.orders.slice(0,100); ss.set("adal-orders",state.orders);
       state.cart={}; saveCart(); state.busy=false; go("done");
     }catch(ex){
       state.busy=false; render(); restore();
@@ -1529,7 +1669,7 @@ window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(VI
   if(u && !CUST.name && u.first_name) CUST={...CUST, name:u.first_name};
   const h=location.hash.slice(1); if(VIEWS.includes(h)) state.view=h;
   if(state.leader) state.leaderMode="login";
-  loadCatalog().then(()=>{ if(!ss.get("adal-hero")) openHeroPicker(); if(state.view==="leader" && state.leader) loadLeader(); if(state.view==="orders") loadOrders(); });
+  loadCatalog().then(()=>{ if(!ss.get("adal-hero")) openHeroPicker(); if(state.view==="leader" && state.leader) loadLeader(); if(state.view==="profile"||state.view==="orders") loadOrders(); });
 })();
 </script>
 
