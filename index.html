@@ -559,6 +559,15 @@ body[data-hero="irbi"] .reg-hero>*:not(.himg){max-width:70%}
 .hpick .rig.mrig{height:128px;width:auto}
 .hpick .rig:not(.mrig){height:128px;width:128px}
 @media (prefers-reduced-motion:reduce){.mg-head,.mg-feather,.mc-head,.mrig .rg:nth-of-type(2),.mg-head .lid,.mc-head .lid{animation:none!important}}
+
+/* позы-картинки */
+.an-breath{transform-origin:50% 100%;animation:pbreath 3.4s ease-in-out infinite}
+@keyframes pbreath{0%,100%{transform:scale(1,1)}50%{transform:scale(1.015,1.03)}}
+.peek.pose{height:auto;overflow:visible;margin:0 20px -14px auto}
+.peek.pose img{width:var(--pw,130px);height:auto;align-self:auto;animation:hpeek2 .7s cubic-bezier(.2,1.3,.4,1) .3s both}
+@keyframes hpeek2{from{transform:translateY(40%);opacity:0}to{transform:translateY(0);opacity:1}}
+.tip .irbi:not(.rig){height:auto}
+@media (prefers-reduced-motion:reduce){.an-breath{animation:none!important}.peek.pose img{animation:none}}
 </style>
 </head>
 <body>
@@ -906,19 +915,21 @@ function filterList(){
   return PRODUCTS.filter(p=>norm([p.name,p.name_kk,p.brand,p.variant,p.weight,CATS[p.cat],t(CATS[p.cat])].join(" ")).includes(q));
 }
 const HEROES = {
-  irbi:  {name:"Ирби", img:"img/irbi.webp", w:96, h:96, big:132, peek:120, poses:{}, desc:"Барсёнок. Подскажет про сбор дома и цены."},
-  makta: {name:"Мақта қыз", img:"img/makta.webp", w:84, h:157, big:96, peek:70, poses:{}, desc:"Героиня казахской сказки и её кот. Подскажет про лидеров."}
+  irbi:  {name:"Ирби", img:"img/irbi.webp", w:96, h:96, big:132, peek:150, poses:{wave:"img/poses/irbi-wave.webp",point:"img/poses/irbi-point.webp",bag:"img/poses/irbi-bag.webp",cheer:"img/poses/irbi-cheer.webp",think:"img/poses/irbi-think.webp",peek:"img/poses/irbi-peek.webp"}, desc:"Барсёнок. Подскажет про сбор дома и цены."},
+  makta: {name:"Мақта қыз", img:"img/makta.webp", w:84, h:157, big:96, peek:104, poses:{wave:"img/poses/makta-wave.webp",point:"img/poses/makta-point.webp",bag:"img/poses/makta-bag.webp",cheer:"img/poses/makta-cheer.webp",think:"img/poses/makta-think.webp",peek:"img/poses/makta-peek.webp"}, desc:"Героиня казахской сказки и её кот. Подскажет про лидеров."}
 };
 /* позы: когда появятся отдельные картинки, добавьте их в poses, например irbi.poses.cheer = "img/irbi-cheer.webp" (wave, point, bag, cheer, think, peek) */
 /* живой Ирби: слои (туловище, хвост, голова с веками) двигаются отдельно; Мақта қыз пока одной картинкой */
 function heroMedia(pose, cls, w, h, lazy){
   cls = cls||"";
-  if(state.hero==="irbi" && !HEROES.irbi.poses[pose]){
+  const PI = HEROES[state.hero].poses[pose];
+  if(PI) return `<img class="${cls}" src="${PI}" alt="${esc(hero().name)}"${w?` width="${Math.round(w)}"`:""}${lazy?' loading="lazy"':""}>`;
+  if(state.hero==="irbi"){
     cls = cls.replace(/\ban-(sway|bob)\b/g,"").trim();
     const L = lazy ? ' loading="lazy"' : "";
     return `<div class="rig ${cls}" role="img" aria-label="Ирби"><div class="rin"><img class="rg rg-body" src="img/rig/irbi-body.webp" alt=""${L}><img class="rg rg-tail" src="img/rig/irbi-tail.webp" alt=""${L}><div class="rg rg-head"><img src="img/rig/irbi-head.webp" alt=""${L}><img class="lid l" src="img/rig/irbi-lid_l.webp" alt=""${L}><img class="lid r" src="img/rig/irbi-lid_r.webp" alt=""${L}></div></div></div>`;
   }
-  if(state.hero==="makta" && !HEROES.makta.poses[pose]){
+  if(state.hero==="makta"){
     cls = cls.replace(/\ban-(sway|bob)\b/g,"").trim();
     const L = lazy ? ' loading="lazy"' : "", R="img/rig/makta-";
     return `<div class="rig mrig ${cls}" role="img" aria-label="Мақта қыз"><div class="rin"><img class="rg" src="${R}body.webp" alt=""${L}>
@@ -928,10 +939,10 @@ function heroMedia(pose, cls, w, h, lazy){
   }
   return `<img class="${cls}" src="${heroImg(pose)}" alt="${esc(hero().name)}" width="${w}" height="${h}"${lazy?' loading="lazy"':""}>`;
 }
-function heroMediaFor(k){ const prev=state.hero; state.hero=k; const out=heroMedia("wave","pkrig"); state.hero=prev; return out; }
+function heroMediaFor(k){ const prev=state.hero; state.hero=k; const out=heroMedia("idle","pkrig"); state.hero=prev; return out; }
 const heroImg = pose => { const h=hero(); return h.poses[pose] || h.img; };
-const ANIM = {wave:"an-sway", point:"an-bob", bag:"an-hop", cheer:"an-hop", think:"an-bob", peek:"an-bob"};
-function heroPeek(pose){ const h=hero(); return `<div class="peek" aria-hidden="true" style="--pw:${h.peek}px">${heroMedia(pose||"peek","peekimg",h.peek,h.peek*h.h/h.w)}</div>`; }
+const ANIM = {wave:"an-breath", point:"an-breath", bag:"an-breath", cheer:"an-hop", think:"an-breath", peek:"", idle:""};
+function heroPeek(pose){ const h=hero(); return `<div class="peek pose" aria-hidden="true" style="--pw:${h.peek}px">${heroMedia("peek","peekimg",h.peek,0,true)}</div>`; }
 const hero = () => HEROES[state.hero] || HEROES.irbi;
 const greet = () => `Привет, я ${hero().name}!`;
 function heroBig(pose){ const h=hero(); const bh=Math.round(h.big*h.h/h.w); return heroMedia(pose,`irbi-big ${ANIM[pose]||"an-bob"}`,h.big,bh); }
@@ -953,13 +964,13 @@ function tipList(){
   return [
     left ? {pose:"wave",text:`${greet()} Дому не хватает ${fmt(left)} до машины. Позови соседей — вместе дешевле!`,btn:["Позвать соседей",`data-ext="${esc(share)}"`]}
          : {pose:"wave",text:`${greet()} Сбор дома набран — скоро привезём заказы лидеру.`},
-    {pose:"wave",text:`Хочешь зарабатывать ${Math.round(SET.commission)}% с заказов дома? Стань лидером ЖК!`,btn:["Стать лидером",'data-act="becomeleader"']},
+    {pose:"cheer",text:`Хочешь зарабатывать ${Math.round(SET.commission)}% с заказов дома? Стань лидером ЖК!`,btn:["Стать лидером",'data-act="becomeleader"']},
     {pose:"bag",text:"Закажи до 21:00, а завтра лидер получит машину. Платить сразу не нужно — переведёшь на Kaspi при получении."},
     (o>c && c) ? {pose:"point",text:`Ты уже экономишь ${fmt(o-c)} в корзине. Так держать!`} : {pose:"point",text:"Нажми на фото товара — там состав и срок годности."},
   ];
 }
 const tipHtml = k => { const h=hero(), mk=state.hero==="makta";
-  const img = heroMedia(k.pose, `irbi ${ANIM[k.pose]||""}${k.pose==="point"?" flip":""}`, h.w, h.h, true);
+  const img = heroMedia(k.pose, `irbi ${ANIM[k.pose]||""}`, h.w, h.h, true);
   return `<div class="tip${mk?" mk":""}">${img}<div class="bub"><b>${h.name}</b><span>${esc(k.text)}</span>${k.btn?`<button class="btn light" ${k.btn[1]}>${k.btn[0]}</button>`:""}</div></div>`; };
 let tipObs=null;
 function observeTips(){
@@ -1054,7 +1065,7 @@ function viewSoon(){
       <p>Мы не тратим деньги на рекламу — мы возвращаем их вам в цене.</p>
       <button class="cta" data-act="towait">Записаться в список</button>
       <div class="packs" aria-hidden="true"><img src="img/111.jpg" alt=""><img src="img/119.jpg" alt=""></div>
-      ${heroMedia("wave","himg2 an-sway",hero().w,hero().h)}
+      ${heroMedia("idle","himg2",hero().w,hero().h)}
     </div>
     <div class="panel launchp">
       <div class="lp-top"><b>Запустимся, когда нас станет ${goal}</b><span>${n} из ${goal}</span></div>
@@ -1091,7 +1102,7 @@ function viewSoon(){
       <div class="why"><b>2</b><div><div class="t">Без рекламы и магазина</div><div class="muted">Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.</div></div></div>
       <div class="why"><b>3</b><div><div class="t">Заказ забираете у соседа</div><div class="muted">Лидер вашего дома принимает машину и выдаёт пакеты. Курьер к каждой двери не нужен.</div></div></div>
     </div>
-    ${tipHtml({pose:"wave",text:`Хотите зарабатывать? Станьте лидером своего ЖК: ${Math.round(SET.commission)}% с каждого заказа дома. Приглашайте соседей, а когда запустимся, выдавайте им заказы.`,btn:["Стать лидером ЖК",'data-act="becomeleader"']})}
+    ${tipHtml({pose:"cheer",text:`Хотите зарабатывать? Станьте лидером своего ЖК: ${Math.round(SET.commission)}% с каждого заказа дома. Приглашайте соседей, а когда запустимся, выдавайте им заказы.`,btn:["Стать лидером ЖК",'data-act="becomeleader"']})}
   </section>`;
 }
 
@@ -1309,7 +1320,7 @@ function viewReg(){
   const r=state.reg, rate=Math.round(SET.commission);
   return `<section class="section wrap">
     <div class="reg-hero">
-      ${heroMedia("point","himg an-bob",hero().w,hero().h)}
+      ${heroMedia("point","himg an-breath",hero().w,hero().h)}
       <span class="label" style="color:inherit;opacity:.85">Для активных соседей</span>
       <h1>Зарабатывайте на заказах своего дома</h1>
       <p style="margin:0;opacity:.92">Зовите соседей и выдавайте им заказы по коду. ${rate}% с каждого выданного заказа дома.</p>
@@ -1336,7 +1347,7 @@ function viewReg(){
          ["Вечером в день привоза","Выдаёте по коду","Сосед называет код и платит на Kaspi Bereke store. Вам идёт "+rate+"% с выданного заказа."]]
         .map((x,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${x[0]}</span><div class="t">${x[1]}</div><div class="muted">${x[2]}</div></div></div>`).join("")}
     </div>
-    ${tipHtml({pose:"wave",text:`${greet()} Зови соседей и выдавай им заказы — и береке придёт в каждый дом.`})}
+    ${tipHtml({pose:"point",text:`${greet()} Зови соседей и выдавай им заказы — и береке придёт в каждый дом.`})}
     <div class="two2">
       <div class="panel"><h2>Вы делаете</h2><ul class="tick"><li>Зовёте соседей в чате дома</li><li>Принимаете машину</li><li>1–2 часа вечером выдаёте заказы</li></ul></div>
       <div class="panel"><h2>Вам не нужно</h2><ul class="tick no"><li>Покупать товар</li><li>Возить и собирать заказы</li><li>Брать деньги с соседей: они платят на Kaspi Bereke store</li></ul></div>
