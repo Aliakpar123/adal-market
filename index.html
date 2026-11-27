@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="ADAL market — бытовая химия по оптовым ценам с доставкой до двери.">
+<meta name="description" content="ADAL market — бытовая химия по оптовым ценам: соседи покупают вместе, заказ вы забираете у лидера своего дома.">
 <meta name="theme-color" content="#FFFFFF">
 <meta name="color-scheme" content="light only">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -145,7 +145,7 @@ h1{font-size:22px;line-height:1.2} h2{font-size:17px} h3{font-size:15px}
 
 /* bottom nav */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
-.nav-in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.nav-in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
 .nav button{border:0;background:transparent;padding:10px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:700;color:var(--muted);position:relative}
 .nav button[aria-current="page"]{color:var(--brand)}
 .nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -240,6 +240,30 @@ body.has-bar .app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .toast{bottom:calc(146px + env(safe-area-inset-bottom,0px));border-radius:14px}
 .hero-l,.reg-hero{border-radius:22px}
 @media (prefers-reduced-motion:reduce){.plus{transition:none}}
+/* ===== модель с лидерами ЖК ===== */
+.collect{background:var(--brand);color:var(--brand-ink);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.collect .big{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+.collect .bar{height:10px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}
+.collect .bar i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.collect.ok .bar i{background:#9BE7BB}
+.collect .sub{font-size:13px;opacity:.92}
+.leader-strip{display:flex;gap:12px;align-items:center;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:10px 12px;font-size:13.5px}
+.leader-strip .av{width:38px;height:38px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.leader-strip a{font-weight:700;color:var(--brand)}
+.codebox{background:var(--brand);color:#fff;border-radius:22px;padding:18px;text-align:center;display:flex;flex-direction:column;gap:6px}
+.codebox b{font-size:46px;letter-spacing:.18em;font-variant-numeric:tabular-nums;line-height:1.1}
+.codebox.small{padding:10px;border-radius:14px}.codebox.small b{font-size:28px}
+.kaspi{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--bg);border-radius:12px;padding:10px 12px}
+.kaspi b{font-size:17px;font-variant-numeric:tabular-nums}
+.linkrow{display:flex;gap:8px;align-items:center;background:var(--bg);border-radius:12px;padding:8px 8px 8px 12px}
+.linkrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:13.5px}
+.tmpl{background:var(--bg);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45}
+.sec-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.entry2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.entry2:last-child{border-bottom:0}
+.codein{font-size:26px!important;letter-spacing:.3em;text-align:center;font-weight:800}
+.ordcard{gap:10px}
+
 
 </style>
 </head>
@@ -249,22 +273,25 @@ body.has-bar .app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
   <header class="top wrap">
     <div class="top-row">
       <div class="logo" aria-label="adal market"><svg width="32" height="25" viewBox="0 0 46 36" aria-hidden="true"><path class="h1" d="M3 34 V17 L14 7 L25 17 V34 Z"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg><span>adal<small>market</small></span></div>
-      <div class="zk" aria-hidden="true"><span class="zk-txt"><small>Доставка</small><span>до двери</span></span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-.01M17 19a2 2 0 1 0 0-.01"/></svg></div>
+      <button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
+        <span class="zk-txt"><small>Мой дом</small><span id="zkName"></span></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
     </div>
-    <div class="deadline" id="deadline"><span class="dot"></span><span>Заказ до 21:00 — привезём завтра</span><b id="cd">--:--:--</b></div>
+    <div class="deadline" id="deadline"><span class="dot"></span><span>Сбор заказов до 21:00</span><b id="cd">--:--:--</b></div>
   </header>
 
   <main id="view"></main>
   <button class="cartbar" id="cartBar" data-go="cart" hidden></button>
-  <p class="demo wrap">Тестовый запуск: оплата при получении.</p>
+  <p class="demo wrap">Оплата Kaspi-переводом при получении заказа у лидера.</p>
 </div>
 
 <nav class="nav" aria-label="Разделы">
   <div class="nav-in">
     <button data-go="shop"><svg viewBox="0 0 24 24"><path d="M3 9l1.5-5h15L21 9M3 9h18v11H3zM9 13h6"/></svg>Магазин</button>
     <button data-go="cart"><svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6"/></svg>Корзина<span class="badge" id="cartBadge" hidden>0</span></button>
-    <button data-go="how"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5h.01"/></svg>Как это работает</button>
+    <button data-go="orders"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/></svg>Заказы</button>
+    <button data-go="leader"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Лидер ЖК</button>
   </div>
 </nav>
 
@@ -284,27 +311,30 @@ async function api(path, body){
 }
 const rpc = (fn, args) => api("rpc/" + fn, args);
 
-const COMMISSION = 0.07;
 const CATS = {clean:"Чистящие средства", soap:"Мыло", dish:"Для посуды", wash:"Для стирки"};
-const STATUS = {
-  paid:{t:"Новый", c:"p-paid"}, sent:{t:"У поставщика", c:"p-sent"},
-  ready:{t:"Привезли · выдать", c:"p-ready"}, done:{t:"Выдан", c:"p-done"}
+const STAGE_OF = {paid:0, sent:1, ready:2, done:3};
+const STATUS = {paid:{t:"Новый", c:"p-paid"}, sent:{t:"В пути", c:"p-sent"}, ready:{t:"Привезли", c:"p-ready"}, done:{t:"Выдан", c:"p-done"}};
+const BUYER_STATUS = {
+  paid:["Собираем заказы дома","Ждём, пока дом наберёт нужную сумму"],
+  sent:["Закупаем и везём лидеру","Заказы вашего дома уже в пути"],
+  ready:["Можно забирать","Назовите код лидеру и переведите оплату на Kaspi"],
+  done:["Заказ выдан","Спасибо, что покупаете вместе"]
 };
-let CUST = (()=>{ try{ return JSON.parse(localStorage.getItem("adal-cust"))||{}; }catch(_){ return {}; } })();
-let ZKS = [], PRODUCTS = [], DELIV = {delivery_fee:0, free_from:0};
-const deliveryFee = sum => (DELIV.free_from>0 && sum>=DELIV.free_from) ? 0 : (+DELIV.delivery_fee||0);
+let ZKS = [], PRODUCTS = [], POOLS = {}, SET = {threshold:20000, kaspi:"", kaspi_name:"", commission:5};
 
 const ss = {
   get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(_){ return null; } },
   set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(_){} },
   del(k){ try{ localStorage.removeItem(k); }catch(_){} }
 };
+let CUST = ss.get("adal-cust") || {};
 
 const state = {
-  view:"shop", cat:"all", zk: ss.get("adal-zk") || "sp", cart: ss.get("adal-cart") || {},
+  view:"shop", cat:"all", zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
   loading:true, loadError:null, busy:false,
-  leaderTab:"orders", lastNew:null, leader: ss.get("adal-leader"), // {zk, code}
-  ld:null, ldError:null, leaderMode:"reg", regDone:false, calc:30,
+  orders: ss.get("adal-orders") || [], ostat:{}, oLoading:false, done:null,
+  leader: ss.get("adal-leader"), ld:null, ldError:null, ltab:"collect", leaderMode:"login", regDone:false,
+  calc:30, tmpl:"eve", found:null, foundErr:null,
   reg:{name:"",phone:"",city:"Алматы",zk:"",addr:"",flats:"200–500",chat:"WhatsApp",members:"",spot:"Холл или консьерж",pay:"Самозанятый",agree:false}
 };
 
@@ -315,27 +345,53 @@ const pName = id => { const p=prod(id); return p ? `${p.name}${p.variant?" · "+
 const cartSum = () => Object.entries(state.cart).reduce((s,[id,q])=>s+(prod(id)?.price||0)*q,0);
 const cartOld = () => Object.entries(state.cart).reduce((s,[id,q])=>{const p=prod(id); return s+((p?.old_price||p?.price||0))*q;},0);
 const cartCount = () => Object.values(state.cart).reduce((a,b)=>a+b,0);
-const zk = () => ZKS.find(z=>z.id===state.zk) || ZKS[0] || {id:"",name:"Выберите ЖК",leader_name:""};
+const zk = () => ZKS.find(z=>z.id===state.zk) || ZKS[0] || {id:"",name:"Выберите ЖК",leader_name:"",flats:""};
+const pool = id => +(POOLS[id]||0);
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const saveCart = () => ss.set("adal-cart", state.cart);
+const imgOf = (p,id) => esc((p&&p.image_url) || `img/${p&&p.id||id}.jpg`);
+const tile = p => `background:linear-gradient(150deg,${esc(p.color||"#0F4C4A")},${esc(p.color2||p.color||"#0F4C4A")})`;
+const plural = (n,a,b,c) => { const m=n%100, d=n%10; return (m>10&&m<20)?c:(d===1?a:(d>=2&&d<=4?b:c)); };
+const itemsText = items => Object.entries(items||{}).map(([id,q])=>`${esc(pName(id))} ×${q}`).join(", ");
 
 function toast(msg){
   const t=document.createElement("div"); t.className="toast"; t.textContent=msg; t.setAttribute("role","status");
   document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
 }
-const imgOf = (p,id) => esc((p&&p.image_url) || `img/${p&&p.id||id}.jpg`);
-const tile = p => `background:linear-gradient(150deg,${esc(p.color||"#0F4C4A")},${esc(p.color2||p.color||"#0F4C4A")})`;
+function copyText(txt, okMsg){
+  const done=()=>toast(okMsg||"Скопировано");
+  try{ navigator.clipboard.writeText(txt).then(done,()=>toast("Не удалось скопировать: "+txt)); }catch(_){ toast("Не удалось скопировать: "+txt); }
+}
 
-/* ---------- views ---------- */
+/* ---------- общие блоки ---------- */
+function collectCard(z, sum, title, toWhom){
+  const thr=SET.threshold, left=Math.max(0,thr-sum), pct=thr?Math.min(100,sum/thr*100):100;
+  return `<section class="collect ${left?"":"ok"}">
+    <b style="font-size:16px">${title||"Сбор вашего дома"}</b>
+    <div><span class="big">${fmt(sum)}</span> <span style="opacity:.85">из ${fmt(thr)}</span></div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${thr}" aria-valuenow="${Math.round(sum)}"><i style="width:${pct}%"></i></div>
+    <span class="sub">${(()=>{ const who = toWhom || (z.leader_name?"лидеру "+esc(z.leader_name):"лидеру"); return left?`Ещё ${fmt(left)} — и мы привезём заказы дома ${who}`:`Сбор набран: закупаем и везём заказы дома ${who}`; })()}</span>
+  </section>`;
+}
+function payBlock(total){
+  return `<section class="panel">
+    <h2>Оплата</h2>
+    <p class="muted" style="margin:0">Когда будете забирать заказ у лидера, переведите ${total?`<b>${fmt(total)}</b> `:""}на Kaspi ADAL. Наличные не принимаем.</p>
+    ${SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi${SET.kaspi_name?" · "+esc(SET.kaspi_name):""}</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`
+      :`<div class="kaspi"><span class="muted">Реквизиты Kaspi появятся здесь</span></div>`}
+  </section>`;
+}
+function stageBar(st){
+  const i = STAGE_OF[st] ?? 0, names=["Сбор","В пути","Привезли","Выдан"];
+  return `<div class="progress">${names.map((_,k)=>`<i class="${k<=i?"on":""}"></i>`).join("")}</div>
+    <div class="stage">${names.map((n,k)=>`<span class="${k===i?"cur":""}">${n}</span>`).join("")}</div>`;
+}
+
+/* ---------- витрина ---------- */
 function cardCtl(id){
   const q=state.cart[id]||0;
   if(!q) return `<button class="plus" data-add="${id}" aria-label="Добавить в корзину"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>`;
   return `<div class="pill-q"><button data-dec="${id}" aria-label="Меньше">−</button><span>${q}</span><button data-add="${id}" aria-label="Больше">+</button></div>`;
-}
-function qtyCtl(id){
-  const q=state.cart[id]||0;
-  if(!q) return `<button class="btn" data-add="${id}">В корзину</button>`;
-  return `<div class="qty"><button data-dec="${id}" aria-label="Меньше">−</button><span>${q}</span><button data-add="${id}" aria-label="Больше">+</button></div>`;
 }
 
 function viewShop(){
@@ -343,14 +399,11 @@ function viewShop(){
   if(state.loadError) return `<section class="wrap empty"><h2>Не удалось загрузить каталог</h2><p class="muted">${esc(state.loadError)}. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-act="reload">Обновить</button></section>`;
   const cats = Object.keys(CATS).filter(k=>PRODUCTS.some(p=>p.cat===k));
   const list = PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
+  const z = zk();
   return `<section class="section wrap">
-    <div>
-      <div class="promo">
-        <div><h1>Оптовые цены для&nbsp;вашего&nbsp;дома</h1>
-        <p>Закажите до 21:00, а завтра привезём прямо к вашей двери.</p></div>
-        <svg class="promo-art" viewBox="0 0 46 36" aria-hidden="true"><path d="M3 34 V17 L14 7 L25 17 V34 Z" fill="rgba(255,255,255,.28)"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg>
-      </div>
-    </div>
+    ${ZKS.length ? `${collectCard(z, pool(z.id))}
+      <div class="leader-strip"><span class="av">${esc((z.leader_name||"Л").slice(0,1))}</span>
+        <div><b>${z.leader_name?esc(z.leader_name)+" — лидер вашего дома":"Лидер вашего дома"}</b><div class="muted" style="font-size:12.5px">Заказ заберёте у лидера${z.flats?" · "+esc(z.flats):""}. <a href="#how" data-go="how">Как это работает</a></div></div></div>` : ""}
     <div class="chips" role="group" aria-label="Категории">
       <button class="chip" data-cat="all" aria-pressed="${state.cat==="all"}">Все</button>
       ${cats.map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cat===k}">${CATS[k]}</button>`).join("")}
@@ -372,17 +425,16 @@ function viewShop(){
   </section>`;
 }
 
+/* ---------- корзина и оформление ---------- */
 function viewCart(){
   const ids = Object.keys(state.cart).filter(id=>prod(id));
   if(!ids.length) return `<section class="wrap empty">
     <h2>Корзина пуста</h2>
-    <p class="muted">Добавьте товары из каталога. Заказы, оформленные до 21:00, приедут в ваш ЖК завтра.</p>
+    <p class="muted">Добавьте товары из каталога. Когда дом наберёт нужную сумму, мы привезём заказы лидеру, и вы их заберёте.</p>
     <button class="btn" data-go="shop">Перейти в магазин</button></section>`;
-  const sum=cartSum(), old=cartOld(), fee=deliveryFee(sum), left=DELIV.free_from>0 ? DELIV.free_from-sum : 0;
+  const sum=cartSum(), old=cartOld(), z=zk(), withMe=pool(z.id)+sum;
   return `<section class="section wrap">
     <h1>Корзина</h1>
-    ${left>0 && DELIV.delivery_fee>0 ? `<div class="free-hint"><span>Добавьте ещё <b>${fmt(left)}</b>, и доставка будет бесплатной</span><i><em style="width:${Math.min(100,sum/DELIV.free_from*100)}%"></em></i></div>`
-      : (DELIV.free_from>0 ? `<div class="free-hint ok"><span>Доставка бесплатная</span></div>` : "")}
     <div class="panel" style="padding-block:4px">
       ${ids.map(id=>{const p=prod(id);return `<div class="line">
         <div class="mini" style="${tile(p)}"><img src="${imgOf(p)}" alt="" onerror="this.remove()">${esc(p.weight)}</div>
@@ -393,183 +445,123 @@ function viewCart(){
     <div class="panel">
       ${old>sum?`<div class="sum-row"><span class="muted">В обычном магазине</span><span class="old" style="font-size:15px">${fmt(old)}</span></div>
       <div class="sum-row"><span>Ваша экономия</span><b style="color:var(--ok)">−${fmt(old-sum)}</b></div>`:""}
-      <div class="sum-row"><span class="muted">Товары</span><span>${fmt(sum)}</span></div>
-      <div class="sum-row"><span class="muted">Доставка</span><span>${fee?fmt(fee):`<b style="color:var(--ok)">бесплатно</b>`}</span></div>
-      <div class="sum-row total"><span>Итого</span><span>${fmt(sum+fee)}</span></div>
+      <div class="sum-row"><span class="muted">Получение у лидера</span><b style="color:var(--ok)">бесплатно</b></div>
+      <div class="sum-row total"><span>Итого</span><span>${fmt(sum)}</span></div>
     </div>
+    ${collectCard(z, withMe, "Сбор дома с вашим заказом")}
     <form class="panel" id="checkout" novalidate>
-      <h2>Куда привезти</h2>
+      <h2>Кто заберёт</h2>
+      <div class="field"><label for="f-zk">Ваш ЖК и лидер</label>
+        <select id="f-zk">${ZKS.map(x=>`<option value="${esc(x.id)}" ${x.id===z.id?"selected":""}>${esc(x.name)} — ${esc(x.leader_name)}</option>`).join("")}</select></div>
       <div class="two">
         <div class="field"><label for="f-name">Имя</label><input id="f-name" autocomplete="given-name" maxlength="80" placeholder="Алия" value="${esc(CUST.name||"")}"></div>
-        <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __" value="${esc(CUST.phone||"")}"></div>
-      </div>
-      <div class="field"><label for="f-addr">Адрес</label><input id="f-addr" autocomplete="street-address" maxlength="160" placeholder="Улица, дом или ЖК и блок" value="${esc(CUST.address||"")}"></div>
-      <div class="two">
         <div class="field"><label for="f-apt">Квартира</label><input id="f-apt" maxlength="20" placeholder="45" value="${esc(CUST.apt||"")}"></div>
-        <div class="field"><label for="f-ent">Подъезд, этаж</label><input id="f-ent" maxlength="40" placeholder="2 подъезд, 5 этаж" value="${esc(CUST.entrance||"")}"></div>
       </div>
-      <div class="field"><label for="f-comment">Комментарий курьеру</label><input id="f-comment" maxlength="200" placeholder="Необязательно: код домофона, ориентир"></div>
-      <div class="note"><b>Привезём завтра.</b> Курьер позвонит перед доставкой. Оплата при получении: Kaspi или наличными.</div>
+      <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" type="tel" maxlength="30" autocomplete="tel" placeholder="+7 7__ ___ __ __" value="${esc(CUST.phone||"")}"></div>
+      <div class="note"><b>Как забрать:</b> когда сбор дома наберётся, мы привезём заказы лидеру. Вы получите код выдачи, назовёте его лидеру и переведёте оплату на Kaspi.</div>
       <p id="formErr" class="err" hidden></p>
-      <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Отправляем…":"Оформить заказ на "+fmt(sum+fee)}</button>
+      <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Отправляем…":"Оформить заказ на "+fmt(sum)}</button>
     </form>
   </section>`;
 }
 
-let doneOrder=null;
 function viewDone(o){
-  return `<section class="section wrap" style="text-align:center;align-items:center;padding-top:40px">
-    <div style="width:72px;height:72px;border-radius:50%;background:var(--ok-soft);display:flex;align-items:center;justify-content:center">
-      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
-    <h1>Заказ №${o.id} принят</h1>
-    <p class="muted" style="margin:0">Привезём завтра по адресу: ${esc(o.address)}.<br>Курьер позвонит перед доставкой.</p>
-    <div class="panel" style="width:100%;text-align:left">
-      ${o.delivery_fee?`<div class="sum-row"><span class="muted">в том числе доставка</span><span>${fmt(o.delivery_fee)}</span></div>`:""}
-      <div class="sum-row"><span>Сумма к оплате</span><b>${fmt(o.total)}</b></div>
-      ${o.old_total>o.total?`<div class="sum-row"><span>Сэкономили</span><b style="color:var(--ok)">${fmt(o.old_total-o.total)}</b></div>`:""}
+  const z = ZKS.find(x=>x.id===o.zk) || zk();
+  return `<section class="section wrap">
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding-top:6px">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--ok-soft);display:flex;align-items:center;justify-content:center">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" stroke-width="3" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+      <h1>Заказ №${o.id} принят</h1>
+      <p class="muted" style="margin:0">${fmt(o.total)} · забрать у лидера ${esc(z.leader_name||"")}</p>
     </div>
+    <div class="codebox"><span style="font-size:13px;font-weight:700;opacity:.85">Код выдачи</span><b>${esc(o.code)}</b><span style="font-size:13px;opacity:.85">Назовите код лидеру, когда будете забирать. Код сохранён в разделе «Заказы».</span></div>
+    ${collectCard(z, +o.pool||pool(z.id))}
+    ${payBlock(o.total)}
+    <button class="btn block" data-go="orders">Мои заказы</button>
     <button class="btn ghost block" data-go="shop">Вернуться в магазин</button>
   </section>`;
 }
 
+/* ---------- мои заказы ---------- */
+function viewOrders(){
+  if(!state.orders.length) return `<section class="wrap empty"><h2>Заказов пока нет</h2><p class="muted">Здесь появятся ваши заказы, коды выдачи и статусы.</p><button class="btn" data-go="shop">Перейти в магазин</button></section>`;
+  return `<section class="section wrap">
+    <h1>Мои заказы</h1>
+    ${state.orders.map(o=>{
+      const d = state.ostat[o.id];
+      if(!d) return `<div class="panel"><b>Заказ №${o.id}</b><span class="muted">${state.oLoading?"Загружаем статус…":"Не удалось получить статус"}</span></div>`;
+      const [title, hint] = BUYER_STATUS[d.status] || ["",""];
+      return `<div class="panel ordcard">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><b style="font-size:16px">Заказ №${d.id}</b><b>${fmt(d.total)}</b></div>
+        ${stageBar(d.status)}
+        <div><b>${title}</b><div class="muted" style="font-size:13px">${hint}</div></div>
+        ${d.status!=="done"?`<div class="codebox small"><span style="font-size:12px;font-weight:700;opacity:.85">Код выдачи</span><b>${esc(d.code)}</b></div>`:""}
+        <div class="muted" style="font-size:13px">${itemsText(d.items)}</div>
+        <div class="muted" style="font-size:13px">Лидер: ${esc(d.leader_name)} · ${esc(d.zk_name)}</div>
+        ${d.status==="paid"?`<div class="free-hint"><span>Сбор дома: <b>${fmt(d.pool)}</b> из ${fmt(d.threshold)}</span><i><em style="width:${Math.min(100,d.threshold?d.pool/d.threshold*100:100)}%"></em></i></div>`:""}
+        ${d.status==="ready"&&SET.kaspi?`<div class="kaspi"><div><small class="muted">Kaspi ADAL</small><div><b>${esc(SET.kaspi)}</b></div></div><button class="btn light" data-copy="${esc(SET.kaspi)}">Копировать</button></div>`:""}
+      </div>`;}).join("")}
+  </section>`;
+}
+
+/* ---------- как это работает ---------- */
 function viewHow(){
   return `<section class="section wrap">
-    <div>
-      <span class="label">Как устроен ADAL market</span>
-      <h1 style="margin-top:6px">Покупаем оптом под ваш заказ, поэтому дешевле</h1>
-    </div>
+    <div><span class="label">Как устроен ADAL market</span><h1 style="margin-top:6px">Соседи покупают вместе, поэтому дешевле</h1></div>
     <div class="steps">
       ${[
-        ["Сегодня до 21:00","Вы делаете заказ","Выбираете товары и указываете адрес. Оплачивать сразу не нужно."],
-        ["Ночью","Закупаем оптом","Собираем все заказы за день и берём товар у поставщиков большими партиями."],
-        ["Завтра","Привозим к двери","Курьер звонит перед доставкой и приносит заказ домой."],
-        ["При получении","Оплачиваете","Через Kaspi или наличными курьеру."]
+        ["Сегодня до 21:00","Вы делаете заказ","Выбираете товары и своего лидера дома. Платить сразу не нужно."],
+        ["Когда дом набрал "+fmt(SET.threshold),"Закупаем оптом","Сумма заказов вашего дома должна дойти до порога. Не дошла: заказы ждут следующий сбор."],
+        ["Следующий день","Везём лидеру","Одна машина привозит все заказы дома вашему лидеру. Вам придёт код выдачи."],
+        ["Вечером","Забираете у лидера","Называете код, переводите оплату на Kaspi ADAL и забираете пакет."]
       ].map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${s[0]}</span><div class="t">${s[1]}</div><div class="muted">${s[2]}</div></div></div>`).join("")}
     </div>
     <h2>Откуда низкая цена</h2>
-    <div class="panel"><span class="muted">Мы закупаем только под уже собранные заказы. Нет торгового зала, кассиров и остатков на полках, поэтому цена ближе к оптовой.</span></div>
-    <h2>Доставка</h2>
-    <div class="panel"><span class="muted">${DELIV.delivery_fee?`Доставка стоит ${fmt(DELIV.delivery_fee)}${DELIV.free_from?`, а при заказе от ${fmt(DELIV.free_from)} — бесплатно`:""}.`:"Доставка бесплатная."}</span></div>
-    <button class="btn block" data-go="shop">Перейти к покупкам</button>
+    <div class="panel"><span class="muted">Мы закупаем только под уже собранные заказы. Нет торгового зала, кассиров и остатков на полках, а доставка идёт одной машиной на весь дом.</span></div>
+    <h2>Кто такой лидер</h2>
+    <div class="panel"><span class="muted">Сосед, который зовёт других покупателей и выдаёт заказы по коду. За это он получает ${Math.round(SET.commission)}% с каждого выданного заказа дома.</span></div>
+    <button class="btn accent block" data-act="becomeleader">Стать лидером своего ЖК</button>
+    <button class="btn ghost block" data-go="shop">Перейти к покупкам</button>
   </section>`;
 }
 
-/* ----- кабинет лидера ----- */
-function stageOf(orders){
-  if(!orders.length) return 0;
-  if(orders.every(o=>o.st==="done")) return 3;
-  if(orders.some(o=>o.st==="ready")) return 2;
-  if(orders.some(o=>o.st==="sent")) return 1;
-  return 0;
-}
-function viewLeader(){
-  if(!state.leader) return state.leaderMode==="login" ? viewLogin() : (state.regDone ? viewRegDone() : viewReg());
-  if(state.ldError) return `<section class="wrap empty"><h2>Не удалось открыть кабинет</h2><p class="muted">${esc(state.ldError)}</p><button class="btn" data-act="loadleader">Повторить</button><button class="btn ghost" data-act="logout">Выйти</button></section>`;
-  if(!state.ld) return `<section class="wrap empty"><p class="muted">Загружаем заказы…</p></section>`;
-  const {zk:z, orders, history} = state.ld;
-  const sumAll=orders.reduce((s,o)=>s+o.total,0);
-  const paid=orders.filter(o=>o.st==="paid");
-  const stageIdx=stageOf(orders);
-  const stages=["Сбор","Закупка","Привезли","Выдано"];
-  const dis = state.busy?"disabled":"";
-  let action="";
-  if(stageIdx===0) action=`<button class="btn accent block" data-act="close" ${paid.length&&!state.busy?"":"disabled"}>Закрыть сбор и отправить ${paid.length} заказов в ADAL</button>`;
-  else if(stageIdx===1) action=`<button class="btn accent block" data-act="arrive" ${dis}>Машина приехала в ЖК</button>`;
-  else if(stageIdx===2) action=`<p class="note" style="margin:0">Отмечайте выдачу у каждого соседа. Осталось выдать: <b>${orders.filter(o=>o.st==="ready").length}</b></p>`;
-  else action=`<button class="btn block" data-act="newround" ${dis}>Начать новый сбор</button>`;
-  if(paid.length && stageIdx>0) action += `<p class="muted" style="margin:0;font-size:13px">Новых заказов после закрытия сбора: ${paid.length}. Они уйдут в следующий сбор.</p>`;
-
-  const tabs=`<div class="tabs-l chips" role="group" aria-label="Разделы кабинета">
-    <button class="chip" data-ltab="orders" aria-pressed="${state.leaderTab==="orders"}">Заказы соседей</button>
-    <button class="chip" data-ltab="summary" aria-pressed="${state.leaderTab==="summary"}">Сводка для закупки</button>
-    <button class="chip" data-ltab="money" aria-pressed="${state.leaderTab==="money"}">Мой доход</button>
-    <button class="chip" data-act="loadleader">Обновить</button></div>`;
-
-  let body="";
-  if(state.leaderTab==="orders"){
-    body = orders.length ? orders.slice().reverse().map(o=>{
-      const s=STATUS[o.st];
-      const btn = o.st==="ready" ? `<button class="btn" data-give="${o.id}" ${dis}>Выдал</button>` : "";
-      return `<div class="order">
-        <div class="order-top"><b>${esc(o.who)}</b><span class="pill ${s.c}">${s.t}</span></div>
-        ${o.phone?`<div class="items">${esc(o.phone)}</div>`:""}
-        <div class="items">${Object.entries(o.items||{}).map(([id,q])=>`${esc(pName(id))} ×${q}`).join(", ")}</div>
-        <div class="bot"><span>№${o.id} · <b>${fmt(o.total)}</b></span>${btn}</div>
-      </div>`}).join("") : `<div class="empty"><h3>Пока нет заказов</h3><p class="muted">Отправьте ссылку-приглашение в чат дома.</p></div>`;
-    body += `<button class="btn ghost block" data-act="ordfor">+ Оформить заказ за соседа</button>`;
-  } else if(state.leaderTab==="summary"){
-    const agg={}; orders.filter(o=>o.st!=="done").forEach(o=>Object.entries(o.items||{}).forEach(([id,q])=>agg[id]=(agg[id]||0)+q));
-    const rows=Object.entries(agg).sort((a,b)=>b[1]-a[1]);
-    body = rows.length ? `<div class="panel" style="padding-block:4px">${rows.map(([id,q])=>{const p=prod(id)||{weight:"",price:0};return `<div class="line">
-      <div class="mini" style="${tile(p)}"><img src="${imgOf(prod(id),id)}" alt="" onerror="this.remove()">${esc(p.weight)}</div><div class="grow"><div class="name">${esc(pName(id))}</div><div class="muted" style="font-size:13px">${fmt(p.price*q)}</div></div><b style="font-size:18px;font-variant-numeric:tabular-nums">×${q}</b></div>`}).join("")}</div>
-      <p class="muted" style="margin:0;font-size:13px">По этой сводке мы закупаем и собираем коробки для вашего ЖК.</p>` : `<div class="empty"><p class="muted">Нет невыданных заказов.</p></div>`;
-  } else {
-    body = `<div class="panel">
-      <div class="sum-row"><span>Текущий сбор · ${orders.length} заказов</span><b>${fmt(sumAll*COMMISSION)}</b></div>
-      ${history.map(h=>`<div class="sum-row"><span class="muted">${new Date(h.d).toLocaleDateString("ru-RU",{day:"numeric",month:"long"})} · ${h.n} заказов</span><span>${fmt(h.sum*COMMISSION)}</span></div>`).join("")}
-      <div class="sum-row total"><span>За 60 дней</span><span>${fmt((sumAll+history.reduce((s,h)=>s+(+h.sum),0))*COMMISSION)}</span></div>
-    </div>
-    <p class="muted" style="margin:0;font-size:13px">Вы получаете ${Math.round(COMMISSION*100)}% от суммы выданных заказов.</p>`;
-  }
-  const invite = location.origin + location.pathname + "?zk=" + encodeURIComponent(z.id);
-  return `<section class="section wrap">
-    <div class="hero-l">
-      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><span style="font-size:13px;opacity:.85">Кабинет лидера${z.flats?" · "+esc(z.flats):""}</span><h2 style="margin-top:2px">${esc(z.leader_name)}, ${esc(z.name)}</h2></div><button class="logout" data-act="logout">Выйти</button></div>
-      <div class="stats">
-        <div class="s"><b>${orders.length}</b><small>заказов в сборе</small></div>
-        <div class="s"><b>${(sumAll/1000).toFixed(1).replace(".",",")}к</b><small>сумма, ₸</small></div>
-        <div class="s"><b>${fmt(sumAll*COMMISSION).replace(" ₸","")}</b><small>ваш доход, ₸</small></div>
-      </div>
-      <div class="invite"><code id="inviteLink">${esc(invite)}</code><button data-act="copy">Копировать</button></div>
-    </div>
-    <div class="panel">
-      <div class="progress">${stages.map((_,i)=>`<i class="${i<=stageIdx?"on":""}"></i>`).join("")}</div>
-      <div class="stage">${stages.map((s,i)=>`<span class="${i===stageIdx?"cur":""}">${s}</span>`).join("")}</div>
-      ${action}
-    </div>
-    ${tabs}
-    ${body}
-  </section>`;
-}
-
+/* ---------- лидер ЖК: вход и заявка ---------- */
 function viewLogin(){
   return `<section class="section wrap">
     <h1>Вход для лидера ЖК</h1>
     <form class="panel" id="loginForm" novalidate>
       <div class="field"><label for="l-zk">Ваш ЖК</label><select id="l-zk">${ZKS.map(z=>`<option value="${esc(z.id)}" ${z.id===state.zk?"selected":""}>${esc(z.name)} — ${esc(z.leader_name)}</option>`).join("")}</select></div>
-      <div class="field"><label for="l-code">Код доступа</label><input id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="6 символов от менеджера ADAL"></div>
+      <div class="field"><label for="l-code">Код доступа</label><input id="l-code" inputmode="numeric" autocomplete="one-time-code" maxlength="20" placeholder="6 цифр от менеджера ADAL"></div>
       <p id="loginErr" class="err" hidden></p>
       <button class="btn block" type="submit" ${state.busy?"disabled":""}>${state.busy?"Проверяем…":"Войти"}</button>
     </form>
-    <div class="note">Демо-доступ: <b>ЖК Северный парк</b>, код <b>123456</b>.</div>
     <button class="btn ghost block" data-act="becomeleader">Ещё не лидер? Оставить заявку</button>
   </section>`;
 }
 
 const CITIES=["Алматы","Астана","Шымкент","Караганда","Другой город"];
-const ROUNDS_PER_MONTH=12, AVG_CHECK=5000;
-const calcIncome = n => Math.round(n*AVG_CHECK*COMMISSION*ROUNDS_PER_MONTH);
+const calcIncome = n => Math.round(n*3000*4*SET.commission/100);
 function opts(list,cur){ return list.map(o=>`<option ${o===cur?"selected":""}>${esc(o)}</option>`).join(""); }
 
 function viewReg(){
-  const r=state.reg;
+  const r=state.reg, rate=Math.round(SET.commission);
   return `<section class="section wrap">
     <div class="reg-hero">
       <span class="label" style="color:inherit;opacity:.8">Для активных соседей</span>
       <h1>Станьте лидером своего ЖК</h1>
-      <p style="margin:0;opacity:.9">Собирайте заказы соседей в чате дома и получайте ${Math.round(COMMISSION*100)}% от каждого выданного заказа.</p>
+      <p style="margin:0;opacity:.9">Зовите соседей и выдавайте им заказы по коду. ${rate}% с каждого выданного заказа дома, выплата раз в неделю.</p>
       <div class="calc">
         <label for="calc">Сколько соседей будут заказывать: <b id="calcN">${state.calc}</b></label>
         <input id="calc" type="range" min="10" max="100" step="5" value="${state.calc}">
         <div class="calc-out"><span>Ваш доход в месяц</span><b id="calcOut">≈ ${fmt(calcIncome(state.calc))}</b></div>
-        <small>Расчёт: средний чек ${fmt(AVG_CHECK)}, ${ROUNDS_PER_MONTH} сборов в месяц (3 в неделю).</small>
+        <small>Расчёт: заказ на 3 000 ₸ раз в неделю, 4 недели, ${rate}% лидеру.</small>
       </div>
     </div>
     <h2>Что нужно делать</h2>
     <div class="duties">
-      <div class="duty"><b>Приглашать соседей</b><span class="muted">Отправить ссылку в чат дома и напоминать о сборе.</span></div>
-      <div class="duty"><b>Закрывать сбор</b><span class="muted">Одна кнопка в кабинете в 21:00. Закупку берём на себя.</span></div>
-      <div class="duty"><b>Выдавать заказы</b><span class="muted">Принять машину и раздать пакеты соседям вечером, 1–2 часа.</span></div>
+      <div class="duty"><b>Звать соседей</b><span class="muted">Отправлять ссылку в чат дома: готовые тексты уже в кабинете.</span></div>
+      <div class="duty"><b>Принять машину</b><span class="muted">Мы привозим заказы дома, когда сбор дошёл до ${fmt(SET.threshold)}.</span></div>
+      <div class="duty"><b>Выдать заказы по коду</b><span class="muted">1–2 часа вечером. Соседи платят на Kaspi ADAL, деньги у вас не остаются.</span></div>
     </div>
     <form class="panel" id="regForm" novalidate>
       <h2>Заявка</h2>
@@ -612,7 +604,7 @@ function viewRegDone(){
       <div class="steps">
         ${[["Сегодня","Менеджер позвонит","Расскажет об условиях и ответит на вопросы."],
            ["1–2 дня","Проверим ЖК и место выдачи","Убедимся, что машина может подъехать, а заказы есть где хранить пару часов."],
-           ["Онлайн","Подпишем агентский договор","Через телефон, без визита в офис. Поможем оформить самозанятость."],
+           ["Онлайн","Подпишем договор","Через телефон, без визита в офис. Поможем оформить самозанятость."],
            ["Старт","Получите код доступа","Войдёте в кабинет, отправите ссылку в чат дома, и соседи начнут заказывать."]]
           .map((s,i)=>`<div class="step"><div class="n">${i+1}</div><div><span class="time">${s[0]}</span><div class="t">${s[1]}</div><div class="muted">${s[2]}</div></div></div>`).join("")}
       </div>
@@ -621,42 +613,133 @@ function viewRegDone(){
   </section>`;
 }
 
-/* ---------- render & data ---------- */
+/* ---------- кабинет лидера ---------- */
+function leaderLink(z){ return location.origin + location.pathname + "?zk=" + encodeURIComponent(z.id); }
+function leaderText(d){
+  const link = leaderLink(d.zk), left = Math.max(0, d.threshold - d.pool);
+  if(state.tmpl==="morn") return `Доброе утро, соседи! Сегодня до 21:00 собираем общий заказ ADAL: бытовая химия дешевле магазина. Наберём ${fmt(d.threshold)}, заказы привезут мне, и вы заберёте их у меня. Заказать: ${link}`;
+  return `Соседи, сбор ADAL закрывается сегодня в 21:00. Набрано ${fmt(d.pool)} из ${fmt(d.threshold)}${left?`, осталось ${fmt(left)}.`:". Сбор набран!"} Как наберём, заказы привезут мне, и вы заберёте их у меня. Бытовая химия по оптовым ценам: ${link}`;
+}
+
+function viewLeader(){
+  if(!state.leader) return state.leaderMode==="reg" ? (state.regDone?viewRegDone():viewReg()) : viewLogin();
+  if(state.ldError) return `<section class="wrap empty"><h2>Не удалось открыть кабинет</h2><p class="muted">${esc(state.ldError)}</p><button class="btn" data-act="loadleader">Повторить</button><button class="btn ghost" data-act="logout">Выйти</button></section>`;
+  if(!state.ld) return `<section class="wrap empty"><p class="muted">Загружаем кабинет…</p></section>`;
+  const d=state.ld, z=d.zk, orders=d.orders, dis=state.busy?"disabled":"";
+  const inPool = orders.filter(o=>o.st==="paid"), onWay = orders.filter(o=>o.st==="sent"), ready = orders.filter(o=>o.st==="ready"), done = orders.filter(o=>o.st==="done");
+  const head = `<div class="hero-l">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div style="min-width:0"><span style="font-size:13px;opacity:.85">Кабинет лидера${z.flats?" · "+esc(z.flats):""}</span><h2 style="margin-top:2px">${esc(z.leader_name)}, ${esc(z.name)}</h2></div><button class="logout" data-act="logout">Выйти</button></div>
+    <div class="stats">
+      <div class="s"><b>${d.pool_count}</b><small>заказов в сборе</small></div>
+      <div class="s"><b>${fmt(d.pool).replace(" ₸","")}</b><small>сумма, ₸</small></div>
+      <div class="s"><b>${fmt(d.pool*d.rate/100).replace(" ₸","")}</b><small>ваши ${Math.round(d.rate)}%, ₸</small></div>
+    </div></div>`;
+  const tabs = `<div class="tabs-l chips" role="group" aria-label="Разделы кабинета">
+    ${[["collect","Сбор"],["give","Выдача"+(ready.length||onWay.length?` · ${ready.length+onWay.length}`:"")],["money","Доход"]].map(([k,v])=>`<button class="chip" data-ltab="${k}" aria-pressed="${state.ltab===k}">${v}</button>`).join("")}
+    <button class="chip" data-act="loadleader">Обновить</button></div>`;
+  let body = "";
+  if(state.ltab==="collect"){
+    const text = leaderText(d);
+    body = collectCard({}, d.pool, "Сбор сегодня", "вам") + `
+    <section class="panel">
+      <h2>Позвать соседей</h2>
+      <div class="linkrow"><span>${esc(leaderLink(z))}</span><button class="btn light" data-copy="${esc(leaderLink(z))}">Копировать</button></div>
+      <div class="chips" role="group" aria-label="Готовые тексты">
+        <button class="chip" data-tmpl="eve" aria-pressed="${state.tmpl==="eve"}">Вечер</button>
+        <button class="chip" data-tmpl="morn" aria-pressed="${state.tmpl==="morn"}">Утро</button></div>
+      <div class="tmpl">${esc(text)}</div>
+      <div class="two"><a class="btn block" style="text-align:center;text-decoration:none" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">В WhatsApp</a>
+        <button class="btn ghost block" data-copy="${esc(text)}">Копировать</button></div>
+    </section>
+    <section class="panel">
+      <div class="sec-row"><h2>Заказы в сборе</h2><span class="muted">${inPool.length}</span></div>
+      ${inPool.length?inPool.map(o=>`<div class="entry2"><div><b>${esc(o.who)}, кв. ${esc(o.apt)}</b><div class="muted" style="font-size:12.5px">${itemsText(o.items)}</div></div><b>${fmt(o.total)}</b></div>`).join("")
+        :`<p class="muted" style="margin:0">Пока нет заказов. Отправьте ссылку в чат дома.</p>`}
+    </section>`;
+  } else if(state.ltab==="give"){
+    body = `${onWay.length?`<section class="panel"><h2>Машина в пути</h2><p class="muted" style="margin:0">Заказов вашего дома: ${onWay.length}. Когда привезут, нажмите кнопку, и можно выдавать.</p><button class="btn accent block" data-act="arrive" ${dis}>Принял машину</button></section>`:""}
+    <form class="panel" id="findForm" novalidate>
+      <h2>Выдать заказ</h2>
+      <div class="field"><label for="oc">Код покупателя</label><input id="oc" class="codein" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000"></div>
+      <p id="findErr" class="err" ${state.foundErr?"":"hidden"}>${esc(state.foundErr||"")}</p>
+      <button class="btn block" type="submit" ${dis}>Найти заказ</button>
+    </form>
+    ${state.found?(()=>{ const o=state.found;
+      const msg = o.st==="ready" ? "" : o.st==="done" ? "Этот заказ уже выдан." : o.st==="sent" ? "Заказ ещё в пути. Сначала нажмите «Принял машину»." : "Сбор дома ещё не набран, заказ пока не привезли.";
+      return `<section class="panel" style="border:2px solid var(--accent)">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline"><b style="font-size:17px">${esc(o.who)}, кв. ${esc(o.apt)}</b><span class="pill ${STATUS[o.st].c}">${STATUS[o.st].t}</span></div>
+        <span class="muted" style="font-size:13px">${itemsText(o.items)}</span>
+        <div class="sum-row"><span>К оплате на Kaspi ADAL</span><b>${fmt(o.total)}</b></div>
+        ${msg?`<p class="note" style="margin:0">${msg}</p>`:`<button class="btn block" data-give="${o.id}" ${dis}>Оплатил Kaspi · выдать</button>`}
+      </section>`; })():""}
+    <section class="panel">
+      <div class="sec-row"><h2>Ждут выдачи</h2><span class="muted">${ready.length}</span></div>
+      ${ready.length?ready.map(o=>`<div class="entry2"><div><b>${esc(o.who)}, кв. ${esc(o.apt)}</b><div class="muted" style="font-size:12.5px">${o.phone?esc(o.phone)+" · ":""}${fmt(o.total)}</div></div><span class="pill p-ready">Привезли</span></div>`).join("")
+        :`<p class="muted" style="margin:0">${onWay.length?"Ждём машину.":"Нет заказов, которые ждут выдачи."}</p>`}
+      ${done.length?`<div class="sec-row" style="margin-top:6px"><h2>Выданы за неделю</h2><span class="muted">${done.length}</span></div>${done.map(o=>`<div class="entry2"><div><b>${esc(o.who)}, кв. ${esc(o.apt)}</b></div><b>${fmt(o.total)}</b></div>`).join("")}`:""}
+    </section>`;
+  } else {
+    const e=d.earn;
+    body = `<section class="collect"><span style="font-size:13.5px;opacity:.85">К выплате в понедельник</span><span class="big" style="color:#F3C77A">${fmt(e.accrued)}</span>
+      <span class="sub">${e.count?`${e.count} ${plural(e.count,"выданный заказ","выданных заказа","выданных заказов")} на ${fmt(e.base)}`:"Пока нет выданных заказов"}</span></section>
+    <section class="panel"><div class="sum-row"><span class="muted">Ещё в работе: в сборе, в пути, ждут выдачи</span><b>${fmt(e.upcoming)}</b></div>
+      <p class="muted" style="margin:0;font-size:13px">Мы начисляем ${Math.round(d.rate)}% с каждого выданного заказа вашего дома. Выплата раз в неделю на Kaspi.</p></section>
+    <section class="panel"><h2>История выплат</h2>
+      ${d.payouts.length?d.payouts.map(p=>`<div class="entry2"><div><b>${new Date(p.paid_at).toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}</b><div class="muted" style="font-size:12.5px">${p.orders} ${plural(p.orders,"заказ","заказа","заказов")}</div></div><b style="color:var(--ok)">+${fmt(p.amount)}</b></div>`).join("")
+        :`<p class="muted" style="margin:0">Первая выплата будет после первой недели с выданными заказами.</p>`}
+    </section>`;
+  }
+  return `<section class="section wrap">${head}${tabs}${body}</section>`;
+}
+
+/* ---------- отрисовка и данные ---------- */
+const VIEWS=["shop","cart","orders","how","leader"];
 function render(){
+  $("#zkName").textContent = zk().name;
   let html;
-  if(state.view==="done"&&doneOrder) html=viewDone(doneOrder);
-  else html=({shop:viewShop,cart:viewCart,how:viewHow}[state.view]||viewShop)();
+  if(state.view==="done"&&state.done) html=viewDone(state.done);
+  else html=({shop:viewShop,cart:viewCart,orders:viewOrders,how:viewHow,leader:viewLeader}[state.view]||viewShop)();
   $("#view").innerHTML=html;
-  const nav=state.view==="done"?"cart":state.view;
+  const nav=state.view==="done"?"orders":state.view;
   document.querySelectorAll(".nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.go===nav?"page":"false"));
   const c=cartCount(); const bd=$("#cartBadge"); bd.hidden=!c; bd.textContent=c;
-  const cb=$("#cartBar"), showBar=c>0 && (state.view==="shop"||state.view==="how");
+  const cb=$("#cartBar"), showBar=c>0 && state.view==="shop";
   cb.hidden=!showBar; document.body.classList.toggle("has-bar",showBar);
   if(showBar) cb.innerHTML=`<span class="cb-n">${c}</span><span class="cb-t">Корзина</span><b>${fmt(cartSum())}</b><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  $("#deadline").hidden = false;
+  $("#deadline").hidden = state.view==="leader";
 }
 function go(v){
   state.view=v; if(location.hash!=="#"+v && v!=="done") history.replaceState(null,"",location.pathname+location.search+"#"+v);
   if(v==="leader" && state.leader && !state.ld) loadLeader();
+  if(v==="orders") loadOrders();
+  if(v==="shop"||v==="cart") loadPools();
   render(); window.scrollTo(0,0);
 }
 
+async function loadPools(){
+  try{ const [p,s] = await Promise.all([rpc("adal_zk_pools",{}), rpc("adal_public_settings",{})]); POOLS=p||{}; SET={...SET,...(s||{})}; if(state.view==="shop"||state.view==="cart") { const keep=window.scrollY; render(); window.scrollTo(0,keep);} }catch(_){}
+}
 async function loadCatalog(){
   state.loading=true; state.loadError=null; render();
   try{
-    const [zks, prods] = await Promise.all([
-      Promise.resolve([]),
-      api("adal_products?select=id,cat,brand,name,variant,weight,price,old_price,color,color2,image_url&active=eq.true&order=sort")
+    const [zks, prods, set, pools] = await Promise.all([
+      api("adal_zk?select=id,name,leader_name,flats,city&active=eq.true&order=name"),
+      api("adal_products?select=id,cat,brand,name,variant,weight,price,old_price,color,color2,image_url&active=eq.true&order=sort"),
+      rpc("adal_public_settings",{}).catch(()=>null), rpc("adal_zk_pools",{}).catch(()=>({}))
     ]);
-    ZKS=zks; PRODUCTS=prods;
-    try{ DELIV = await rpc("adal_public_settings", {}) || DELIV; }catch(_){}
+    ZKS=zks; PRODUCTS=prods; POOLS=pools||{}; if(set) SET={...SET,...set};
     if(!ZKS.some(z=>z.id===state.zk) && ZKS[0]) state.zk=ZKS[0].id;
     for(const id of Object.keys(state.cart)) if(!prod(id)) delete state.cart[id];
     saveCart();
   }catch(e){ state.loadError=e.message; }
   state.loading=false; render();
 }
-
+async function loadOrders(){
+  if(!state.orders.length) return;
+  state.oLoading=true; render();
+  await Promise.all(state.orders.map(async o=>{ try{ const d=await rpc("adal_order_status",{p_id:o.id,p_code:o.code}); if(d) state.ostat[o.id]=d; }catch(_){} }));
+  state.oLoading=false; if(state.view==="orders") render();
+}
 async function loadLeader(){
   if(!state.leader) return;
   state.ldError=null;
@@ -672,56 +755,57 @@ async function leaderAction(action, order){
   try{
     const r = await rpc("adal_leader_action",{p_zk:state.leader.zk, p_code:state.leader.code, p_action:action, p_order:order??null});
     if(r && r.error) toast(r.error);
-    else toast({close:"Сбор закрыт, сводка ушла в ADAL", arrive:"Отмечено: заказы привезли", give:"Отмечено: заказ выдан", newround:"Новый сбор открыт"}[action]);
+    else { toast(action==="arrive"?"Отмечено: заказы привезли":"Заказ выдан"); if(action==="give") state.found=null; }
   }catch(e){ toast(e.message); }
   state.busy=false; await loadLeader();
 }
 
+/* ---------- события ---------- */
 document.addEventListener("click",e=>{
+  const a=e.target.closest("a[data-go]"); if(a){ e.preventDefault(); go(a.dataset.go); return; }
   const t=e.target.closest("button"); if(!t) return;
   const d=t.dataset;
   if(d.go){ go(d.go); return; }
   if(d.add){ state.cart[d.add]=Math.min(50,(state.cart[d.add]||0)+1); saveCart(); render(); return; }
   if(d.dec){ state.cart[d.dec]--; if(state.cart[d.dec]<=0) delete state.cart[d.dec]; saveCart(); render(); return; }
   if(d.cat){ state.cat=d.cat; render(); return; }
-  if(d.ltab){ state.leaderTab=d.ltab; render(); return; }
+  if(d.ltab){ state.ltab=d.ltab; state.found=null; state.foundErr=null; render(); return; }
+  if(d.tmpl){ state.tmpl=d.tmpl; render(); return; }
+  if(d.copy){ copyText(d.copy, "Скопировано"); return; }
   if(d.give){ leaderAction("give", +d.give); return; }
   if(d.pay){ state.reg.pay=d.pay; document.querySelectorAll("[data-pay]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pay===d.pay)); return; }
   if(d.act==="reload"){ loadCatalog(); return; }
   if(d.act==="becomeleader"){ state.leaderMode="reg"; state.regDone=false; go("leader"); return; }
   if(d.act==="tologin"){ state.leaderMode="login"; go("leader"); return; }
-  if(d.act==="logout"){ state.leader=null; state.ld=null; state.ldError=null; ss.del("adal-leader"); state.leaderMode="login"; go("leader"); return; }
+  if(d.act==="logout"){ state.leader=null; state.ld=null; state.ldError=null; state.found=null; ss.del("adal-leader"); state.leaderMode="login"; go("leader"); return; }
   if(d.act==="loadleader"){ loadLeader(); return; }
-  if(d.act==="ordfor"){ if(state.ld) state.zk=state.ld.zk.id; go("shop"); return; }
-  if(["close","arrive","newround"].includes(d.act)){ leaderAction(d.act); return; }
-  if(d.act==="copy"){ const txt=$("#inviteLink").textContent;
-    const done=()=>toast("Ссылка скопирована, отправьте её в чат дома");
-    try{ navigator.clipboard.writeText(txt).then(done,()=>{selectInvite();toast("Выделил ссылку, скопируйте её вручную")}); }catch(_){ selectInvite(); }
-    return; }
+  if(d.act==="arrive"){ leaderAction("arrive"); return; }
   if(t.id==="zkBtn"){ openZk(); return; }
 });
-function selectInvite(){ const r=document.createRange(); r.selectNodeContents($("#inviteLink")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
 
-
+document.addEventListener("change",e=>{ if(e.target.id==="f-zk"){ state.zk=e.target.value; ss.set("adal-zk",state.zk); render(); } });
 
 document.addEventListener("submit",async e=>{
-  const id=e.target.id; if(!["checkout","regForm","loginForm"].includes(id)) return;
+  const id=e.target.id; if(!["checkout","regForm","loginForm","findForm"].includes(id)) return;
   e.preventDefault(); if(state.busy) return;
 
   if(id==="checkout"){
-    const v = id => $("#"+id).value.trim();
-    const f = {name:v("f-name"), phone:v("f-phone"), address:v("f-addr"), apt:v("f-apt").replace(/^кв\.?\s*/i,""), entrance:v("f-ent"), comment:v("f-comment")};
+    const v = k => $("#"+k).value.trim();
+    const f = {zk:v("f-zk"), name:v("f-name"), apt:v("f-apt").replace(/^кв\.?\s*/i,""), phone:v("f-phone")};
     const err=$("#formErr"), miss=[];
     if(!f.name) miss.push("имя");
+    if(!f.apt) miss.push("квартиру");
     if(f.phone.replace(/\D/g,"").length<10) miss.push("телефон");
-    if(f.address.length<5) miss.push("адрес");
-    if(miss.length){ err.textContent="Заполните: "+miss.join(", ")+". Без этого курьер не найдёт вас."; err.hidden=false; return; }
-    const restore = () => { $("#f-name").value=f.name; $("#f-phone").value=f.phone; $("#f-addr").value=f.address; $("#f-apt").value=f.apt; $("#f-ent").value=f.entrance; $("#f-comment").value=f.comment; };
+    if(miss.length){ err.textContent="Укажите "+miss.join(", ")+", чтобы лидер знал, кому отдать заказ."; err.hidden=false; return; }
+    state.zk=f.zk; ss.set("adal-zk",f.zk);
+    const restore = () => { $("#f-name").value=f.name; $("#f-apt").value=f.apt; $("#f-phone").value=f.phone; };
     state.busy=true; render(); restore();
     try{
-      const r = await rpc("adal_place_delivery",{p:{...f, items:state.cart}});
-      CUST = {name:f.name, phone:f.phone, address:f.address, apt:f.apt, entrance:f.entrance}; ss.set("adal-cust", CUST);
-      doneOrder={...r, address:f.address+(f.apt?", кв. "+f.apt:"")};
+      const r = await rpc("adal_place_order",{p_zk:f.zk, p_name:f.name, p_apt:f.apt, p_phone:f.phone, p_items:state.cart});
+      CUST={name:f.name, apt:f.apt, phone:f.phone}; ss.set("adal-cust",CUST);
+      state.orders.unshift({id:r.id, code:r.code, zk:f.zk}); state.orders=state.orders.slice(0,20); ss.set("adal-orders",state.orders);
+      POOLS[f.zk]=r.pool;
+      state.done={...r, zk:f.zk};
       state.cart={}; saveCart(); state.busy=false; go("done");
     }catch(ex){
       state.busy=false; render(); restore();
@@ -738,9 +822,19 @@ document.addEventListener("submit",async e=>{
       const d = await rpc("adal_leader_data",{p_zk:z, p_code:code});
       state.busy=false;
       if(d && d.error){ render(); $("#l-zk").value=z; const er=$("#loginErr"); er.textContent=d.error; er.hidden=false; return; }
-      state.leader={zk:z, code}; ss.set("adal-leader", state.leader); state.ld=d; state.leaderTab="orders"; render();
+      state.leader={zk:z, code}; ss.set("adal-leader", state.leader); state.ld=d; state.ltab="collect"; render();
     }catch(ex){ state.busy=false; render(); const er=$("#loginErr"); er.textContent=ex.message; er.hidden=false; }
     return;
+  }
+
+  if(id==="findForm"){
+    const c=$("#oc").value.trim(); if(!c){ return; }
+    state.busy=true; state.foundErr=null; state.found=null; render();
+    try{
+      const r = await rpc("adal_leader_find",{p_zk:state.leader.zk, p_code:state.leader.code, p_order_code:c});
+      if(r && r.error) state.foundErr=r.error; else state.found=r.order;
+    }catch(ex){ state.foundErr=ex.message; }
+    state.busy=false; render(); return;
   }
 
   if(id==="regForm"){
@@ -770,7 +864,7 @@ function openZk(){
   if(!ZKS.length) return;
   const bg=document.createElement("div"); bg.className="sheet-bg";
   bg.innerHTML=`<div class="sheet" role="dialog" aria-label="Выбор ЖК"><h2>Ваш жилой комплекс</h2>
-    <p class="muted" style="margin:0">Заказ привезут лидеру выбранного ЖК.</p>
+    <p class="muted" style="margin:0">Заказ заберёте у лидера выбранного ЖК.</p>
     ${ZKS.map(z=>`<button class="opt" data-zk="${esc(z.id)}" aria-pressed="${z.id===state.zk}"><span><b>${esc(z.name)}</b><br><span class="muted" style="font-size:13px">Лидер: ${esc(z.leader_name)}${z.flats?" · "+esc(z.flats):""}</span></span>${z.id===state.zk?"✓":""}</button>`).join("")}
     <button class="btn ghost block" data-close>Закрыть</button></div>`;
   bg.addEventListener("click",ev=>{
@@ -788,14 +882,15 @@ function tick(){
   $("#cd").textContent=`${p(Math.floor(s/3600))}:${p(Math.floor(s%3600/60))}:${p(s%60)}`;
 }
 setInterval(tick,1000); tick();
+setInterval(()=>{ if(!document.hidden && (state.view==="shop"||state.view==="cart") && !state.busy) loadPools(); }, 60000);
 
-const VIEWS=["shop","cart","how"];
-window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(VIEWS.includes(h)) go(h); });
+window.addEventListener("hashchange",()=>{ const h=location.hash.slice(1); if(VIEWS.includes(h) && h!==state.view) go(h); });
 (function boot(){
   const q=new URLSearchParams(location.search).get("zk");
   if(q){ state.zk=q; ss.set("adal-zk",q); }
   const h=location.hash.slice(1); if(VIEWS.includes(h)) state.view=h;
-  loadCatalog();
+  if(state.leader) state.leaderMode="login";
+  loadCatalog().then(()=>{ if(state.view==="leader" && state.leader) loadLeader(); if(state.view==="orders") loadOrders(); });
 })();
 </script>
 

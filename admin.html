@@ -176,6 +176,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .pay.ok{background:var(--ok-soft);color:var(--ok)}
 .tabs{overflow-x:auto;scrollbar-width:none}
 .tabs button{flex:1 0 auto}
+.bar{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px}
 .tabs{display:flex;gap:4px;background:var(--surface);box-shadow:var(--shadow);border-radius:16px;padding:4px}
 .tabs button{flex:1;border:0;background:transparent;border-radius:12px;padding:10px 6px;font-weight:800;font-size:14px;color:var(--muted);position:relative}
 .tabs button[aria-selected="true"]{background:var(--brand);color:var(--brand-ink)}
@@ -247,7 +249,7 @@ const store = {
 };
 
 const state = { pass: store.get(), products: [], q:"", filter:"all", busy:false, loading:false,
-  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","finance","plan"].includes(h)?h:"products"; })(),
+  tab: (()=>{ const h=location.hash.slice(1); return ["products","orders","finance","leaders","plan"].includes(h)?h:"products"; })(),
   orders: [], days: 7, ozk: "all", ost: "all", apps: [], zks: [], confirm: null };
 const DEF_SET = {leader:7, acq:1.5, tax:4, logistics:0, target:15};
 const S = () => ({...DEF_SET, ...(state.settings||{})});
@@ -283,14 +285,14 @@ function profitTag(p){
   const e = econ(p.price, p.cost);
   return `<span class="tag ${e.profit>=0?"profit":"loss"}">${e.profit>=0?"прибыль":"убыток"} ${fmt(Math.abs(e.profit))} · ${pct(e.margin)}</span>`;
 }
-const STATUS = {paid:"Новый", sent:"Собирается", ready:"В пути", done:"Доставлен"};
+const STATUS = {paid:"Новый · в сборе", sent:"В пути к лидеру", ready:"Привезли лидеру", done:"Выдан"};
 const PAY = {kaspi:"Kaspi", cash:"Наличные", card:"Карта"};
 const pname = id => { const p=state.products.find(x=>x.id==id); return p ? p.name+(p.variant?" · "+p.variant:"") : "Товар №"+id; };
 const dt = s => new Date(s).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 function tabsHtml(){
   const n = state.apps.filter(a=>a.status==="new").length;
   return `<div class="tabs" role="tablist">
-    ${[["products","Товары"],["orders","Заказы"],["finance","Финансы"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
+    ${[["products","Товары"],["orders","Заказы"],["finance","Финансы"],["leaders","Лидеры"],["plan","План"]].map(([k,v])=>`<button role="tab" data-tab="${k}" aria-selected="${state.tab===k}">${v}${k==="leaders"&&n?`<span class="cnt">${n}</span>`:""}</button>`).join("")}
   </div>`;
 }
 function render(){ if(state.tab==="orders") viewOrders(); else if(state.tab==="leaders") viewLeaders(); else if(state.tab==="plan") viewPlan(); else if(state.tab==="finance") viewFinance(); else viewList(); }
@@ -473,7 +475,7 @@ function viewOrders(){
       <div class="stat"><b>${list.length?fmt(sum/list.length):"—"}</b><span>средний чек</span></div>
     </div>
     <section class="panel">
-      <div class="sec-h"><h2>Что закупить</h2><span class="muted" style="font-size:13px">заказы «Новый» и «Собирается»</span></div>
+      <div class="sec-h"><h2>Что закупить</h2><span class="muted" style="font-size:13px">заказы «Новый» и «В пути»</span></div>
       ${buyRows.length?`<div class="buy">${buyRows.map(([id,q])=>`<div class="ln"><span>${esc(pname(id))}</span><b>×${q}</b></div>`).join("")}
         <div class="ln" style="font-weight:800"><span>Итого по ценам сайта</span><span>${fmt(buySum)}</span></div>
         ${(()=>{ const miss=buyRows.filter(([id])=>state.products.find(p=>p.id==id)?.cost==null).length;
@@ -483,9 +485,9 @@ function viewOrders(){
     </section>
     <div class="list">${list.length?list.map(o=>`<div class="ocard">
       <div class="top-l"><div><div class="who">${esc(o.customer_name)}${o.phone?` · ${esc(o.phone)}`:""}</div>
-        <div class="sub">${o.address?`${esc(o.address)}${o.apt&&o.apt!=="—"?", кв. "+esc(o.apt):""}${o.entrance?", "+esc(o.entrance):""}`:`${esc(o.zk_name||"")}, кв. ${esc(o.apt)}`}</div>
+        <div class="sub">${o.address?`${esc(o.address)}${o.apt&&o.apt!=="—"?", кв. "+esc(o.apt):""}${o.entrance?", "+esc(o.entrance):""}`:`${o.leader_name?"лидер "+esc(o.leader_name)+", ":""}кв. ${esc(o.apt)}`}</div>
         ${o.comment?`<div class="sub">Комментарий: ${esc(o.comment)}</div>`:""}
-        <div class="sub">№${o.id} · ${dt(o.created_at)}${o.delivery_fee?` · доставка ${fmt(o.delivery_fee)}`:""}</div></div>
+        <div class="sub">№${o.id} · ${dt(o.created_at)}${o.zk_name?` · ${esc(o.zk_name)}`:""}${o.code?` · код ${esc(o.code)}`:""}</div></div>
         <select class="st st-${o.status}" data-ostatus="${o.id}" aria-label="Статус заказа ${o.id}">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${o.status===k?"selected":""}>${v}</option>`).join("")}</select></div>
       <div class="items">${Object.entries(o.items||{}).map(([id,q])=>`${esc(pname(id))} ×${q}`).join(", ")}</div>
       <div class="bot"><b>${fmt(o.total)}</b>
@@ -499,7 +501,13 @@ function viewLeaders(){
   const c = state.confirm;
   const apps = state.apps;
   $("#view").innerHTML = tabsHtml() + `
-    <div><h1>Лидеры ЖК</h1><p class="muted" style="margin:4px 0 0">Одобрите заявку, и лидер получит код доступа в кабинет. Код передайте ему лично.</p></div>
+    <div><h1>Лидеры ЖК</h1><p class="muted" style="margin:4px 0 0">Сбор по домам, выплаты раз в неделю и заявки новых лидеров.</p></div>
+    ${collectSettingsHtml()}
+    <div class="sec-h"><h2>Сбор по домам</h2><span class="muted" style="font-size:13px">порог ${fmt((state.collect||{}).threshold||0)}</span></div>
+    <div class="list">${state.zks.filter(z=>z.active).map(zkCard).join("")||'<div class="empty">Нет активных ЖК</div>'}</div>
+    <section class="panel"><div class="sec-h"><h2>Выплаты лидерам</h2><span class="muted" style="font-size:13px">${(state.payouts||[]).length}</span></div>
+      ${(state.payouts||[]).length?(state.payouts).map(p=>`<div class="entry"><div><b>${esc(p.leader_name)} · ${esc(p.zk_name)}</b><div class="sub">${dt(p.paid_at)} · ${p.orders} заказов</div></div><div class="am out">−${fmt(p.amount)}</div></div>`).join(""):`<p class="muted" style="margin:0">Выплат пока не было.</p>`}
+    </section>
     <div class="sec-h"><h2>Заявки</h2><span class="muted" style="font-size:13px">${apps.filter(a=>a.status==="new").length} новых</span></div>
     <div class="list">${apps.length?apps.map(a=>`<div class="ocard">
       <div class="top-l"><div><div class="who">${esc(a.name)}</div><div class="sub">${esc(a.zk_name)}, ${esc(a.city||"")} · ${dt(a.created_at)}</div></div>
@@ -519,7 +527,7 @@ function viewLeaders(){
       </div>`:""}
     </div>`).join(""):`<div class="empty">Заявок пока нет. Они появятся, когда кто-то заполнит форму «Стать лидером» на сайте.</div>`}</div>
 
-    <div class="sec-h"><h2>Действующие ЖК</h2><span class="muted" style="font-size:13px">${state.zks.filter(z=>z.active).length} активных</span></div>
+    <div class="sec-h"><h2>Коды и доступ</h2><span class="muted" style="font-size:13px">${state.zks.filter(z=>z.active).length} активных</span></div>
     <div class="list">${state.zks.map(z=>`<div class="ocard" style="${z.active?"":"opacity:.6"}">
       <div class="top-l"><div><div class="who">${esc(z.name)}</div><div class="sub">Лидер: ${esc(z.leader_name)}${z.phone?" · "+esc(z.phone):""}${z.flats?" · "+esc(z.flats):""}</div></div>
         <label class="switch"><input type="checkbox" data-zkactive="${esc(z.id)}" ${z.active?"checked":""} aria-label="ЖК активен"><span class="tr"></span></label></div>
@@ -532,6 +540,36 @@ function viewLeaders(){
     </div>`).join("")}</div>`;
 }
 
+function collectSettingsHtml(){
+  const c = state.collect || {}, rate = state.rate ?? 5;
+  return `<form class="panel" id="collectForm" novalidate>
+    <h2>Сбор и оплата</h2>
+    <div class="two">
+      <div class="field"><label for="cThr">Порог сбора дома, ₸</label><input id="cThr" inputmode="numeric" value="${esc(c.threshold??20000)}"><span class="hint">Набрали — закупаем и везём лидеру.</span></div>
+      <div class="field"><label for="cRate">Комиссия лидера, %</label><input id="cRate" inputmode="decimal" value="${esc(rate)}"><span class="hint">С каждого выданного заказа.</span></div>
+      <div class="field"><label for="cKaspi">Kaspi для оплаты</label><input id="cKaspi" value="${esc(c.kaspi||"")}" placeholder="+7 7__ ___ __ __"><span class="hint">Номер или ссылка. Увидят покупатели.</span></div>
+      <div class="field"><label for="cName">Получатель</label><input id="cName" value="${esc(c.kaspi_name||"")}" placeholder="ИП или имя"></div>
+    </div>
+    <p class="err" id="cErr" hidden></p>
+    <button class="btn" type="submit">Сохранить</button>
+  </form>`;
+}
+function zkCard(z){
+  const thr = (state.collect||{}).threshold || 0, pool = +z.pool || 0, pct = thr ? Math.min(100, pool/thr*100) : 100, ok = pool >= thr;
+  const c = state.confirm;
+  return `<div class="ocard">
+    <div class="top-l"><div><div class="who">${esc(z.name)}</div><div class="sub">Лидер: ${esc(z.leader_name)}${z.phone?" · "+esc(z.phone):""}</div></div>
+      <span class="tag ${ok&&z.pool_count?"ok":""}">${ok&&z.pool_count?"Сбор набран":"Собираем"}</span></div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${thr}" aria-valuenow="${pool}"><i style="width:${pct}%;background:${ok?"var(--ok)":"var(--accent)"}"></i></div>
+    <div class="bot"><span><b>${fmt(pool)}</b> из ${fmt(thr)} · ${z.pool_count} заказов</span><span class="sub">${z.in_way?`в пути: ${z.in_way}`:""}</span></div>
+    <div class="acts">
+      ${z.pool_count?(ok?`<button class="btn" data-ship="${esc(z.id)}">Отправить в закупку</button>`
+        : c===("ship"+z.id)?`<button class="btn danger" data-ship="${esc(z.id)}" data-force="1">Отправить, хотя не набрано</button><button class="ghost" data-cancel>Отмена</button>`
+        : `<button class="btn light" data-askship="${esc(z.id)}">Отправить досрочно</button>`):""}
+      ${+z.unpaid_count?`<button class="btn ${c===("pay"+z.id)?"danger":"light"}" data-payout="${esc(z.id)}">${c===("pay"+z.id)?"Подтвердить выплату ":"Выплатить "}${fmt(+z.accrued)}</button>`:`<span class="sub" style="align-self:center">К выплате: 0 ₸</span>`}
+    </div>
+  </div>`;
+}
 function openApprove(a){
   const bg = document.createElement("div"); bg.className="sheet-bg";
   bg.innerHTML = `<form class="sheet" id="apForm" role="dialog" aria-label="Одобрить заявку" novalidate>
@@ -568,7 +606,7 @@ async function loadOrders(){
   state.loading = false; if(state.pass) render();
 }
 async function loadLeaders(){
-  try{ const d = await rpc("adal_admin_leaders", {p_pass:state.pass}); state.apps = d.applications; state.zks = d.zks; }
+  try{ const d = await rpc("adal_admin_leaders", {p_pass:state.pass}); state.apps = d.applications; state.zks = d.zks; state.collect = d.collect; state.rate = d.rate; state.payouts = d.payouts; }
   catch(ex){ if(!authFail(ex)) toast(ex.message); }
   if(state.pass) render();
 }
@@ -676,7 +714,7 @@ function planChanged(){ const d=$("#planDirty"); if(d) d.hidden=false; const o=$
 
 
 /* ===================== Финансы ===================== */
-const EXP_CATS = ["Закупка товара","Доставка и бензин","Аренда","Зарплата","Реклама","Упаковка","Налоги","Связь и сервисы","Прочее"];
+const EXP_CATS = ["Закупка товара","Выплата лидерам","Доставка и бензин","Аренда","Зарплата","Реклама","Упаковка","Налоги","Связь и сервисы","Прочее"];
 const INC_CATS = ["Продажа вне сайта","Прочий доход"];
 const monthStart = d => new Date(d.getFullYear(), d.getMonth(), 1);
 const isoDay = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
@@ -855,6 +893,16 @@ async function savePrice(input){
 
 /* ---------- events ---------- */
 document.addEventListener("submit", async e => {
+  if(e.target.id==="collectForm"){
+    e.preventDefault();
+    const v = id => $("#"+id).value.trim().replace(",",".");
+    try{
+      await rpc("adal_admin_save_collect",{p_pass:state.pass,p:{threshold:v("cThr").replace(/\s/g,""),commission:v("cRate"),kaspi:$("#cKaspi").value.trim(),kaspi_name:$("#cName").value.trim()}});
+      toast("Сохранено: на сайте обновится сразу"); await loadLeaders();
+      state.settings = {...(state.settings||{}), leader:+v("cRate")};
+    }catch(ex){ const er=$("#cErr"); er.textContent=ex.message; er.hidden=false; }
+    return;
+  }
   if(e.target.id !== "loginForm") return;
   e.preventDefault();
   const pw = $("#pw").value; if(!pw) return viewLogin("Введите пароль");
@@ -862,7 +910,7 @@ document.addEventListener("submit", async e => {
   state.pass = pw;
   try{
     const d = await rpc("adal_admin_products", {p_pass:pw});
-    state.products = d.products; state.settings = d.settings; store.set(pw); state.busy = false; setTab(state.tab);
+    state.products = d.products; state.settings = d.settings; store.set(pw); state.busy = false; setTab(state.tab); loadLeaders();
   }catch(ex){ state.pass = null; state.busy = false; viewLogin(ex.message); }
 });
 
@@ -887,6 +935,10 @@ document.addEventListener("click", async e => {
   }
   if(b.dataset.act==="new"){ openEditor(null); return; }
   if(b.dataset.act==="calcset"){ openCalcSettings(); return; }
+  if(b.dataset.askship){ state.confirm="ship"+b.dataset.askship; viewLeaders(); return; }
+  if(b.dataset.ship){ b.disabled=true; try{ const r=await rpc("adal_admin_ship",{p_pass:state.pass,p_zk:b.dataset.ship,p_force:!!b.dataset.force}); state.confirm=null; toast(`Отправлено в закупку: ${r.count} заказов`); await loadLeaders(); }catch(ex){ toast(ex.message); b.disabled=false; } return; }
+  if(b.dataset.payout){ const id=b.dataset.payout; if(state.confirm!=="pay"+id){ state.confirm="pay"+id; viewLeaders(); return; }
+    b.disabled=true; try{ const r=await rpc("adal_admin_payout",{p_pass:state.pass,p_zk:id}); state.confirm=null; toast(`Выплата ${fmt(r.amount)} записана в расходы`); await loadLeaders(); }catch(ex){ toast(ex.message); b.disabled=false; } return; }
   if(b.dataset.act==="delivery"){ openDelivery(); return; }
   if(b.dataset.fin){ openFinance(b.dataset.fin); return; }
   if(b.dataset.fmonth){ const d=state.fmonth; state.fmonth=new Date(d.getFullYear(), d.getMonth()+(+b.dataset.fmonth), 1); state.fin=null; loadFinance(); return; }
@@ -1036,7 +1088,7 @@ function openPassword(){
   });
 }
 
-if(state.pass){ load().then(ok=>{ if(ok){ if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); if(state.tab==='finance') loadFinance(); } }); } else { viewLogin(); }
+if(state.pass){ load().then(ok=>{ if(ok){ loadLeaders(); if(state.tab==='orders') loadOrders(); if(state.tab==='plan') loadPlanData(); if(state.tab==='finance') loadFinance(); } }); } else { viewLogin(); }
 </script>
 </body>
 </html>
