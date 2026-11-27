@@ -520,6 +520,26 @@ form.panel,.panel.joined{position:relative;z-index:2}
 @media (prefers-reduced-motion:reduce){.an-sway,.an-bob,.an-hop,.peek img{animation:none!important}}
 body[data-hero="irbi"] .reg-hero .himg{height:108px;right:6px;bottom:6px}
 body[data-hero="irbi"] .reg-hero>*:not(.himg){max-width:70%}
+
+/* живой Ирби */
+.rig{position:relative;aspect-ratio:1/1;display:block;flex:none}
+.rig .rin{position:absolute;inset:0;transform-origin:50% 100%;animation:rbreathe 3.6s ease-in-out infinite}
+.rig .rg,.rig .rg-head>img{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.rg-tail{transform-origin:71.4% 64.3%;animation:rwag 2.8s ease-in-out infinite}
+.rg-head{transform-origin:50% 52%;animation:rnod 5s ease-in-out infinite}
+.rg-head .lid{transform:scaleY(0);animation:rblink 4.6s infinite}
+.rg-head .lid.l{transform-origin:31.2% 31.8%}
+.rg-head .lid.r{transform-origin:57.4% 29.3%;animation-delay:0s}
+@keyframes rbreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.012,1.022)}}
+@keyframes rwag{0%,45%,100%{transform:rotate(0)}8%{transform:rotate(8deg)}16%{transform:rotate(-7deg)}24%{transform:rotate(8deg)}32%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}}
+@keyframes rnod{0%,100%{transform:rotate(0) translateY(0)}18%{transform:rotate(3deg) translateY(1.5px)}38%{transform:rotate(-2.5deg) translateY(0)}55%{transform:rotate(0) translateY(2px)}75%{transform:rotate(2deg) translateY(0)}}
+@keyframes rblink{0%,92%,100%{transform:scaleY(0)}94%,97%{transform:scaleY(1)}}
+.peek .rig{width:var(--pw);align-self:flex-start;animation:hpeek .7s cubic-bezier(.2,1.3,.4,1) .3s both}
+.peek .rig .rin{animation-name:rbreathe}
+.hpick .rig{height:128px;width:128px}
+.tip .rig.irbi{width:96px;height:96px}
+.reg-hero .rig.himg{width:auto}
+@media (prefers-reduced-motion:reduce){.rig .rin,.rg-tail,.rg-head,.rg-head .lid{animation:none!important}}
 </style>
 </head>
 <body>
@@ -871,13 +891,24 @@ const HEROES = {
   makta: {name:"Мақта қыз", img:"img/makta.webp", w:84, h:157, big:96, peek:70, poses:{}, desc:"Героиня казахской сказки и её кот. Подскажет про лидеров."}
 };
 /* позы: когда появятся отдельные картинки, добавьте их в poses, например irbi.poses.cheer = "img/irbi-cheer.webp" (wave, point, bag, cheer, think, peek) */
+/* живой Ирби: слои (туловище, хвост, голова с веками) двигаются отдельно; Мақта қыз пока одной картинкой */
+function heroMedia(pose, cls, w, h, lazy){
+  cls = cls||"";
+  if(state.hero==="irbi" && !HEROES.irbi.poses[pose]){
+    cls = cls.replace(/\ban-(sway|bob)\b/g,"").trim();
+    const L = lazy ? ' loading="lazy"' : "";
+    return `<div class="rig ${cls}" role="img" aria-label="Ирби"><div class="rin"><img class="rg rg-body" src="img/rig/irbi-body.webp" alt=""${L}><img class="rg rg-tail" src="img/rig/irbi-tail.webp" alt=""${L}><div class="rg rg-head"><img src="img/rig/irbi-head.webp" alt=""${L}><img class="lid l" src="img/rig/irbi-lid_l.webp" alt=""${L}><img class="lid r" src="img/rig/irbi-lid_r.webp" alt=""${L}></div></div></div>`;
+  }
+  return `<img class="${cls}" src="${heroImg(pose)}" alt="${esc(hero().name)}" width="${w}" height="${h}"${lazy?' loading="lazy"':""}>`;
+}
+function heroMediaFor(k){ const prev=state.hero; state.hero=k; const out=heroMedia("wave","pkrig"); state.hero=prev; return out; }
 const heroImg = pose => { const h=hero(); return h.poses[pose] || h.img; };
 const ANIM = {wave:"an-sway", point:"an-bob", bag:"an-hop", cheer:"an-hop", think:"an-bob", peek:"an-bob"};
-function heroPeek(pose){ const h=hero(); return `<div class="peek" aria-hidden="true"><img src="${heroImg(pose||"peek")}" alt="" width="${h.peek}" style="width:${h.peek}px"></div>`; }
+function heroPeek(pose){ const h=hero(); return `<div class="peek" aria-hidden="true" style="--pw:${h.peek}px">${heroMedia(pose||"peek","peekimg",h.peek,h.peek*h.h/h.w)}</div>`; }
 const hero = () => HEROES[state.hero] || HEROES.irbi;
 const greet = () => `Привет, я ${hero().name}!`;
-function heroBig(pose){ const h=hero(); const bh=Math.round(h.big*h.h/h.w); return `<img class="irbi-big ${ANIM[pose]||"an-bob"}" src="${heroImg(pose)}" alt="${esc(h.name)}" width="${h.big}" height="${bh}">`; }
-function heroPick(){ return Object.entries(HEROES).map(([k,h])=>`<button class="hpick" data-hero="${k}" aria-pressed="${!!ss.get("adal-hero")&&state.hero===k}"><img src="${h.img}" alt="" width="${Math.round(h.w*.8)}" height="${Math.round(h.h*.8)}"><b>${h.name}</b><span>${h.desc}</span></button>`).join(""); }
+function heroBig(pose){ const h=hero(); const bh=Math.round(h.big*h.h/h.w); return heroMedia(pose,`irbi-big ${ANIM[pose]||"an-bob"}`,h.big,bh); }
+function heroPick(){ return Object.entries(HEROES).map(([k,h])=>`<button class="hpick" data-hero="${k}" aria-pressed="${!!ss.get("adal-hero")&&state.hero===k}">${k==="irbi"?heroMediaFor("irbi"):`<img src="${h.img}" alt="" width="${Math.round(h.w*.8)}" height="${Math.round(h.h*.8)}">`}<b>${h.name}</b><span>${h.desc}</span></button>`).join(""); }
 function setHero(k){ if(!HEROES[k]) return; state.hero=k; ss.set("adal-hero",k); render(); }
 function openHeroPicker(){
   if(document.getElementById("hbg")) return;
@@ -901,7 +932,7 @@ function tipList(){
   ];
 }
 const tipHtml = k => { const h=hero(), mk=state.hero==="makta";
-  const img = `<img class="irbi ${ANIM[k.pose]||""}${k.pose==="point"?" flip":""}" src="${heroImg(k.pose)}" alt="" width="${h.w}" height="${h.h}" loading="lazy">`;
+  const img = heroMedia(k.pose, `irbi ${ANIM[k.pose]||""}${k.pose==="point"?" flip":""}`, h.w, h.h, true);
   return `<div class="tip${mk?" mk":""}">${img}<div class="bub"><b>${h.name}</b><span>${esc(k.text)}</span>${k.btn?`<button class="btn light" ${k.btn[1]}>${k.btn[0]}</button>`:""}</div></div>`; };
 let tipObs=null;
 function observeTips(){
@@ -996,7 +1027,7 @@ function viewSoon(){
       <p>Мы не тратим деньги на рекламу — мы возвращаем их вам в цене.</p>
       <button class="cta" data-act="towait">Записаться в список</button>
       <div class="packs" aria-hidden="true"><img src="img/111.jpg" alt=""><img src="img/119.jpg" alt=""></div>
-      <img class="himg2 an-sway" src="${heroImg("wave")}" alt="${esc(hero().name)}" width="${hero().w}" height="${hero().h}">
+      ${heroMedia("wave","himg2 an-sway",hero().w,hero().h)}
     </div>
     <div class="panel launchp">
       <div class="lp-top"><b>Запустимся, когда нас станет ${goal}</b><span>${n} из ${goal}</span></div>
@@ -1251,7 +1282,7 @@ function viewReg(){
   const r=state.reg, rate=Math.round(SET.commission);
   return `<section class="section wrap">
     <div class="reg-hero">
-      <img class="himg an-bob" src="${heroImg("point")}" alt="" width="${hero().w}" height="${hero().h}">
+      ${heroMedia("point","himg an-bob",hero().w,hero().h)}
       <span class="label" style="color:inherit;opacity:.85">Для активных соседей</span>
       <h1>Зарабатывайте на заказах своего дома</h1>
       <p style="margin:0;opacity:.92">Зовите соседей и выдавайте им заказы по коду. ${rate}% с каждого выданного заказа дома.</p>
