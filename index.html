@@ -625,6 +625,11 @@ body.prelaunch .sub-row{display:none!important}
 .field textarea:focus{border-color:var(--brand);outline:none}
 body[data-hero="irbi"] .sup-hero .himg{height:108px;right:6px;bottom:6px}
 body[data-hero="irbi"] .sup-hero>*:not(.himg){max-width:70%}
+
+/* ссылка для бизнеса: маленькая, внизу, не мешает */
+.foot{text-align:center;padding-block:2px 12px}
+.linkbtn{border:0;background:transparent;color:var(--muted);font:inherit;font-size:12.5px;font-weight:500;text-decoration:underline;text-underline-offset:3px;padding:6px 8px}
+body[data-view="supply"] .foot{display:none}
 </style>
 </head>
 <body>
@@ -647,6 +652,7 @@ body[data-hero="irbi"] .sup-hero>*:not(.himg){max-width:70%}
   <main id="view"></main>
   <button class="cartbar" id="cartBar" data-go="cart" hidden></button>
   <p class="demo wrap">Оплата Kaspi-переводом при получении заказа.</p>
+  <nav class="foot wrap" id="foot" aria-label="Для бизнеса"><button type="button" class="linkbtn" data-go="supply">Поставщикам и бизнесу</button></nav>
 </div>
 
 <nav class="nav" aria-label="Разделы">
@@ -1186,7 +1192,6 @@ function viewSoon(){
       <div class="why"><b>2</b><div><div class="t">Без рекламы и магазина</div><div class="muted">Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.</div></div></div>
       <div class="why"><b>3</b><div><div class="t">Заказ забираете у соседа</div><div class="muted">Лидер вашего дома принимает машину и выдаёт пакеты. Курьер к каждой двери не нужен.</div></div></div>
     </div>
-    <div class="panel bizp"><div><b>Вы производитель или поставщик?</b><div class="muted" style="font-size:13px">Мы закупаем оптом под заказы жителей ЖК. Оставьте заявку.</div></div><button class="btn light" data-go="supply">Для поставщиков</button></div>
     ${tipHtml({pose:"cheer",text:`Хотите зарабатывать? Станьте лидером своего ЖК: ${Math.round(SET.commission)}% с каждого заказа дома. Приглашайте соседей, а когда запустимся, выдавайте им заказы.`,btn:["Стать лидером ЖК",'data-act="becomeleader"']})}
   </section>`;
 }
@@ -1438,7 +1443,6 @@ function viewHow(){
     <h2>Ваш помощник</h2>
     <div class="hgrid">${heroPick()}</div>
     ${waBox("all","Остались вопросы?","Задайте их в группе WhatsApp Bereke store.")}
-    <button class="btn ghost block" data-go="supply">Я поставщик или производитель</button>
     <button class="btn accent block" data-act="becomeleader">Стать лидером своего ЖК</button>
     <button class="btn ghost block" data-go="shop">Перейти к покупкам</button>
   </section>`;
@@ -1657,6 +1661,7 @@ function viewLeader(){
 const VIEWS=["shop","cart","profile","orders","how","leader","supply"];
 function render(){
   document.body.dataset.hero=state.hero;
+  document.body.dataset.view=state.view;
   $("#zkName").textContent = zk().name;
   document.body.classList.toggle("prelaunch", !!SET.prelaunch);
   if(state.view==="orders") state.view="profile";
