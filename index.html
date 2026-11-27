@@ -568,6 +568,9 @@ body[data-hero="irbi"] .reg-hero>*:not(.himg){max-width:70%}
 @keyframes hpeek2{from{transform:translateY(40%);opacity:0}to{transform:translateY(0);opacity:1}}
 .tip .irbi:not(.rig){height:auto}
 @media (prefers-reduced-motion:reduce){.an-breath{animation:none!important}.peek.pose img{animation:none}}
+.soon>.himg2{height:auto;width:auto;max-height:176px;right:10px;bottom:-4px}
+body[data-hero="makta"] .soon>.himg2{height:172px}
+body[data-hero="irbi"] .soon>.himg2{height:148px}
 </style>
 </head>
 <body>
@@ -1065,7 +1068,7 @@ function viewSoon(){
       <p>Мы не тратим деньги на рекламу — мы возвращаем их вам в цене.</p>
       <button class="cta" data-act="towait">Записаться в список</button>
       <div class="packs" aria-hidden="true"><img src="img/111.jpg" alt=""><img src="img/119.jpg" alt=""></div>
-      ${heroMedia("idle","himg2",hero().w,hero().h)}
+      ${heroMedia("bag","himg2 an-breath",hero().w,hero().h)}
     </div>
     <div class="panel launchp">
       <div class="lp-top"><b>Запустимся, когда нас станет ${goal}</b><span>${n} из ${goal}</span></div>
