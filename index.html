@@ -10,16 +10,24 @@
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Bereke store</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%230F4C4A%27/%3E%3Cg transform=%27translate(9 13)%27%3E%3Cpath d=%27M3 34V17L14 7l11 10v17z%27 fill=%27%23fff%27/%3E%3Cpath d=%27M21 34V17l11-10 11 10v17z%27 fill=%27%23E9A23B%27/%3E%3C/g%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest-cyrillic-wght-normal.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest-cyrillic-ext-wght-normal.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Unbounded;font-style:normal;font-weight:700;font-display:swap;src:url(fonts/unbounded-cyrillic-700-normal.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Unbounded;font-style:normal;font-weight:700;font-display:swap;src:url(fonts/unbounded-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122}
+</style>
+<link rel="preload" href="fonts/onest-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* Layout: phone app shell (max 480px), sticky top bar, fixed bottom tabs; views — Магазин, Корзина, Как это работает */
 :root{
   --bg:#F3F6F5; --surface:#FFFFFF; --ink:#0E2B2C; --muted:#5D7273; --line:#DCE5E3;
   --brand:#0F4C4A; --brand-ink:#FFFFFF; --accent:#E9A23B; --accent-soft:#FBEBD2;
   --ok:#2E8B57; --ok-soft:#DDF1E5; --warn:#B7701A; --info:#2F6FB0; --info-soft:#DDE9F6;
-  --font-display:"Unbounded", "Manrope", system-ui, sans-serif;
-  --font-body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display:"Onest", system-ui, sans-serif;
+  --font-logo:"Unbounded", "Onest", system-ui, sans-serif;
+  --font-body:"Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
   --r:14px;
 }
 
@@ -34,7 +42,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{ou
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brand)}
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--brand);color:var(--brand-ink);padding-block:12px}
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.logo{display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:-.01em;line-height:1;color:#fff}
+.logo{display:flex;align-items:center;gap:8px;font-family:var(--font-logo);font-weight:700;font-size:20px;letter-spacing:-.01em;line-height:1;color:#fff}
 .logo svg{flex:none;display:block}
 .logo small{font-family:var(--font-body);font-weight:600;font-size:14px;letter-spacing:.01em;opacity:.7;margin-left:4px}
 .zk{display:flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--brand-ink) 14%,transparent);border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--brand-ink);max-width:60%}
@@ -290,6 +298,30 @@ body.prelaunch .zk,body.prelaunch .deadline,body.prelaunch .demo{display:none!im
 body.in-tg .demo{display:none}
 .codein{font-size:26px!important;letter-spacing:.3em;text-align:center;font-weight:800}
 .ordcard{gap:10px}
+.top-r{display:flex;align-items:center;gap:8px;min-width:0}
+@media (max-width:400px){.logo{font-size:17px}.logo small{font-size:12px}.top-r{gap:6px}.lang{min-width:40px;padding:0 8px}.zk{padding:6px 8px 6px 10px}}
+.zk{flex:1 1 auto;min-width:0;max-width:none}
+.lang{flex:none;border:0;background:var(--bg);color:var(--ink);font:inherit;font-weight:800;font-size:12.5px;border-radius:12px;min-width:44px;height:40px;padding:0 10px}
+.search{position:relative}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search input{width:100%;border:0;background:var(--surface);box-shadow:var(--shadow);border-radius:14px;padding:13px 14px 13px 42px;font:inherit;font-size:15px;color:var(--ink)}
+.search input::-webkit-search-cancel-button{display:none}
+.card .photo,.card .name,.tz{cursor:pointer}
+.nores{text-align:center;padding:28px 8px;display:flex;flex-direction:column;gap:8px;align-items:center}
+.pcard{max-height:92vh;overflow:auto;position:relative;gap:12px}
+.pclose{position:absolute;right:12px;top:12px;z-index:2;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.92);box-shadow:0 1px 4px rgba(0,0,0,.18);font-size:22px;line-height:1;color:var(--ink)}
+.pimg{position:relative;aspect-ratio:1/1;border-radius:16px;overflow:hidden;margin:-4px -4px 0}
+.pimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#F3F5F4}
+.pcard h2{font-size:21px;line-height:1.2}
+.pprice{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pprice .price{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.pprice .old{font-size:16px}
+.psave{background:var(--ok-soft);color:var(--ok);font-weight:800;font-size:13.5px;border-radius:10px;padding:8px 12px}
+.pinfo{display:grid;gap:0;margin:0;border-top:1px solid var(--line)}
+.pinfo>div{display:grid;grid-template-columns:118px 1fr;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pinfo dt{color:var(--muted);font-weight:600}.pinfo dd{margin:0;font-weight:600}
+.pbuy{display:flex;gap:10px;align-items:center}
+.pbuy .btn{flex:1}
 
 
 </style>
@@ -300,10 +332,10 @@ body.in-tg .demo{display:none}
   <header class="top wrap">
     <div class="top-row">
       <div class="logo" aria-label="Bereke store"><svg width="32" height="25" viewBox="0 0 46 36" aria-hidden="true"><path class="h1" d="M3 34 V17 L14 7 L25 17 V34 Z"/><path d="M21 34 V17 L32 7 L43 17 V34 Z" fill="#E9A23B"/></svg><span>bereke<small>store</small></span></div>
-      <button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
+      <div class="top-r"><button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
         <span class="zk-txt"><small>Мой дом</small><span id="zkName"></span></span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
+      </button><button class="lang" id="langBtn" data-lang>ҚАЗ</button></div>
     </div>
     <div class="deadline" id="deadline"><span class="dot"></span><span>Сбор заказов до 21:00</span><b id="cd">--:--:--</b></div>
   </header>
@@ -375,7 +407,7 @@ const ss = {
 let CUST = ss.get("adal-cust") || {};
 
 const state = {
-  view:"shop", cat:"all", zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
+  view:"shop", cat:"all", q:"", pid:null, zk: ss.get("adal-zk") || "", cart: ss.get("adal-cart") || {},
   loading:true, loadError:null, busy:false,
   orders: ss.get("adal-orders") || [], ostat:{}, oLoading:false, done:null,
   leader: ss.get("adal-leader"), ld:null, ldError:null, ltab:"collect", leaderMode:"login", regDone:false,
@@ -386,7 +418,7 @@ const state = {
 const $ = s => document.querySelector(s);
 const fmt = n => Math.round(n).toLocaleString("ru-RU").replace(/ |,/g," ") + " ₸";
 const prod = id => PRODUCTS.find(p=>p.id==id);
-const pName = id => { const p=prod(id); return p ? `${p.name}${p.variant?" · "+p.variant:""}` : `Товар №${id}`; };
+const pName = id => { const p=prod(id); return p ? `${tName(p)}${p.variant?" · "+p.variant:""}` : `Товар №${id}`; };
 const cartSum = () => Object.entries(state.cart).reduce((s,[id,q])=>s+(prod(id)?.price||0)*q,0);
 const cartOld = () => Object.entries(state.cart).reduce((s,[id,q])=>{const p=prod(id); return s+((p?.old_price||p?.price||0))*q;},0);
 const cartCount = () => Object.values(state.cart).reduce((a,b)=>a+b,0);
@@ -399,9 +431,126 @@ const tile = p => `background:linear-gradient(150deg,${esc(p.color||"#0F4C4A")},
 const plural = (n,a,b,c) => { const m=n%100, d=n%10; return (m>10&&m<20)?c:(d===1?a:(d>=2&&d<=4?b:c)); };
 const itemsText = items => Object.entries(items||{}).map(([id,q])=>`${esc(pName(id))} ×${q}`).join(", ");
 
+/* ===== Язык: русский / қазақша ===== */
+let LANG = (()=>{ try{ const v=localStorage.getItem("adal-lang"); if(v==="kk"||v==="ru") return v; }catch(_){}
+  const tl = (window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initDataUnsafe&&Telegram.WebApp.initDataUnsafe.user&&Telegram.WebApp.initDataUnsafe.user.language_code)||navigator.language||"";
+  return /^kk/i.test(tl) ? "kk" : "ru"; })();
+const KK = {
+"Мой дом":"Менің үйім","Сбор заказов до 21:00":"Қабылдау 21:00-ге дейін","Выбрать свой ЖК":"ТҮК таңдау",
+"Оплата Kaspi-переводом при получении заказа у лидера.":"Тапсырысты лидерден алғанда Kaspi аударымымен төлейсіз.",
+"Главная":"Басты бет","Магазин":"Дүкен","Как это работает":"Қалай жұмыс істейді","Корзина":"Себет","Заказы":"Тапсырыстар","Лидер ЖК":"ТҮК лидері","Разделы":"Бөлімдер",
+"Скоро запуск":"Жақында ашылады",
+"Продукты и товары для дома до 40% дешевле магазина":"Азық-түлік пен үй тауарлары дүкеннен 40%-ға дейін арзан",
+"Мы не тратим деньги на рекламу — мы возвращаем их вам в цене.":"Біз жарнамаға ақша жұмсамаймыз — оны бағаға қайтарамыз.",
+"Первые товары":"Алғашқы тауарлар","Почему так дешевле":"Неге бұлай арзан",
+"Покупаем оптом под заказ":"Тапсырыс бойынша көтерме аламыз",
+"Соседи заказывают вместе, мы закупаем у поставщиков большой партией.":"Көршілер бірге тапсырыс береді, біз жеткізушілерден үлкен партиямен сатып аламыз.",
+"Без рекламы и магазина":"Жарнамасыз және дүкенсіз",
+"Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.":"Сауда залы, кассирлер және жарнама бюджеті жоқ. Бұл ақшаны сатып алушыларға қайтарамыз.",
+"Заказ забираете у соседа":"Тапсырысты көршіңізден аласыз",
+"Лидер вашего дома принимает машину и выдаёт пакеты. Курьер к каждой двери не нужен.":"Үйіңіздің лидері көлікті қабылдап, пакеттерді береді. Әр есікке курьер қажет емес.",
+"Мы напишем, когда запустимся. Чем больше соседей запишется, тем быстрее начнём в вашем доме.":"Іске қосылғанда хабарлаймыз. Көбірек көрші жазылса, сіздің үйде соғұрлым тез бастаймыз.",
+"В Telegram":"Telegram-ға","В WhatsApp":"WhatsApp-қа","Копировать приглашение":"Шақыруды көшіру",
+"Записаться в список ожидания":"Күту тізіміне жазылу",
+"Узнаете о запуске первыми и получите доступ к ценам до 40% ниже магазина.":"Іске қосылуды бірінші біліп, дүкеннен 40%-ға дейін төмен бағаларға қол жеткізесіз.",
+"Имя":"Аты","Телефон":"Телефон","ЖК или адрес":"ТҮК немесе мекенжай","Алия":"Алия","Например, ЖК Алатау Сити":"Мысалы, Алатау Сити ТҮК",
+"Записаться":"Жазылу","Записываем…":"Жазылып жатыр…",
+"Хотите зарабатывать?":"Табыс тапқыңыз келе ме?","Стать лидером ЖК":"ТҮК лидері болу","Стать лидером своего ЖК":"Өз ТҮК-ңіздің лидері болу",
+"Сбор вашего дома":"Үйіңіздің жинағы","Лидер вашего дома":"Үйіңіздің лидері","Категории":"Санаттар","Все":"Барлығы",
+"Бакалея":"Азық-түлік","Молочные":"Сүт өнімдері","Мясо и колбасы":"Ет және шұжық","Овощи и фрукты":"Көкөніс пен жеміс","Чай, кофе, напитки":"Шай, кофе, сусындар","Снеки и сладости":"Снектер мен тәттілер","Детские товары":"Балаларға арналған тауарлар","Гигиена":"Гигиена","Для животных":"Жануарларға арналған","Чистящие средства":"Тазалау құралдары","Мыло":"Сабын","Для посуды":"Ыдыс жуу құралдары","Для стирки":"Кір жуу құралдары",
+"Добавить в корзину":"Себетке қосу","Меньше":"Азырақ","Больше":"Көбірек",
+"Не удалось загрузить каталог":"Каталогты жүктеу мүмкін болмады","Обновить":"Жаңарту",
+"Корзина пуста":"Себет бос","Добавьте товары из каталога. Когда дом наберёт нужную сумму, мы привезём заказы лидеру, и вы их заберёте.":"Каталогтан тауар қосыңыз. Үй қажетті соманы жинағанда, тапсырыстарды лидерге жеткіземіз, сіз оларды аласыз.",
+"Перейти в магазин":"Дүкенге өту","В обычном магазине":"Қарапайым дүкенде","Ваша экономия":"Үнемдеуіңіз","Получение у лидера":"Лидерден алу","бесплатно":"тегін","Итого":"Барлығы",
+"Сбор дома с вашим заказом":"Сіздің тапсырысыңызбен үй жинағы","Кто заберёт":"Кім алады","Ваш ЖК и лидер":"Сіздің ТҮК және лидер","Квартира":"Пәтер","Как забрать:":"Қалай алуға болады:",
+"когда сбор дома наберётся, мы привезём заказы лидеру. Вы получите код выдачи, назовёте его лидеру и переведёте оплату на Kaspi.":"үйдің жинағы толған кезде тапсырыстарды лидерге жеткіземіз. Сіз беру кодын аласыз, оны лидерге айтып, Kaspi арқылы төлейсіз.",
+"Отправляем…":"Жіберілуде…","Код выдачи":"Беру коды","Назовите код лидеру, когда будете забирать. Код сохранён в разделе «Заказы».":"Алған кезде кодты лидерге айтыңыз. Код «Тапсырыстар» бөлімінде сақталған.",
+"Оплата":"Төлем","Когда будете забирать заказ у лидера, переведите":"Тапсырысты лидерден алған кезде","на Kaspi Bereke store. Наличные не принимаем.":"Kaspi Bereke store-ға аударыңыз. Қолма-қол ақша қабылдамаймыз.",
+"Когда будете забирать заказ у лидера, переведите на Kaspi Bereke store. Наличные не принимаем.":"Тапсырысты лидерден алған кезде Kaspi Bereke store-ға аударыңыз. Қолма-қол ақша қабылдамаймыз.",
+"Копировать":"Көшіру","Реквизиты Kaspi появятся здесь":"Kaspi деректемелері осы жерде пайда болады","Мои заказы":"Менің тапсырыстарым","Вернуться в магазин":"Дүкенге оралу",
+"Заказов пока нет":"Әзірге тапсырыс жоқ","Здесь появятся ваши заказы, коды выдачи и статусы.":"Мұнда тапсырыстарыңыз, беру кодтары және мәртебелері көрсетіледі.",
+"Загружаем статус…":"Мәртебе жүктелуде…","Не удалось получить статус":"Мәртебені алу мүмкін болмады",
+"Сбор":"Жинақ","В пути":"Жолда","Привезли":"Әкелінді","Выдан":"Берілді",
+"Собираем заказы дома":"Үйдің тапсырыстарын жинап жатырмыз","Ждём, пока дом наберёт нужную сумму":"Үй қажетті соманы жинағанша күтеміз",
+"Закупаем и везём лидеру":"Сатып алып, лидерге жеткізудеміз","Заказы вашего дома уже в пути":"Үйіңіздің тапсырыстары жолда",
+"Можно забирать":"Алуға болады","Назовите код лидеру и переведите оплату на Kaspi":"Кодты лидерге айтып, Kaspi-ге төлем аударыңыз",
+"Заказ выдан":"Тапсырыс берілді","Спасибо, что покупаете вместе":"Бірге сатып алғаныңызға рақмет",
+"Сбор дома:":"Үйдің жинағы:","Kaspi Bereke store":"Kaspi Bereke store",
+"Как устроен Bereke store":"Bereke store қалай жұмыс істейді","Соседи покупают вместе, поэтому дешевле":"Көршілер бірге сатып алады, сондықтан арзан",
+"Сегодня до 21:00":"Бүгін 21:00-ге дейін","Вы делаете заказ":"Сіз тапсырыс бересіз","Выбираете товары и своего лидера дома. Платить сразу не нужно.":"Тауарларды және үйіңіздің лидерін таңдайсыз. Бірден төлеудің қажеті жоқ.",
+"Закупаем оптом":"Көтерме сатып аламыз","Сумма заказов вашего дома должна дойти до порога. Не дошла: заказы ждут следующий сбор.":"Үйіңіздің тапсырыс сомасы шекке жетуі керек. Жетпесе: тапсырыстар келесі жинақты күтеді.",
+"Следующий день":"Келесі күні","Везём лидеру":"Лидерге жеткіземіз","Одна машина привозит все заказы дома вашему лидеру. Вам придёт код выдачи.":"Бір көлік үйдің барлық тапсырыстарын лидерге әкеледі. Сізге беру коды келеді.",
+"Вечером":"Кешке","Забираете у лидера":"Лидерден аласыз","Называете код, переводите оплату на Kaspi Bereke store и забираете пакет.":"Кодты айтасыз, Kaspi Bereke store-ға төлейсіз және пакетті аласыз.",
+"Откуда низкая цена":"Баға неге төмен","Мы закупаем только под уже собранные заказы. Нет торгового зала, кассиров и остатков на полках, а доставка идёт одной машиной на весь дом.":"Біз тек жиналған тапсырыстарға сатып аламыз. Сауда залы, кассирлер және сөреде қалатын қалдық жоқ, ал жеткізу бүкіл үйге бір көлікпен жүреді.",
+"Кто такой лидер":"Лидер кім","Перейти к покупкам":"Сатып алуға өту",
+"Ваш жилой комплекс":"Сіздің тұрғын үй кешеніңіз","Заказ заберёте у лидера выбранного ЖК.":"Тапсырысты таңдалған ТҮК лидерінен аласыз.","Закрыть":"Жабу","Выбор ЖК":"ТҮК таңдау",
+"Скопировано":"Көшірілді",
+"Поиск по товарам":"Тауарлардан іздеу","Ничего не найдено":"Ештеңе табылмады","Попробуйте другое слово или выберите категорию.":"Басқа сөзді көріңіз немесе санатты таңдаңыз.","Сбросить":"Тазарту",
+"Состав":"Құрамы","Срок годности":"Жарамдылық мерзімі","Хранение":"Сақтау","О товаре":"Тауар туралы","В магазине":"Дүкенде","Цены откроем при запуске":"Бағаны іске қосылғанда ашамыз","Карточка товара":"Тауар картасы","В корзине":"Себетте","Не ограничен":"Шектелмейді",
+"Рис длиннозёрный шлифованный":"Ұзын дәнді тазартылған күріш","Крупа гречневая ядрица":"Қарақұмық жармасы (ядрица)","Сахар белый кристаллический":"Ақ кристалды қант","Пшеничная мука высшего сорта":"Жоғары сортты бидай ұны","Мука из твёрдых сортов пшеницы, вода":"Қатты бидай ұны, су","Хлопья овсяные":"Сұлы жапырақшалары","Соль пищевая поваренная":"Ас тұзы","Кофе жареный молотый":"Қуырылған ұнтақ кофе","Масло подсолнечное рафинированное":"Тазартылған күнбағыс майы","Чай чёрный байховый, 100 пакетиков":"Қара байховый шай, 100 пакет","Говядина, жир, соль, специи":"Сиыр еті, май, тұз, дәмдеуіштер","Томаты, соль":"Қызанақ, тұз",
+"В сухом прохладном месте, в закрытой таре":"Құрғақ салқын жерде, жабық ыдыста","В сухом прохладном месте":"Құрғақ салқын жерде","В сухом месте, вдали от запахов":"Құрғақ жерде, иістерден алыс","В сухом месте":"Құрғақ жерде","В плотно закрытой упаковке, в сухом месте":"Тығыз жабық қаптамада, құрғақ жерде","В тёмном месте при температуре до 20 °C":"Қараңғы жерде, 20 °C-қа дейінгі температурада","При температуре от 0 до 20 °C":"0-ден 20 °C-қа дейінгі температурада","При температуре от 0 до 25 °C":"0-ден 25 °C-қа дейінгі температурада"
+};
+const KK_RE = [
+[/^(.+), вы в списке!$/,"$1, сіз тізімдесіз!"],
+[/^Уже в списке: (\d+) \S+\. Нажимая кнопку, вы соглашаетесь на обработку персональных данных\.$/,"Тізімде: $1 көрші. Түймені басу арқылы дербес деректерді өңдеуге келісесіз."],
+[/^Станьте одним из первых\. Нажимая кнопку, вы соглашаетесь на обработку персональных данных\.$/,"Алғашқылардың бірі болыңыз. Түймені басу арқылы дербес деректерді өңдеуге келісесіз."],
+[/^Станьте лидером своего ЖК: (\d+)% с каждого заказа дома\. Приглашайте соседей, а когда запустимся, выдавайте им заказы\.$/,"Өз ТҮК-ңіздің лидері болыңыз: үйдегі әр тапсырыстан $1%. Көршілерді шақырыңыз, ал іске қосылғанда оларға тапсырыс беріңіз."],
+[/^из (.+)$/,"$1 ішінен"],
+[/^Ещё (.+?) — и мы привезём заказы дома лидеру(?: (.+))?$/,(m,a,b)=>`Тағы ${a} — және үйіңіздің тапсырыстарын ${b?b+" ":""}лидеріне жеткіземіз`],
+[/^Сбор набран: закупаем и везём заказы дома лидеру(?: (.+))?$/,(m,b)=>`Жинақ толды: үйдің тапсырыстарын сатып алып, ${b?b+" ":""}лидеріне жеткіземіз`],
+[/^(.+) — лидер вашего дома$/,"$1 — үйіңіздің лидері"],
+[/^Заказ заберёте у лидера(.*?)\.\s*$/,"Тапсырысты лидерден аласыз$1. "],
+[/^Добавить в корзину · (.+)$/,"Себетке қосу · $1"],
+[/^Оформить заказ на (.+)$/,"Тапсырыс беру: $1"],
+[/^Заказ №(\d+) принят$/,"№$1 тапсырыс қабылданды"],[/^Заказ №(\d+)$/,"№$1 тапсырыс"],
+[/^(.+) · забрать у лидера (.*)$/,(m,a,b)=>`${a} · ${b?b+" лидерінен":"лидерден"} алу`],
+[/^Лидер: (.+)$/,"Лидер: $1"],
+[/^Когда дом набрал (.+)$/,"Үй $1 жинағанда"],
+[/^Сосед, который зовёт других покупателей и выдаёт заказы по коду\. За это он получает (\d+)% с каждого выданного заказа дома\.$/,"Басқа сатып алушыларды шақырып, тапсырыстарды код бойынша беретін көрші. Ол үшін үйде берілген әр тапсырыстан $1% алады."],
+[/^ЖК выбран: (.+)$/,"ТҮК таңдалды: $1"],
+[/^Лидер: (.+?)( · .+)?$/,"Лидер: $1$2"],
+[/^(\d+) ?месяц(?:а|ев)?$/,"$1 ай"],
+[/^(\d+) ([а-я]+)$/,(m,n,u)=>({"шт":"дана","пакетиков":"пакет"}[u]?`${n} ${({"шт":"дана","пакетиков":"пакет"})[u]}`:m)],
+[/^(.+) \/ шт$/,"$1 / дана"],
+[/^Дешевле магазина на (.+) \(−(\d+)%\)$/,"Дүкеннен $1 арзан (−$2%)"],
+[/^Ничего не найдено по запросу «(.+)»$/,"«$1» бойынша ештеңе табылмады"]
+];
+function t(s){
+  if(LANG!=="kk"||!s) return s;
+  const k=String(s).replace(/ /g," ").trim();
+  if(KK[k]) return KK[k];
+  for(const [re,r] of KK_RE){ if(re.test(k)) return k.replace(re,r); }
+  return s;
+}
+function tName(p){ return (LANG==="kk" && p.name_kk) ? p.name_kk : p.name; }
+function translateDom(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>/^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+  const nodes=[]; while(w.nextNode()) nodes.push(w.currentNode);
+  for(const n of nodes){
+    if(n._ru===undefined) n._ru=n.nodeValue;
+    const src=n._ru, core=src.trim();
+    if(!core){ continue; }
+    const out = LANG==="kk" ? t(core) : core;
+    const lead=src.slice(0,src.indexOf(core)), tail=src.slice(src.indexOf(core)+core.length);
+    const nv = out===core ? src : lead+out+tail;
+    if(n.nodeValue!==nv) n.nodeValue=nv;
+  }
+  root.querySelectorAll("[placeholder],[aria-label],[title]").forEach(el=>{
+    if(el.id==="langBtn") return;
+    for(const a of ["placeholder","aria-label","title"]){
+      if(!el.hasAttribute(a)) continue;
+      const k="_ru_"+a; if(el[k]===undefined) el[k]=el.getAttribute(a);
+      const nv = LANG==="kk" ? t(el[k]) : el[k]; if(el.getAttribute(a)!==nv) el.setAttribute(a,nv);
+    }
+  });
+  const lb=document.getElementById("langBtn"); if(lb){ lb.textContent = LANG==="kk" ? "РУС" : "ҚАЗ"; lb.setAttribute("aria-label", LANG==="kk"?"Выбрать язык: русский":"Тілді таңдау: қазақша"); }
+  document.documentElement.lang = LANG==="kk" ? "kk" : "ru";
+}
+function setLang(l){ LANG=l; try{ localStorage.setItem("adal-lang",l); }catch(_){} render(); }
+
 function toast(msg){
-  const t=document.createElement("div"); t.className="toast"; t.textContent=msg; t.setAttribute("role","status");
-  document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
+  const el=document.createElement("div"); el.className="toast"; el.textContent=t(msg); el.setAttribute("role","status");
+  document.body.appendChild(el); setTimeout(()=>el.remove(),2600);
 }
 function copyText(txt, okMsg){
   const done=()=>toast(okMsg||"Скопировано");
@@ -439,35 +588,75 @@ function cardCtl(id){
   return `<div class="pill-q"><button data-dec="${id}" aria-label="Меньше">−</button><span>${q}</span><button data-add="${id}" aria-label="Больше">+</button></div>`;
 }
 
-function viewShop(){
-  if(state.loading) return `<section class="section wrap"><div class="grid">${Array.from({length:4},()=>`<div class="card skel"><div class="photo"></div><div class="body"><div class="sk"></div><div class="sk short"></div></div></div>`).join("")}</div></section>`;
-  if(state.loadError && !SET.prelaunch) return `<section class="wrap empty"><h2>Не удалось загрузить каталог</h2><p class="muted">${esc(state.loadError)}. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-act="reload">Обновить</button></section>`;
-  if(SET.prelaunch) return viewSoon();
-  const cats = Object.keys(CATS).filter(k=>PRODUCTS.some(p=>p.cat===k));
-  const list = PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
-  const z = zk();
-  return `<section class="section wrap">
-    ${ZKS.length ? `${collectCard(z, pool(z.id))}
-      <div class="leader-strip"><span class="av">${esc((z.leader_name||"Л").slice(0,1))}</span>
-        <div><b>${z.leader_name?esc(z.leader_name)+" — лидер вашего дома":"Лидер вашего дома"}</b><div class="muted" style="font-size:12.5px">Заказ заберёте у лидера${z.flats?" · "+esc(z.flats):""}. <a href="#how" data-go="how">Как это работает</a></div></div></div>` : ""}
-    <div class="chips" role="group" aria-label="Категории">
-      <button class="chip" data-cat="all" aria-pressed="${state.cat==="all"}">Все</button>
-      ${cats.map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cat===k}">${CATS[k]}</button>`).join("")}
-    </div>
-    <div class="grid">
-      ${list.map(p=>`<article class="card ${state.cart[p.id]?"in":""}">
-        <div class="photo" style="${tile(p)}">
-          <img src="${imgOf(p)}" alt="${esc(p.name)}${p.variant?" "+esc(p.variant):""}" loading="lazy" onerror="this.remove()">
+const norm = x => String(x||"").toLowerCase().replace(/ё/g,"е");
+function filterList(){
+  const q=norm(state.q).trim();
+  if(!q) return PRODUCTS.filter(p=>state.cat==="all"||p.cat===state.cat);
+  return PRODUCTS.filter(p=>norm([p.name,p.name_kk,p.brand,p.variant,p.weight,CATS[p.cat],t(CATS[p.cat])].join(" ")).includes(q));
+}
+function gridHtml(list){
+  if(!list.length) return `<div class="nores"><b>Ничего не найдено</b><span class="muted">Попробуйте другое слово или выберите категорию.</span><button class="btn light" data-qclear>Сбросить</button></div>`;
+  return `<div class="grid">${list.map(p=>`<article class="card ${state.cart[p.id]?"in":""}">
+        <div class="photo" style="${tile(p)}" data-open="${p.id}">
+          <img src="${imgOf(p)}" alt="${esc(tName(p))}${p.variant?" "+esc(p.variant):""}" loading="lazy" onerror="this.remove()">
           <span class="w">${esc(p.weight)}</span>
           <div class="ctl">${cardCtl(p.id)}</div>
         </div>
         <div class="body">
           <div class="price-row"><span class="price">${fmt(p.price)}</span>${p.old_price?`<span class="old">${fmt(p.old_price)}</span><span class="save">−${Math.round((1-p.price/p.old_price)*100)}%</span>`:""}</div>
-          <div class="name">${esc(p.name)}</div>
+          <div class="name" data-open="${p.id}">${esc(tName(p))}</div>
           ${p.variant?`<div class="variant">${esc(p.variant)}</div>`:""}
         </div>
-      </article>`).join("")}
+      </article>`).join("")}</div>`;
+}
+
+/* ---------- карточка товара ---------- */
+function productSheet(p){
+  const q=state.cart[p.id]||0, live=!SET.prelaunch;
+  const save = p.old_price && p.old_price>p.price ? p.old_price-p.price : 0;
+  const rows=[["Состав",p.composition],["Срок годности",p.shelf],["Хранение",p.storage],["О товаре",p.descr]].filter(r=>r[1]);
+  return `<div class="sheet pcard" role="dialog" aria-label="Карточка товара">
+    <button class="pclose" data-pclose aria-label="Закрыть">×</button>
+    <div class="pimg" style="${tile(p)}"><img src="${imgOf(p)}" alt="${esc(tName(p))}" onerror="this.remove()"></div>
+    <div><h2>${esc(tName(p))}</h2><div class="muted" style="margin-top:4px">${p.variant?esc(p.variant)+" · ":""}${esc(p.weight)}</div></div>
+    ${live?`<div class="pprice"><span class="price">${fmt(p.price)}</span>${p.old_price&&p.old_price>p.price?`<span class="old">${fmt(p.old_price)}</span>`:""}</div>
+      ${save?`<div class="psave">Дешевле магазина на ${fmt(save)} (−${Math.round(save/p.old_price*100)}%)</div>`:""}`
+     :`<div class="psave" style="background:var(--accent-soft);color:var(--warn)">Цены откроем при запуске</div>`}
+    ${rows.length?`<dl class="pinfo">${rows.map(r=>`<div><dt>${r[0]}</dt><dd>${esc(r[1])}</dd></div>`).join("")}</dl>`:""}
+    ${live?`<div class="pbuy">${q?`<div class="pill-q" style="position:static;flex:none"><button data-dec="${p.id}" aria-label="Меньше">−</button><span>${q}</span><button data-add="${p.id}" aria-label="Больше">+</button></div><button class="btn" data-pclose>В корзине</button>`
+       :`<button class="btn" data-add="${p.id}">Добавить в корзину · ${fmt(p.price)}</button>`}</div>`:""}
+  </div>`;
+}
+function renderProduct(){
+  let bg=document.getElementById("pbg");
+  const p = state.pid ? prod(state.pid) : null;
+  if(!p){ if(bg) bg.remove(); document.body.style.overflow=""; return; }
+  if(!bg){ bg=document.createElement("div"); bg.id="pbg"; bg.className="sheet-bg"; document.body.appendChild(bg); }
+  const keep = bg.firstElementChild ? bg.firstElementChild.scrollTop : 0;
+  bg.innerHTML=productSheet(p); document.body.style.overflow="hidden";
+  if(bg.firstElementChild) bg.firstElementChild.scrollTop=keep;
+  translateDom(bg);
+}
+function openProduct(id){ state.pid=id; renderProduct(); const c=document.querySelector("#pbg .pclose"); if(c) c.focus(); }
+function closeProduct(){ state.pid=null; renderProduct(); }
+
+function viewShop(){
+  if(state.loading) return `<section class="section wrap"><div class="grid">${Array.from({length:4},()=>`<div class="card skel"><div class="photo"></div><div class="body"><div class="sk"></div><div class="sk short"></div></div></div>`).join("")}</div></section>`;
+  if(state.loadError && !SET.prelaunch) return `<section class="wrap empty"><h2>Не удалось загрузить каталог</h2><p class="muted">${esc(state.loadError)}. Проверьте интернет и попробуйте ещё раз.</p><button class="btn" data-act="reload">Обновить</button></section>`;
+  if(SET.prelaunch) return viewSoon();
+  const cats = Object.keys(CATS).filter(k=>PRODUCTS.some(p=>p.cat===k));
+  const list = filterList();
+  const z = zk();
+  return `<section class="section wrap">
+    ${ZKS.length ? `${collectCard(z, pool(z.id))}
+      <div class="leader-strip"><span class="av">${esc((z.leader_name||"Л").slice(0,1))}</span>
+        <div><b>${z.leader_name?esc(z.leader_name)+" — лидер вашего дома":"Лидер вашего дома"}</b><div class="muted" style="font-size:12.5px">Заказ заберёте у лидера${z.flats?" · "+esc(z.flats):""}. <a href="#how" data-go="how">Как это работает</a></div></div></div>` : ""}
+    <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="Поиск по товарам" aria-label="Поиск по товарам" value="${esc(state.q)}"></label>
+    <div class="chips" role="group" aria-label="Категории">
+      <button class="chip" data-cat="all" aria-pressed="${state.cat==="all"}">Все</button>
+      ${cats.map(k=>`<button class="chip" data-cat="${k}" aria-pressed="${state.cat===k}">${CATS[k]}</button>`).join("")}
     </div>
+    <div id="gridWrap">${gridHtml(list)}</div>
   </section>`;
 }
 
@@ -485,7 +674,7 @@ function viewSoon(){
       <div class="packs" aria-hidden="true"><img src="img/111.jpg" alt=""><img src="img/119.jpg" alt=""><img src="img/118.jpg" alt=""></div>
     </div>
     ${PRODUCTS.length?`<div><h2 style="margin-bottom:8px">Первые товары</h2>
-      <div class="strip">${PRODUCTS.slice(0,12).map(p=>`<div class="tz"><div class="ph" style="${tile(p)}"><img src="${imgOf(p)}" alt="${esc(p.name)}" loading="lazy" onerror="this.remove()"></div><span>${esc(p.brand||p.name)}</span></div>`).join("")}</div></div>`:""}
+      <div class="strip">${PRODUCTS.slice(0,12).map(p=>`<div class="tz" data-open="${p.id}" role="button" tabindex="0"><div class="ph" style="${tile(p)}"><img src="${imgOf(p)}" alt="${esc(tName(p))}" loading="lazy" onerror="this.remove()"></div><span>${esc(p.brand||tName(p))}</span></div>`).join("")}</div></div>`:""}
     <div class="panel"><h2>Почему так дешевле</h2>
       <div class="why"><b>1</b><div><div class="t">Покупаем оптом под заказ</div><div class="muted">Соседи заказывают вместе, мы закупаем у поставщиков большой партией.</div></div></div>
       <div class="why"><b>2</b><div><div class="t">Без рекламы и магазина</div><div class="muted">Нет торгового зала, кассиров и рекламных бюджетов. Эти деньги мы возвращаем покупателям.</div></div></div>
@@ -528,7 +717,7 @@ function viewCart(){
     <div class="panel" style="padding-block:4px">
       ${ids.map(id=>{const p=prod(id);return `<div class="line">
         <div class="mini" style="${tile(p)}"><img src="${imgOf(p)}" alt="" onerror="this.remove()">${esc(p.weight)}</div>
-        <div class="grow"><div class="name">${esc(p.name)}</div><div class="muted" style="font-size:13px">${esc(p.variant||"")}${p.variant?" · ":""}${fmt(p.price)} / шт</div></div>
+        <div class="grow"><div class="name">${esc(tName(p))}</div><div class="muted" style="font-size:13px">${esc(p.variant||"")}${p.variant?" · ":""}${fmt(p.price)} / шт</div></div>
         <div class="qty"><button data-dec="${id}" aria-label="Меньше">−</button><span>${state.cart[id]}</span><button data-add="${id}" aria-label="Больше">+</button></div>
       </div>`}).join("")}
     </div>
@@ -812,6 +1001,8 @@ function render(){
   cb.hidden=!showBar; document.body.classList.toggle("has-bar",showBar);
   if(showBar) cb.innerHTML=`<span class="cb-n">${c}</span><span class="cb-t">Корзина</span><b>${fmt(cartSum())}</b><svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   $("#deadline").hidden = state.view==="leader";
+  translateDom(document.body);
+  if(state.pid) renderProduct();
   tgSync();
 }
 function go(v){
@@ -830,7 +1021,7 @@ async function loadCatalog(){
   try{
     const [zks, prods, set, pools] = await Promise.all([
       api("adal_zk?select=id,name,leader_name,flats,city&active=eq.true&order=name"),
-      api("adal_products?select=id,cat,brand,name,variant,weight,price,old_price,color,color2,image_url&active=eq.true&order=sort"),
+      api("adal_products?select=id,cat,brand,name,name_kk,variant,weight,price,old_price,color,color2,image_url,composition,shelf,storage,descr&active=eq.true&order=sort"),
       rpc("adal_public_settings",{}).catch(()=>null), rpc("adal_zk_pools",{}).catch(()=>({}))
     ]);
     ZKS=zks; PRODUCTS=prods; POOLS=pools||{}; if(set) SET={...SET,...set};
@@ -869,8 +1060,13 @@ async function leaderAction(action, order){
 /* ---------- события ---------- */
 document.addEventListener("click",e=>{
   const a=e.target.closest("a[data-go]"); if(a){ e.preventDefault(); go(a.dataset.go); return; }
-  const t=e.target.closest("button"); if(!t) return;
+  if(e.target.id==="pbg"){ closeProduct(); return; }
+  const t=e.target.closest("button");
+  if(!t){ const o=e.target.closest("[data-open]"); if(o) openProduct(+o.dataset.open); return; }
   const d=t.dataset;
+  if(d.pclose!==undefined){ closeProduct(); return; }
+  if(d.lang!==undefined){ setLang(LANG==="kk"?"ru":"kk"); return; }
+  if(d.qclear!==undefined){ state.q=""; render(); return; }
   if(d.go){ go(d.go); return; }
   if(d.add){ state.cart[d.add]=Math.min(50,(state.cart[d.add]||0)+1); saveCart(); render(); return; }
   if(d.dec){ state.cart[d.dec]--; if(state.cart[d.dec]<=0) delete state.cart[d.dec]; saveCart(); render(); return; }
@@ -976,8 +1172,13 @@ document.addEventListener("submit",async e=>{
   }
 });
 
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && state.pid){ closeProduct(); return; }
+  if((e.key==="Enter"||e.key===" ") && e.target.matches && e.target.matches(".tz[data-open]")){ e.preventDefault(); openProduct(+e.target.dataset.open); }
+});
 document.addEventListener("input",e=>{
   const t=e.target;
+  if(t.id==="q"){ state.q=t.value; const g=$("#gridWrap"); if(g){ g.innerHTML=gridHtml(filterList()); translateDom(g); } return; }
   if(t.id==="calc"){ state.calc=+t.value; $("#calcN").textContent=t.value; $("#calcOut").textContent="≈ "+fmt(calcIncome(+t.value)); return; }
   if(t.dataset.reg){ state.reg[t.dataset.reg]= t.type==="checkbox" ? t.checked : t.value; t.classList.remove("bad"); }
 });
@@ -994,7 +1195,7 @@ function openZk(){
     if(b){ state.zk=b.dataset.zk; ss.set("adal-zk",state.zk); render(); bg.remove(); toast("ЖК выбран: "+zk().name); ev.stopPropagation(); return; }
     if(ev.target===bg||ev.target.closest("[data-close]")){ bg.remove(); ev.stopPropagation(); }
   });
-  document.body.appendChild(bg); bg.querySelector(".opt").focus();
+  document.body.appendChild(bg); translateDom(bg); bg.querySelector(".opt").focus();
 }
 
 function tick(){

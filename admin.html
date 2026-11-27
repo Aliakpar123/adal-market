@@ -8,8 +8,15 @@
 <meta name="color-scheme" content="light only">
 <title>Bereke store · Админка</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%230F4C4A%27/%3E%3Cg transform=%27translate(9 13)%27%3E%3Cpath d=%27M3 34V17L14 7l11 10v17z%27 fill=%27%23fff%27/%3E%3Cpath d=%27M21 34V17l11-10 11 10v17z%27 fill=%27%23E9A23B%27/%3E%3C/g%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest-cyrillic-wght-normal.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest-cyrillic-ext-wght-normal.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Onest;font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Unbounded;font-style:normal;font-weight:700;font-display:swap;src:url(fonts/unbounded-cyrillic-700-normal.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Unbounded;font-style:normal;font-weight:700;font-display:swap;src:url(fonts/unbounded-latin-700-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122}
+</style>
+<link rel="preload" href="fonts/onest-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* Layout: одна колонка до 760px — шапка, панель фильтров, список товаров строками; редактирование в нижней шторке */
 :root{
@@ -17,8 +24,8 @@
   --brand:#0F4C4A; --brand-ink:#FFFFFF; --accent:#E9A23B; --accent-soft:#FBEBD2;
   --ok:#2E8B57; --ok-soft:#DDF1E5; --warn:#B7701A; --bad:#C0473A; --bad-soft:#F8E1DE;
   --shadow:0 1px 2px rgba(14,43,44,.06),0 4px 14px rgba(14,43,44,.06);
-  --font-logo:"Unbounded","Manrope",system-ui,sans-serif;
-  --font-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-logo:"Unbounded","Onest",system-ui,sans-serif;
+  --font-body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -392,6 +399,7 @@ function openEditor(p){
       <div class="field"><label for="eCat">Категория</label><select id="eCat">${Object.entries(CATS).map(([k,v])=>`<option value="${k}" ${p.cat===k?"selected":""}>${v}</option>`).join("")}</select></div>
     </div>
     <div class="field"><label for="eName">Название</label><input id="eName" maxlength="120" value="${esc(p.name)}" placeholder="Средство для посуды ERA"></div>
+    <div class="field"><label for="eNameKk">Название на казахском</label><input id="eNameKk" maxlength="120" value="${esc(p.name_kk||"")}" placeholder="необязательно"></div>
     <div class="two">
       <div class="field"><label for="eVariant">Вкус или вариант</label><input id="eVariant" maxlength="60" value="${esc(p.variant)}" placeholder="Лимон и мята"></div>
       <div class="field"><label for="eWeight">Объём / вес</label><input id="eWeight" maxlength="20" value="${esc(p.weight)}" placeholder="1 л"></div>
@@ -402,6 +410,12 @@ function openEditor(p){
     </div>
     <div id="eCalc">${calcHtml(p.price, p.cost)}</div>
     <div class="field"><label for="eOld">Цена в обычном магазине, ₸</label><input id="eOld" inputmode="numeric" value="${esc(p.old_price??"")}" placeholder="необязательно"><span class="hint">Если заполнить, на сайте появится скидка «−%».</span></div>
+    <div class="field"><label for="eComp">Состав</label><input id="eComp" maxlength="400" value="${esc(p.composition||"")}" placeholder="Например: говядина, жир, соль, специи"></div>
+    <div class="two">
+      <div class="field"><label for="eShelf">Срок годности</label><input id="eShelf" maxlength="80" value="${esc(p.shelf||"")}" placeholder="12 месяцев"></div>
+      <div class="field"><label for="eStorage">Хранение</label><input id="eStorage" maxlength="200" value="${esc(p.storage||"")}" placeholder="В сухом месте"></div>
+    </div>
+    <div class="field"><label for="eDescr">Описание</label><input id="eDescr" maxlength="600" value="${esc(p.descr||"")}" placeholder="необязательно"></div>
     <label class="switch"><input type="checkbox" id="eActive" ${p.active?"checked":""}><span class="tr"></span>Показывать на сайте</label>
     <p class="err" id="eErr" hidden></p>
     <button class="btn block" type="submit">${isNew?"Создать товар":"Сохранить"}</button>
@@ -438,7 +452,8 @@ function openEditor(p){
   bg.querySelector("#editForm").addEventListener("submit", async e => {
     e.preventDefault();
     const err = bg.querySelector("#eErr"); err.hidden = true;
-    const body = { id:p.id, cat:bg.querySelector("#eCat").value, brand:bg.querySelector("#eBrand").value, name:bg.querySelector("#eName").value,
+    const body = { id:p.id, cat:bg.querySelector("#eCat").value, brand:bg.querySelector("#eBrand").value, name:bg.querySelector("#eName").value, name_kk:bg.querySelector("#eNameKk").value,
+      composition:bg.querySelector("#eComp").value, shelf:bg.querySelector("#eShelf").value, storage:bg.querySelector("#eStorage").value, descr:bg.querySelector("#eDescr").value,
       variant:bg.querySelector("#eVariant").value, weight:bg.querySelector("#eWeight").value,
       price:bg.querySelector("#ePrice").value.replace(/\D/g,""), cost:bg.querySelector("#eCost").value.replace(/\D/g,""), old_price:bg.querySelector("#eOld").value.replace(/\D/g,""),
       active:bg.querySelector("#eActive").checked };
