@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <meta name="color-scheme" content="light only">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{overscroll-behavior-y:none}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Kespe market</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2716%27 fill=%27%230F4C4A%27/%3E%3Cg transform=%27translate(9 13)%27%3E%3Cpath d=%27M3 34V17L14 7l11 10v17z%27 fill=%27%23fff%27/%3E%3Cpath d=%27M21 34V17l11-10 11 10v17z%27 fill=%27%23E9A23B%27/%3E%3C/g%3E%3C/svg%3E">
 <style>
@@ -36,7 +36,7 @@
 body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.app{max-width:480px;margin:0 auto;min-height:calc(100vh - env(safe-area-inset-top,0px));padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brand)}
@@ -240,6 +240,7 @@ body::before{background:var(--surface)}
 .free-hint i em{display:block;height:100%;background:var(--accent);border-radius:999px}
 .free-hint.ok{color:var(--ok);font-weight:800}
 .cartbar b{font-variant-numeric:tabular-nums}
+@supports (height:100dvh){.app{min-height:calc(100dvh - env(safe-area-inset-top,0px))}}
 body.has-bar .app{padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .nav{border-top:0;box-shadow:0 -1px 0 var(--line)}
 .nav button{font-weight:700;font-size:10.5px;padding:8px 4px 10px}
@@ -704,6 +705,7 @@ function initTelegram(){
   if(!TG) return;
   try{
     TG.ready(); TG.expand();
+    try{ if(TG.disableVerticalSwipes) TG.disableVerticalSwipes(); }catch(_){}
     try{ TG.setHeaderColor("#FFFFFF"); TG.setBackgroundColor("#F6F9F7"); if(TG.setBottomBarColor) TG.setBottomBarColor("#FFFFFF"); }catch(_){}
     document.body.classList.add("in-tg");
     TG.BackButton.onClick(()=>{ go("shop"); });
