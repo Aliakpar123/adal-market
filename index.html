@@ -43,7 +43,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--brand);color:var(--brand-ink);padding-block:12px}
 .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .logo{display:flex;align-items:center;gap:8px;font-family:var(--font-logo);font-weight:700;font-size:20px;letter-spacing:-.01em;line-height:1;color:#fff}
-.logo svg{flex:none;display:block}
+.logo svg{flex:none;display:block}.logo .wm{height:44px;width:auto}
 .logo small{font-family:var(--font-body);font-weight:600;font-size:14px;letter-spacing:.01em;opacity:.7;margin-left:4px}
 .zk{display:flex;align-items:center;gap:6px;background:color-mix(in srgb,var(--brand-ink) 14%,transparent);border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--brand-ink);max-width:60%}
 .zk span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -637,7 +637,7 @@ body[data-view="supply"] .foot{display:none}
 <div class="app">
   <header class="top wrap">
     <div class="top-row">
-      <div class="logo" aria-label="Kespe market"><span>kespe<small>market</small></span></div>
+      <div class="logo" aria-label="Kespe market"><svg class="wm" viewBox="14 -4 380 122" role="img" aria-label="Kespe market" xmlns="http://www.w3.org/2000/svg"><g font-family="Unbounded,Onest,sans-serif" font-weight="700" font-size="84" letter-spacing="-3" text-anchor="middle"><text x="190" y="92" fill="#0B8A3E" stroke="#0B8A3E" stroke-width="18" stroke-linejoin="round" transform="translate(6 7)">kespe</text><text x="190" y="92" fill="#FFD43B" stroke="#0B8A3E" stroke-width="18" stroke-linejoin="round">kespe</text><text x="190" y="92" fill="#FFD43B">kespe</text></g><g transform="translate(286 2) rotate(-6)"><rect width="96" height="32" rx="10" fill="#FFD43B" stroke="#0B8A3E" stroke-width="3"/><text x="48" y="22" text-anchor="middle" font-family="Unbounded,Onest,sans-serif" font-weight="700" font-size="16" fill="#0B3D2A">market</text></g></svg></div>
       <div class="langsw" id="langSw" role="group" aria-label="Язык / Тіл"><button type="button" data-setlang="ru" aria-pressed="true">РУС</button><button type="button" data-setlang="kk" aria-pressed="false">ҚАЗ</button></div>
     </div>
     <div class="sub-row">
