@@ -191,7 +191,7 @@ body::before{background:var(--surface)}
 .top{background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);color:var(--ink);padding-block:10px 10px;border-bottom:1px solid var(--line)}
 .logo{color:var(--ink)}
 .logo .h1{fill:var(--brand)}
-.logo small{opacity:.55}
+.logo small{opacity:1;background:#FFD43B;color:#0B6B2F;font-family:var(--font-logo);font-weight:700;font-size:10px;letter-spacing:.3px;padding:3px 6px;border-radius:6px;margin-left:5px;transform:rotate(-5deg);position:relative;top:-6px;display:inline-block}
 .zk{background:var(--bg);color:var(--ink);padding:6px 10px 6px 14px;border-radius:14px;text-align:left;gap:6px}
 .zk-txt{display:flex;flex-direction:column;min-width:0;line-height:1.15}
 .zk-txt small{font-size:11px;font-weight:600;color:var(--muted)}
@@ -316,7 +316,7 @@ body.in-tg .demo{display:none}
 .irbi-big{width:132px;height:auto;display:block;margin:0 auto -6px}
 @media (prefers-reduced-motion:reduce){.tip .irbi,.bub{transition:none!important}}
 .top-r{display:flex;align-items:center;gap:8px;min-width:0}
-@media (max-width:400px){.logo{font-size:17px}.logo small{font-size:12px}.top-r{gap:6px}.lang{min-width:40px;padding:0 8px}.zk{padding:6px 8px 6px 10px}}
+@media (max-width:400px){.logo{font-size:19px}.logo small{font-size:9px;padding:3px 5px}.top-r{gap:6px}.lang{min-width:40px;padding:0 8px}.zk{padding:6px 8px 6px 10px}}
 .zk{flex:1 1 auto;min-width:0;max-width:none}
 .lang{flex:none;border:0;background:var(--bg);color:var(--ink);font:inherit;font-weight:800;font-size:12.5px;border-radius:12px;min-width:44px;height:40px;padding:0 10px}
 .search{position:relative}
@@ -355,7 +355,7 @@ body::before{background:#fff}
 .top{background:rgba(255,255,255,.94);border-bottom:0;box-shadow:0 1px 0 var(--line)}
 .logo{font-family:var(--font-body);font-weight:800;letter-spacing:-.03em;color:var(--brand)}
 .logo .h1{fill:var(--brand)}
-.logo small{color:var(--muted);opacity:1;font-weight:600;letter-spacing:0}
+.logo small{color:#0B6B2F;opacity:1;font-weight:700;letter-spacing:.3px}
 .zk,.lang{background:#EAF8EF;color:var(--brand)}
 .zk-txt small{color:#4E7A5E}
 h1,h2{font-family:var(--font-body);font-weight:800;letter-spacing:-.025em}
