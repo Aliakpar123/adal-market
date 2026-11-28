@@ -317,6 +317,7 @@ body.in-tg .demo{display:none}
 .irbi-big{width:132px;height:auto;display:block;margin:0 auto -6px}
 @media (prefers-reduced-motion:reduce){.tip .irbi,.bub{transition:none!important}}
 .top-r{display:flex;align-items:center;gap:8px;min-width:0}
+.wachat{display:inline-flex;align-items:center;gap:6px;border:0;background:#25D366;color:#fff;font:700 13px var(--font-body);border-radius:999px;height:36px;padding:0 12px 0 8px;flex:none;box-shadow:0 2px 0 rgba(0,0,0,.12)}.wachat svg{width:20px;height:20px}.wachat[hidden]{display:none}@media (max-width:360px){.wachat span{display:none}.wachat{padding:0 8px;width:36px;justify-content:center}}
 @media (max-width:400px){.logo{font-size:19px}.logo small{font-size:9px;padding:3px 5px}.top-r{gap:6px}.lang{min-width:40px;padding:0 8px}.zk{padding:6px 8px 6px 10px}}
 .zk{flex:1 1 auto;min-width:0;max-width:none}
 .lang{flex:none;border:0;background:var(--bg);color:var(--ink);font:inherit;font-weight:800;font-size:12.5px;border-radius:12px;min-width:44px;height:40px;padding:0 10px}
@@ -639,7 +640,7 @@ body[data-view="supply"] .foot{display:none}
   <header class="top wrap">
     <div class="top-row">
       <div class="logo" aria-label="Kespe market"><svg class="wm" viewBox="14 -4 380 122" role="img" aria-label="Kespe market" xmlns="http://www.w3.org/2000/svg"><g font-family="Unbounded,Onest,sans-serif" font-weight="700" font-size="84" letter-spacing="-3" text-anchor="middle"><text x="190" y="92" fill="#0B8A3E" stroke="#0B8A3E" stroke-width="18" stroke-linejoin="round" transform="translate(6 7)">kespe</text><text x="190" y="92" fill="#FFD43B" stroke="#0B8A3E" stroke-width="18" stroke-linejoin="round">kespe</text><text x="190" y="92" fill="#FFD43B">kespe</text></g><g transform="translate(286 2) rotate(-6)"><rect width="96" height="32" rx="10" fill="#FFD43B" stroke="#0B8A3E" stroke-width="3"/><text x="48" y="22" text-anchor="middle" font-family="Unbounded,Onest,sans-serif" font-weight="700" font-size="16" fill="#0B3D2A">market</text></g></svg></div>
-      <div class="langsw" id="langSw" role="group" aria-label="Язык / Тіл"><button type="button" data-setlang="ru" aria-pressed="true">РУС</button><button type="button" data-setlang="kk" aria-pressed="false">ҚАЗ</button></div>
+      <div class="top-r"><button type="button" class="wachat" id="waChat" data-act="wajoin" hidden aria-label="Общий чат соседей в WhatsApp"></button><div class="langsw" id="langSw" role="group" aria-label="Язык / Тіл"><button type="button" data-setlang="ru" aria-pressed="true">РУС</button><button type="button" data-setlang="kk" aria-pressed="false">ҚАЗ</button></div></div>
     </div>
     <div class="sub-row">
       <button class="zk" id="zkBtn" aria-label="Выбрать свой ЖК">
@@ -1661,11 +1662,12 @@ function viewLeader(){
 
 /* ---------- отрисовка и данные ---------- */
 const VIEWS=["shop","cart","profile","orders","how","leader","supply"];
+function syncWaChat(){ const b=$("#waChat"); if(!b) return; const on=!!waUrl("all"); b.hidden=!on; if(on && !b.firstChild) b.innerHTML=WA_ICON+"<span>Чат</span>"; }
 function render(){
   document.body.dataset.hero=state.hero;
   document.body.dataset.view=state.view;
   $("#zkName").textContent = zk().name;
-  document.body.classList.toggle("prelaunch", !!SET.prelaunch);
+  document.body.classList.toggle("prelaunch", !!SET.prelaunch); syncWaChat();
   if(state.view==="orders") state.view="profile";
   if(SET.prelaunch && ["cart","profile","done"].includes(state.view)) state.view="shop";
   let html;
